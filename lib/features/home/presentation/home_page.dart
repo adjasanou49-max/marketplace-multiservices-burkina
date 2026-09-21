@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../categories/application/category_controller.dart';
 import '../../categories/presentation/category_strip.dart';
@@ -20,7 +21,7 @@ class HomePage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Marketplace Burkina'),
-        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.notifications_none))],
+        actions: [IconButton(onPressed: () => context.push('/notifications'), icon: const Icon(Icons.notifications_none))],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -36,7 +37,7 @@ class HomePage extends ConsumerWidget {
                 decoration: InputDecoration(
                   hintText: 'Rechercher un produit, une boutique...',
                   prefixIcon: const Icon(Icons.search),
-                  suffixIcon: IconButton(onPressed: () {}, icon: const Icon(Icons.tune)),
+                  suffixIcon: IconButton(onPressed: () => context.push('/search'), icon: const Icon(Icons.tune)),
                 ),
               ),
             ),
