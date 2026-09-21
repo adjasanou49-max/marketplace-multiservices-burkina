@@ -23,7 +23,7 @@ class AppBootstrap {
 
     await Supabase.initialize(
       url: config.supabaseUrl!,
-      publishableKey: config.supabaseAnonKey!,
+      publishableKey: config.supabasePublishableKey!,
     );
   }
 }
