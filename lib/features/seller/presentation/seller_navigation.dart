@@ -29,7 +29,7 @@ class _SellerNavigationState extends ConsumerState<SellerNavigation> {
     }
 
     return FutureBuilder<Map<String, dynamic>?>(
-      future: const SellerShopRepository(client).mine(),
+      future: SellerShopRepository(client).mine(),
       builder: (context, snapshot) {
         final shop = snapshot.data;
         final shopId = shop?['id']?.toString();
@@ -98,8 +98,8 @@ class _MissingShopPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: AppBar(title: Text('Produits')),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Produits')),
       body: Center(
         child: Text('Aucune boutique vendeur n’est encore configurée.'),
       ),
