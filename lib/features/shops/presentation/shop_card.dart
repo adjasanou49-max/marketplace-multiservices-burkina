@@ -14,7 +14,7 @@ class ShopCard extends StatelessWidget {
           child: shop.logoUrl == null ? const Icon(Icons.storefront) : null,
         ),
         title: Text(shop.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: Text(shop.verificationStatus == null ? 'Boutique' : 'Boutique \${shop.verificationStatus}'),
+        subtitle: Text(shop.verificationStatus == null ? 'Boutique' : 'Boutique ${shop.verificationStatus}'),
         trailing: const Icon(Icons.chevron_right),
       ),
     );
