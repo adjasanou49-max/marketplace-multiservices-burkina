@@ -134,7 +134,7 @@ Deno.serve(async (req: Request) => {
   const providerStatus = String(data.status ?? "").toUpperCase();
   let internalStatus: "SUCCEEDED" | "FAILED" | "PROCESSING";
   let eventType: string;
-  if (checked.code === "00" && providerStatus === "ACCEPTED") {
+  if (String(checked.code ?? "") === "00" && providerStatus === "ACCEPTED") {
     internalStatus = "SUCCEEDED";
     eventType = "cinetpay.accepted";
   } else if (providerStatus === "WAITING_FOR_CUSTOMER") {
