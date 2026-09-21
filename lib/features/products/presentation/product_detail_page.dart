@@ -23,7 +23,7 @@ class ProductDetailPage extends ConsumerWidget {
         const SizedBox(height: 16),
         Text(product.name, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
-        Text('\${price.toStringAsFixed(0)} \${product.currency}', style: Theme.of(context).textTheme.titleLarge),
+        Text('${price.toStringAsFixed(0)} ${product.currency}', style: Theme.of(context).textTheme.titleLarge),
         if (product.description != null) ...[const SizedBox(height: 16), Text(product.description!)],
         const SizedBox(height: 24),
         FilledButton.icon(
