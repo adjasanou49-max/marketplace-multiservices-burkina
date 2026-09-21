@@ -13,8 +13,8 @@ class RestaurantDetailPage extends ConsumerWidget {
     final profile = await client
         .from('restaurant_profiles')
         .select(
-          'id,shop_id,cuisine_types,preparation_time_min,delivery_available,
-          shops(name,logo_url,cover_url,description,phone,address,status,verification_status)'
+          'id,shop_id,cuisine_types,preparation_time_min,delivery_available,'
+          'shops(name,logo_url,cover_url,description,phone,address,status,verification_status)',
         )
         .eq('id', restaurantId)
         .single();
