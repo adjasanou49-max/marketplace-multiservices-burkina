@@ -14,10 +14,10 @@ class AppBootstrap {
     final config = AppConfig(
       environment: environment,
       supabaseUrl: supabaseUrl.isEmpty ? null : supabaseUrl,
-      supabaseAnonKey: publishableKey.isEmpty ? null : publishableKey,
+      supabasePublishableKey: publishableKey.isEmpty ? null : publishableKey,
     );
 
-    if (config.supabaseUrl == null || config.supabaseAnonKey == null) {
+    if (config.supabaseUrl == null || config.supabasePublishableKey == null) {
       return;
     }
 
