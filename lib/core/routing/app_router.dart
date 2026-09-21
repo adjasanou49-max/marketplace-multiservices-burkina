@@ -4,23 +4,24 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/sign_in_page.dart';
 import '../../features/cart/presentation/cart_page.dart';
-import '../../features.catalog/presentation/home_page.dart';
-import '../../features.checkout/presentation/checkout_page.dart';
-import '../../features.checkout/presentation/orders_page.dart';
-import '../../features.common/presentation/module_placeholder_page.dart';
-import '../../features.courier/presentation/courier_page.dart';
-import '../../features.delivery/presentation/delivery_tracking_page.dart';
-import '../../features.expiry/presentation/expiry_page.dart';
-import '../../features.group_buy/presentation/group_buy_page.dart';
-import '../../features.mechanics/presentation/mechanics_page.dart';
-import '../../features.messaging/presentation/messages_page.dart';
-import '../../features.notifications/presentation/notifications_page.dart';
-import '../../features.restaurants/presentation/restaurants_page.dart';
-import '../../features.seller/presentation/seller_dashboard_page.dart';
-import '../../features.seller/presentation/seller_tools_page.dart';
-import '../../features.services/presentation/services_page.dart';
-import '../../features.transport/presentation/transport_page.dart';
-import '../../features.admin/presentation/admin_dashboard_page.dart';
+import '../../features/catalog/presentation/home_page.dart';
+import '../../features/checkout/presentation/checkout_page.dart';
+import '../../features/checkout/presentation/orders_page.dart';
+import '../../features/common/presentation/module_placeholder_page.dart';
+import '../../features/courier/presentation/courier_page.dart';
+import '../../features/delivery/presentation/delivery_tracking_page.dart';
+import '../../features/expiry/presentation/expiry_page.dart';
+import '../../features/follows/presentation/follows_page.dart';
+import '../../features/group_buy/presentation/group_buy_page.dart';
+import '../../features/mechanics/presentation/mechanics_page.dart';
+import '../../features/messaging/presentation/messages_page.dart';
+import '../../features/notifications/presentation/notifications_page.dart';
+import '../../features/restaurants/presentation/restaurants_page.dart';
+import '../../features/seller/presentation/seller_dashboard_page.dart';
+import '../../features/seller/presentation/seller_tools_page.dart';
+import '../../features/services/presentation/services_page.dart';
+import '../../features/transport/presentation/transport_page.dart';
+import '../../features/admin/presentation/admin_dashboard_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -74,6 +75,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const ExpiryPage(),
       ),
       GoRoute(
+        path: '/follows',
+        builder: (_, __) => const FollowsPage(),
+      ),
+      GoRoute(
         path: '/group-buy',
         builder: (_, __) => const GroupBuyPage(),
       ),
@@ -103,7 +108,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       for (final item in const <Map<String, Object>>[
         {'path': '/promotions', 'title': 'Promotions', 'icon': 4},
-        {'path': '/follows', 'title': 'Suivis', 'icon': 5},
         {'path': '/seller/stock', 'title': 'Stock vendeur', 'icon': 7},
         {'path': '/seller/finance', 'title': 'Finance vendeur', 'icon': 8},
         {'path': '/seller/payouts', 'title': 'Demandes de paiement', 'icon': 9},
@@ -125,8 +129,6 @@ IconData _placeholderIcon(int value) {
   switch (value) {
     case 4:
       return Icons.local_offer_outlined;
-    case 5:
-      return Icons.favorite_outline;
     case 7:
       return Icons.inventory_2_outlined;
     case 8:
