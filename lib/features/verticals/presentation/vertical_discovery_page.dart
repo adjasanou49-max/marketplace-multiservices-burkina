@@ -643,7 +643,6 @@ class _VerticalDiscoveryPageState
   }
 
   bool _hasAction(VerticalModule module) => const {
-        VerticalModule.rides,
         VerticalModule.rentals,
         VerticalModule.accommodations,
         VerticalModule.events,
@@ -767,6 +766,18 @@ class _VerticalDiscoveryPageState
           ),
         ],
       ),
+      floatingActionButton: widget.module == VerticalModule.rides
+          ? FloatingActionButton.extended(
+              onPressed: () async {
+                final repo = ref.read(verticalRepositoryProvider);
+                if (repo != null && await _ensureAuth()) {
+                  await _requestRide(repo);
+                }
+              },
+              icon: const Icon(Icons.local_taxi_outlined),
+              label: const Text('Nouveau trajet'),
+            )
+          : null,
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _future,
         builder: (context, snapshot) {
