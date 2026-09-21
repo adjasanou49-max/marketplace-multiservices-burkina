@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/repository_providers.dart';
-import '../data/checkout_repository.dart';
 
 class CheckoutPage extends ConsumerStatefulWidget {
   const CheckoutPage({
