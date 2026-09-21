@@ -88,7 +88,7 @@ class _SellerPromotionsPageState
     if (form == null) return;
 
     final client = ref.read(supabaseProvider);
-    if (client == null || shopId == null) return;
+    if (client == null) return;
 
     try {
       final id = await client.rpc(
