@@ -66,7 +66,12 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
               final cuisines = restaurant['cuisine_types'];
 
               final rawMenus = restaurant['restaurant_menus'];
-              final menus = rawMenus is List ? rawMenus : const [];
+              final menus = rawMenus is List
+                  ? rawMenus
+                      .whereType<Map>()
+                      .map((row) => Map<String, dynamic>.from(row))
+                      .toList()
+                  : const <Map<String, dynamic>>[];
 
               return Card(
                 child: ExpansionTile(
@@ -82,9 +87,7 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                         : 'Cuisine non renseignée',
                   ),
                   children: [
-                    for (final rawMenu in menus) _MenuSection(
-                      menu: Map<String, dynamic>.from(rawMenu as Map),
-                    ),
+                    for (final menu in menus) _MenuSection(menu: menu),
                   ],
                 ),
               );
@@ -104,23 +107,22 @@ class _MenuSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rawItems = menu['restaurant_menu_items'];
-    final items = rawItems is List ? rawItems : const [];
+    final items = rawItems is List
+        ? rawItems
+            .whereType<Map>()
+            .map((row) => Map<String, dynamic>.from(row))
+            .toList()
+        : const <Map<String, dynamic>>[];
 
     return ExpansionTile(
       title: Text(menu['name']?.toString() ?? 'Menu'),
       subtitle: Text(menu['description']?.toString() ?? ''),
       children: [
-        for (final rawItem in items)
+        for (final item in items)
           ListTile(
-            title: Text(
-              (rawItem as Map)['name']?.toString() ?? 'Plat',
-            ),
-            subtitle: Text(
-              (rawItem as Map)['description']?.toString() ?? '',
-            ),
-            trailing: Text(
-              ((rawItem as Map)['price']?.toString() ?? '0') + ' XOF',
-            ),
+            title: Text(item['name']?.toString() ?? 'Plat'),
+            subtitle: Text(item['description']?.toString() ?? ''),
+            trailing: Text((item['price']?.toString() ?? '0') + ' XOF'),
           ),
       ],
     );
