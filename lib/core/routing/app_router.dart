@@ -16,6 +16,7 @@ import '../../features/follows/presentation/follows_page.dart';
 import '../../features/group_buy/presentation/group_buy_page.dart';
 import '../../features/mechanics/presentation/mechanics_page.dart';
 import '../../features/messaging/presentation/messages_page.dart';
+import '../../features/notifications/presentation/notification_preferences_page.dart';
 import '../../features/notifications/presentation/notifications_page.dart';
 import '../../features/restaurants/presentation/restaurants_page.dart';
 import '../../features/seller/presentation/seller_dashboard_page.dart';
@@ -125,6 +126,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/notifications',
         builder: (_, __) => const NotificationsPage(),
+      ),
+      GoRoute(
+        path: '/notifications/preferences',
+        builder: (_, __) => const NotificationPreferencesPage(),
       ),
       GoRoute(
         path: '/admin',
