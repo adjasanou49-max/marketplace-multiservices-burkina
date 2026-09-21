@@ -116,6 +116,29 @@ class _HomePageState extends ConsumerState<HomePage> {
     _loadProducts(reset: true);
   }
 
+  void _cycleType(_CatalogMetadata metadata, int delta) {
+    if (metadata.types.isEmpty) return;
+
+    final currentIndex = metadata.types.indexWhere(
+      (item) => item['id']?.toString() == _selectedTypeId,
+    );
+
+    final safeIndex = currentIndex < 0 ? 0 : currentIndex;
+    final nextIndex = (safeIndex + delta) % metadata.types.length;
+    final normalizedIndex = nextIndex < 0
+        ? nextIndex + metadata.types.length
+        : nextIndex;
+    final nextId = metadata.types[normalizedIndex]['id']?.toString();
+
+    if (nextId == null) return;
+
+    setState(() {
+      _selectedTypeId = nextId;
+      _selectedCategoryId = null;
+    });
+    _loadProducts(reset: true);
+  }
+
   List<Map<String, dynamic>> _visibleCategories(
     _CatalogMetadata metadata,
   ) {
@@ -223,6 +246,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     _loadProducts(reset: true);
                   },
                   onCategorySelected: _selectCategory,
+                  onTypeSwipe: (direction) => _cycleType(metadata, direction),
                 ),
               ),
               const ServiceModuleSliver(),
@@ -296,6 +320,7 @@ class _CatalogHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.selectedCategoryId,
     required this.onTypeSelected,
     required this.onCategorySelected,
+    required this.onTypeSwipe,
   });
 
   final List<Map<String, dynamic>> types;
@@ -304,6 +329,7 @@ class _CatalogHeaderDelegate extends SliverPersistentHeaderDelegate {
   final String? selectedCategoryId;
   final ValueChanged<String?> onTypeSelected;
   final ValueChanged<String?> onCategorySelected;
+  final ValueChanged<int> onTypeSwipe;
 
   @override
   double get minExtent => 152;
@@ -320,7 +346,14 @@ class _CatalogHeaderDelegate extends SliverPersistentHeaderDelegate {
     return Material(
       elevation: overlapsContent ? 2 : 0,
       color: Theme.of(context).scaffoldBackgroundColor,
-      child: Padding(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onVerticalDragEnd: (details) {
+          final velocity = details.primaryVelocity ?? 0;
+          if (velocity < -100) onTypeSwipe(1);
+          if (velocity > 100) onTypeSwipe(-1);
+        },
+        child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
         child: Column(
           children: [
@@ -397,7 +430,8 @@ class _CatalogHeaderDelegate extends SliverPersistentHeaderDelegate {
     return oldDelegate.types != types ||
         oldDelegate.categories != categories ||
         oldDelegate.selectedTypeId != selectedTypeId ||
-        oldDelegate.selectedCategoryId != selectedCategoryId;
+        oldDelegate.selectedCategoryId != selectedCategoryId ||
+        oldDelegate.onTypeSwipe != onTypeSwipe;
   }
 }
 
