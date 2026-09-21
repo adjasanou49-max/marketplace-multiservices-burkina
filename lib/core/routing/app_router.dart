@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/navigation/app_navigation.dart';
+
 import '../../features/auth/presentation/sign_in_page.dart';
 import '../../features/cart/presentation/cart_page.dart';
 import '../../features/catalog/presentation/home_page.dart';
@@ -42,6 +44,7 @@ import '../../features/admin/presentation/admin_refunds_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
+    navigatorKey: appNavigatorKey,
     initialLocation: '/',
     routes: [
       GoRoute(path: '/', builder: (_, __) => const HomePage()),
