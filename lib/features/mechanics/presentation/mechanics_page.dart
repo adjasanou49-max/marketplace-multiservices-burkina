@@ -20,17 +20,156 @@ class MechanicsPage extends ConsumerStatefulWidget {
 class _MechanicsPageState extends ConsumerState<MechanicsPage> {
   late Future<List<Map<String, dynamic>>> _mechanicsFuture;
   late Future<List<Map<String, dynamic>>> _quotesFuture;
+  late Future<bool> _isMechanicFuture;
 
   @override
   void initState() {
     super.initState();
     _mechanicsFuture = _loadMechanics();
     _quotesFuture = _loadQuotes();
+    _isMechanicFuture = _loadOwnMechanic();
   }
 
   Future<List<Map<String, dynamic>>> _loadMechanics() {
     return ref.read(mechanicRepositoryProvider)?.mechanics() ??
         Future.value(const []);
+  }
+
+  Future<bool> _loadOwnMechanic() async {
+    final client = ref.read(supabaseProvider);
+    final user = client?.auth.currentUser;
+    if (client == null || user == null) return false;
+    final rows = await client
+        .from('mechanics')
+        .select('id,display_name,active,verification_status')
+        .eq('user_id', user.id)
+        .limit(1);
+    return (rows as List).isNotEmpty;
+  }
+
+  Future<void> _manageAvailability() async {
+    if (!await _loadOwnMechanic()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Aucun profil mécanicien lié à ce compte.')),
+        );
+      }
+      return;
+    }
+
+    final status = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: const Text('Ma disponibilité'),
+        children: const [
+          SimpleDialogOption(
+            value: 'AVAILABLE',
+            child: Text('Disponible maintenant'),
+          ),
+          SimpleDialogOption(
+            value: 'IN_10_MIN',
+            child: Text('Disponible dans 10 min'),
+          ),
+          SimpleDialogOption(
+            value: 'IN_20_MIN',
+            child: Text('Disponible dans 20 min'),
+          ),
+          SimpleDialogOption(
+            value: 'IN_30_MIN',
+            child: Text('Disponible dans 30 min'),
+          ),
+          SimpleDialogOption(
+            value: 'UNAVAILABLE',
+            child: Text('Indisponible'),
+          ),
+        ],
+      ),
+    );
+
+    if (status == null) return;
+
+    try {
+      final client = ref.read(supabaseProvider);
+      await client?.rpc(
+        'set_mechanic_availability',
+        params: {
+          'p_status': status,
+          'p_starts_at': DateTime.now().toUtc().toIso8601String(),
+          'p_ends_at': null,
+        },
+      );
+
+      final vacation = await showDateRangePicker(
+        context: context,
+        firstDate: DateTime.now(),
+        lastDate: DateTime.now().add(const Duration(days: 730)),
+        helpText: 'Programmer un congé (facultatif)',
+      );
+
+      if (vacation != null && mounted) {
+        final reason = await showDialog<String>(
+          context: context,
+          builder: (dialogContext) {
+            final controller = TextEditingController();
+            return AlertDialog(
+              title: const Text('Période de congé'),
+              content: TextField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  labelText: 'Motif (facultatif)',
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Annuler'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(
+                    dialogContext,
+                    controller.text.trim(),
+                  ),
+                  child: const Text('Enregistrer'),
+                ),
+              ],
+            );
+          },
+        );
+
+        await client?.rpc(
+          'schedule_mechanic_time_off',
+          params: {
+            'p_starts_at': DateTime(
+              vacation.start.year,
+              vacation.start.month,
+              vacation.start.day,
+            ).toUtc().toIso8601String(),
+            'p_ends_at': DateTime(
+              vacation.end.year,
+              vacation.end.month,
+              vacation.end.day,
+              23,
+              59,
+              59,
+            ).toUtc().toIso8601String(),
+            'p_reason': reason,
+          },
+        );
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Disponibilité mise à jour.')),
+      );
+      setState(() {
+        _mechanicsFuture = _loadMechanics();
+      });
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Mise à jour refusée : ' + error.toString())),
+      );
+    }
   }
 
   Future<List<Map<String, dynamic>>> _loadQuotes() {
@@ -110,6 +249,17 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
             onPressed: _request,
             icon: const Icon(Icons.car_repair_outlined),
             tooltip: 'Demander un mécanicien',
+          ),
+          FutureBuilder<bool>(
+            future: _isMechanicFuture,
+            builder: (context, snapshot) {
+              if (snapshot.data != true) return const SizedBox.shrink();
+              return IconButton(
+                onPressed: _manageAvailability,
+                icon: const Icon(Icons.schedule_outlined),
+                tooltip: 'Gérer ma disponibilité',
+              );
+            },
           ),
         ],
       ),
@@ -232,6 +382,8 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
         return 'Disponible dans 20 min';
       case 'IN_30_MIN':
         return 'Disponible dans 30 min';
+      case 'UNAVAILABLE':
+        return 'Indisponible';
       default:
         return 'Indisponible';
     }
