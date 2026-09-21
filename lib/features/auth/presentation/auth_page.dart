@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/auth_repository.dart';
 
@@ -78,7 +79,7 @@ class _AuthPageState extends State<AuthPage> {
           ),
         ),
       );
-      if (!register) Navigator.of(context).pop();
+      if (!register) context.go('/');
     } on AuthException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
