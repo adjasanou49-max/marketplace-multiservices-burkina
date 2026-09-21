@@ -21,7 +21,7 @@ class SupabaseConfig {
 
     await Supabase.initialize(
       url: url,
-      anonKey: key,
+      publishableKey: key,
       debug: false,
     );
     return Supabase.instance.client;
