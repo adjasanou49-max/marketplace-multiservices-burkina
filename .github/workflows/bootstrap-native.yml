@@ -33,10 +33,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git status --porcelain | grep -q '^?? android/\|^?? ios/\|^ M android/\|^ M ios/'; then
-            git add android ios
-            git commit -m "chore: add Flutter Android and iOS runners"
-            git push origin HEAD:main
-          else
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android ios
+          if git diff --cached --quiet; then
             echo "Native platforms already present"
+            exit 0
           fi
+          git commit -m "chore: add Flutter Android and iOS runners"
+          git push origin HEAD:main
