@@ -30,7 +30,7 @@ class ProductCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 if (product.price != null)
                   Text(
-                    '\${product.price!.toStringAsFixed(0)} \${product.currency}',
+                    '${product.price!.toStringAsFixed(0)} ${product.currency}',
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
               ],
