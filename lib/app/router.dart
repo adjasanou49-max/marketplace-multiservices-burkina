@@ -21,14 +21,12 @@ import '../features/orders/presentation/orders_page.dart';
 import '../features/addresses/presentation/addresses_page.dart';
 import '../features/notifications/presentation/notifications_page.dart';
 import '../features/messaging/presentation/messages_page.dart';
-import '../features/seller/presentation/seller_dashboard_page.dart';
 import '../features/seller/presentation/seller_orders_page.dart';
 import '../features/seller/presentation/seller_order_detail_page.dart';
 import '../features/seller/presentation/seller_stock_page.dart';
 import '../features/seller/presentation/seller_finance_page.dart';
 import '../features/seller/presentation/seller_payouts_page.dart';
 import '../features/seller/presentation/seller_navigation.dart';
-import '../features/seller/presentation/seller_tools_page.dart';
 import '../features/seller/presentation/seller_create_shop_page.dart';
 import '../features/promotions/presentation/promotions_page.dart';
 import '../features/follows/presentation/follows_page.dart';
@@ -72,6 +70,7 @@ String? _routeGuard(BuildContext context, GoRouterState state) {
   const protectedPrefixes = [
     '/checkout',
     '/orders',
+    '/order',
     '/addresses',
     '/messages',
     '/follows',
