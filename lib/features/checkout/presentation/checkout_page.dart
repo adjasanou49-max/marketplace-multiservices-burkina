@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/location/device_location_service.dart';
 import '../../../core/providers/repository_providers.dart';
 
 class CheckoutPage extends ConsumerStatefulWidget {
@@ -403,6 +404,22 @@ class _AddressDialogState extends State<_AddressDialog> {
     super.dispose();
   }
 
+  Future<void> _useCurrentLocation() async {
+    try {
+      final position = await DeviceLocationService.current();
+      if (!mounted) return;
+      setState(() {
+        _latitude.text = position.latitude.toStringAsFixed(6);
+        _longitude.text = position.longitude.toStringAsFixed(6);
+      });
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Position indisponible : ' + error.toString())),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -432,6 +449,14 @@ class _AddressDialogState extends State<_AddressDialog> {
             TextField(
               controller: _city,
               decoration: const InputDecoration(labelText: 'Ville'),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: _useCurrentLocation,
+                icon: const Icon(Icons.my_location_outlined),
+                label: const Text('Utiliser ma position actuelle'),
+              ),
             ),
             TextField(
               controller: _latitude,
