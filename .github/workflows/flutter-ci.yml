@@ -21,6 +21,8 @@ jobs:
           cache: true
       - run: flutter --version
       - run: flutter pub get
+      - name: Check generated dependency changes
+        run: git diff --exit-code -- pubspec.yaml pubspec.lock
       - name: Format Dart sources
         run: dart format lib test
       - run: flutter analyze
