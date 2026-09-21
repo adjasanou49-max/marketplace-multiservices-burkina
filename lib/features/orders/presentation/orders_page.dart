@@ -161,7 +161,25 @@ class OrderDetailPage extends ConsumerWidget {
                       item['product_name']?.toString() ?? 'Produit',
                     ),
                     subtitle: Text('Quantité : ${item['quantity'] ?? 0}'),
-                    trailing: Text('${item['total_price'] ?? 0} XOF'),
+                    trailing: group['status']?.toString() == 'DELIVERED'
+                        ? IconButton(
+                            tooltip: 'Donner un avis',
+                            icon: const Icon(Icons.rate_review_outlined),
+                            onPressed: () {
+                              final productId = item['product_id']?.toString() ?? '';
+                              final shopId = group['shop_id']?.toString() ?? '';
+                              if (productId.isEmpty || shopId.isEmpty) return;
+                              final uri = Uri(
+                                path: '/review/$productId',
+                                queryParameters: {
+                                  'shopId': shopId,
+                                  'name': item['product_name']?.toString() ?? 'Produit',
+                                },
+                              );
+                              GoRouter.of(context).push(uri.toString());
+                            },
+                          )
+                        : Text('${item['total_price'] ?? 0} XOF'),
                   ),
                 const SizedBox(height: 10),
               ],
