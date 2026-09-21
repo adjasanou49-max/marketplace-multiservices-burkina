@@ -335,16 +335,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                 ),
                 items: const [
                   DropdownMenuItem(
-                    value: 'ORANGE_MONEY',
-                    child: Text('Orange Money'),
+                    value: 'CINETPAY',
+                    child: Text('Orange Money / Moov Money'),
                   ),
                   DropdownMenuItem(
                     value: 'WAVE',
                     child: Text('Wave'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'MOOV_MONEY',
-                    child: Text('Moov Money'),
                   ),
                 ],
                 onChanged: _loading
