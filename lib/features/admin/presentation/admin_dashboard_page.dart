@@ -18,71 +18,91 @@ class AdminDashboardPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Administration'),
-        actions: [
-          IconButton(
-            onPressed: () => GoRouter.of(context).push('/admin/modules'),
-            icon: const Icon(Icons.tune_outlined),
-            tooltip: 'Modules',
-          ),
-        ],
-      ),
-      body: FutureBuilder<Map<String, int>>(
+      appBar: AppBar(title: const Text('Administration')),
+      body: FutureBuilder<Map<String, dynamic>>(
         future: AdminDashboardRepository(client).counts(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(
-              child: Text('Accès refusé ou erreur : ${snapshot.error}'),
-            );
+            return Center(child: Text('Accès refusé ou erreur : ${snapshot.error}'));
           }
+          final counts = snapshot.data ?? const <String, dynamic>{};
 
-          final counts = snapshot.data ?? const <String, int>{};
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              GridView.builder(
+              GridView.count(
+                crossAxisCount: 2,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: counts.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.35,
-                ),
-                itemBuilder: (_, index) {
-                  final entry = counts.entries.elementAt(index);
-                  return Card(
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            entry.value.toString(),
-                            style: Theme.of(context).textTheme.headlineMedium,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                children: counts.entries
+                    .map(
+                      (entry) => Card(
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                entry.value.toString(),
+                                style: Theme.of(context)
+                                    .textTheme.headlineMedium,
+                              ),
+                              const SizedBox(height: 6),
+                              Text(entry.key),
+                            ],
                           ),
-                          const SizedBox(height: 6),
-                          Text(entry.key, textAlign: TextAlign.center),
-                        ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    )
+                    .toList(),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
+              Text(
+                'Outils de gestion',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
               Card(
                 child: ListTile(
-                  leading: const Icon(Icons.extension_outlined),
-                  title: const Text('Gérer les modules'),
-                  subtitle: const Text(
-                    'Activer ou désactiver les services visibles dans l’application.',
-                  ),
+                  leading: const Icon(Icons.category_outlined),
+                  title: const Text('Modules de la plateforme'),
+                  subtitle: const Text('Activer ou désactiver les services'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => GoRouter.of(context).push('/admin/modules'),
+                ),
+              ),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.local_shipping_outlined),
+                  title: const Text('Tarification livraison'),
+                  subtitle: const Text('Configurer les frais par distance'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () =>
+                      GoRouter.of(context).push('/admin/delivery-pricing'),
+                ),
+              ),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.people_outline),
+                  title: const Text('Comptes'),
+                  subtitle: const Text('Suspendre, bloquer ou réactiver'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () =>
+                      GoRouter.of(context).push('/admin/accounts'),
+                ),
+              ),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.inventory_2_outlined),
+                  title: const Text('Produits'),
+                  subtitle: const Text('Modérer le catalogue'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () =>
+                      GoRouter.of(context).push('/admin/products'),
                 ),
               ),
             ],
