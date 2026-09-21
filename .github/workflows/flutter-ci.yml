@@ -13,6 +13,38 @@ permissions:
   contents: read
 
 jobs:
+  bootstrap-platforms:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.2'
+          cache: true
+      - name: Generate Android and iOS projects when missing
+        run: |
+          if [ ! -d android ] || [ ! -d ios ]; then
+            flutter create --platforms=android,ios --project-name marketplace_multiservices_burkina .
+          fi
+      - name: Persist generated platform projects
+        run: |
+          if git diff --quiet -- android ios; then
+            echo "No platform scaffold changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android ios
+          git commit -m "chore: persist Flutter Android and iOS scaffolds"
+          git push origin HEAD:${{ github.ref_name }}
+
   analyze-and-test:
     runs-on: ubuntu-latest
     steps:
