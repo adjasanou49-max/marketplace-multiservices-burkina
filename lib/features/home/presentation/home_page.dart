@@ -11,6 +11,7 @@ import '../../products/presentation/product_grid.dart';
 import '../../shops/application/shop_controller.dart';
 import '../../shops/presentation/shop_card.dart';
 import '../../modules/application/module_controller.dart';
+import '../../modules/domain/marketplace_module.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
