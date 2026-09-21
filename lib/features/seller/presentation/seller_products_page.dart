@@ -40,9 +40,9 @@ class _SellerProductsPageState extends ConsumerState<SellerProductsPage> {
             final p = items[i];
             return ListTile(
               title: Text(p['name'] as String? ?? 'Produit'),
-              subtitle: Text('Stock: ${p['stock_quantity'] ?? 0}'),
+              subtitle: Text('Stock: ${p['inventory'] is Map ? (p['inventory']['quantity'] ?? 0) : 0}'),
               trailing: Switch(
-                value: p['is_active'] as bool? ?? false,
+                value: p['status']?.toString() == 'ACTIVE',
                 onChanged: (v) async {
                   final repo = ref.read(sellerProductRepositoryProvider);
                   if (repo == null) return;
