@@ -305,6 +305,15 @@ class VerticalRepository {
       ))
           .toString();
 
+  Future<Map<String, dynamic>> trackParcel(String trackingCode) async {
+    final result = await client.rpc(
+      'get_parcel_tracking',
+      params: {'p_tracking_code': trackingCode},
+    );
+    if (result is! Map) throw StateError('Suivi colis invalide.');
+    return Map<String, dynamic>.from(result);
+  }
+
   String _date(DateTime value) => value.toIso8601String().substring(0, 10);
 
   List<Map<String, dynamic>> _maps(dynamic rows) {
