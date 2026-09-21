@@ -26,6 +26,12 @@ class CartRepository {
     }
   }
 
+  Future<void> syncItems(List<CartItem> items) async {
+    for (final item in items) {
+      await addItem(item);
+    }
+  }
+
   Future<String> checkout({required Map<String, dynamic> deliveryAddress, num deliveryFee = 0, String? couponCode}) async {
     final cartId = await getOrCreateActiveCart();
     final result = await client.rpc('checkout_cart', params: {
