@@ -47,6 +47,12 @@ class SellerToolsPage extends StatelessWidget {
             onTap: () => context.push('/seller/payouts'),
           ),
           ListTile(
+            leading: const Icon(Icons.campaign_outlined),
+            title: const Text('Promotions'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/seller/promotions'),
+          ),
+          ListTile(
             leading: const Icon(Icons.local_offer_outlined),
             title: const Text('Coupons'),
             trailing: const Icon(Icons.chevron_right),
