@@ -22,9 +22,16 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   Map<String, dynamic>? _selectedAddress;
   Map<String, dynamic>? _quote;
   String _paymentProvider = 'ORANGE_MONEY';
+  final TextEditingController _couponController = TextEditingController();
   bool _loading = false;
 
   late final String _idempotencyKey;
+
+  @override
+  void dispose() {
+    _couponController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -152,6 +159,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         cartId: widget.cartId,
         addressId: addressId,
         deliveryFee: fee,
+        couponCode: _couponController.text.trim().isEmpty
+            ? null
+            : _couponController.text.trim(),
         idempotencyKey: _idempotencyKey,
       );
 
@@ -293,6 +303,22 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   trailing: _quote == null
                       ? const Icon(Icons.calculate_outlined)
                       : const Icon(Icons.check_circle_outline),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'Code promotionnel',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _couponController,
+                enabled: !_loading,
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(
+                  labelText: 'Code coupon (optionnel)',
+                  hintText: 'Ex. PROMO10',
+                  prefixIcon: Icon(Icons.local_offer_outlined),
                 ),
               ),
               const SizedBox(height: 18),
