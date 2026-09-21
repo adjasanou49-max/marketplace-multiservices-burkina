@@ -177,7 +177,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   String _addressLabel(DeliveryAddress address) {
     final parts = <String>[
       if ((address.label ?? '').trim().isNotEmpty) address.label!.trim(),
-      if if ((address.addressLine ?? '').trim().isNotEmpty) (address.addressLine ?? '').trim(),
+      if ((address.addressLine ?? '').trim().isNotEmpty) (address.addressLine ?? '').trim(),
       if ((address.city ?? '').trim().isNotEmpty) address.city!.trim(),
     ];
     return parts.isEmpty ? address.recipientName : parts.join(' — ');
