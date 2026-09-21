@@ -14,12 +14,44 @@ class NotificationsPage extends ConsumerStatefulWidget {
 class _NotificationsPageState
     extends ConsumerState<NotificationsPage> {
   late Future<List<Map<String, dynamic>>> _future;
+  RealtimeChannel? _notificationsChannel;
 
   @override
   void initState() {
     super.initState();
     _future = _load();
+    _startRealtime();
   }
+
+  void _startRealtime() {
+    final client = ref.read(supabaseProvider);
+    final user = client?.auth.currentUser;
+    if (client == null || user == null) return;
+
+    _notificationsChannel = client
+        .channel('notifications-' + user.id)
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'notifications',
+          callback: (_) {
+            if (!mounted) return;
+            setState(() => _future = _load());
+          },
+        )
+        .subscribe();
+  }
+
+  @override
+  void dispose() {
+    final client = ref.read(supabaseProvider);
+    final channel = _notificationsChannel;
+    if (client != null && channel != null) {
+      client.removeChannel(channel);
+    }
+    super.dispose();
+  }
+
 
   Future<List<Map<String, dynamic>>> _load() async {
     final client = ref.read(supabaseProvider);
