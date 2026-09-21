@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/repository_providers.dart';
 import '../data/seller_shop_repository.dart';
+import 'seller_create_shop_page.dart';
 import 'seller_dashboard_page.dart';
 import 'seller_finance_page.dart';
 import 'seller_orders_page.dart';
@@ -58,7 +59,18 @@ class _SellerNavigationState extends ConsumerState<SellerNavigation> {
         switch (index) {
           case 1:
             page = shop == null
-                ? const _MissingShopPage()
+                ? _MissingShopPage(
+                    onCreate: () async {
+                      final created = await Navigator.of(context).push<bool>(
+                        MaterialPageRoute(
+                          builder: (_) => const SellerCreateShopPage(),
+                        ),
+                      );
+                      if (created == true && mounted) {
+                        setState(() => shopFuture = _loadShop());
+                      }
+                    },
+                  )
                 : SellerShopPage(shop: shop);
             break;
           case 2:
@@ -118,16 +130,33 @@ class _SellerNavigationState extends ConsumerState<SellerNavigation> {
 }
 
 class _MissingShopPage extends StatelessWidget {
-  const _MissingShopPage({this.title = 'Boutique'});
+  const _MissingShopPage({
+    this.title = 'Boutique',
+    this.onCreate,
+  });
 
   final String title;
+  final Future<void> Function()? onCreate;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
-      body: const Center(
-        child: Text('Aucune boutique vendeur n’est encore configurée.'),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Aucune boutique vendeur n’est encore configurée.'),
+            if (onCreate != null) ...[
+              const SizedBox(height: 14),
+              FilledButton.icon(
+                onPressed: onCreate,
+                icon: const Icon(Icons.add_business_outlined),
+                label: const Text('Créer ma boutique'),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
