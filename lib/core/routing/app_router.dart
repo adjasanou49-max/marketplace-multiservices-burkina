@@ -35,6 +35,7 @@ import '../../features/seller/presentation/seller_stats_page.dart';
 import '../../features/verticals/data/vertical_repository.dart';
 import '../../features/verticals/presentation/vertical_discovery_page.dart';
 import '../../features/admin/presentation/admin_dashboard_page.dart';
+import '../../features/admin/presentation/admin_accounts_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
