@@ -16,12 +16,12 @@ class AdminModuleRepository {
   }
 
   Future<void> setEnabled(String key, bool enabled) async {
-    await client
-        .from('marketplace_modules')
-        .update({
-          'enabled': enabled,
-          'updated_at': DateTime.now().toUtc().toIso8601String(),
-        })
-        .eq('key', key);
+    await client.rpc(
+      'admin_set_marketplace_module_enabled',
+      params: {
+        'p_key': key,
+        'p_enabled': enabled,
+      },
+    );
   }
 }
