@@ -1,9 +1,13 @@
 name: Flutter CI
 on:
   push:
-    branches: [main, codex/bootstrap]
+    branches: [main]
   pull_request:
-    branches: [main, codex/bootstrap]
+    branches: [main]
+
+concurrency:
+  group: flutter-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
