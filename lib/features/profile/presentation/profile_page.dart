@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -15,6 +17,11 @@ class ProfilePage extends StatelessWidget {
             title: Text('Mon profil'),
           ),
           ListTile(
+            leading: Icon(Icons.login_outlined),
+            title: Text('Connexion / compte'),
+            onTap: () => GoRouter.of(context).push('/auth'),
+          ),
+          ListTile(
             leading: Icon(Icons.location_on_outlined),
             title: Text('Mes adresses'),
           ),
@@ -25,6 +32,18 @@ class ProfilePage extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.settings_outlined),
             title: Text('Paramètres'),
+          ),
+          ListTile(
+            leading: Icon(Icons.logout),
+            title: Text('Déconnexion'),
+            onTap: () async {
+              await Supabase.instance.client.auth.signOut();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Déconnexion effectuée.')),
+                );
+              }
+            },
           ),
         ],
       ),
