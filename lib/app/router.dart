@@ -25,6 +25,7 @@ import '../features/auth/presentation/auth_page.dart';
 import '../features/restaurants/presentation/restaurants_page.dart';
 import '../features/transport/presentation/transport_page.dart';
 import '../features/mechanics/presentation/mechanics_page.dart';
+import '../features/expiry/presentation/expiry_page.dart';
 
 final appRouter=GoRouter(initialLocation:'/',routes:[
  GoRoute(path:'/',builder:(c,s)=>const HomePage()),
@@ -53,4 +54,5 @@ final appRouter=GoRouter(initialLocation:'/',routes:[
  GoRoute(path:'/restaurants',builder:(c,s)=>const RestaurantsPage()),
  GoRoute(path:'/transport',builder:(c,s)=>const TransportPage()),
  GoRoute(path:'/mechanics',builder:(c,s)=>const MechanicsPage()),
+ GoRoute(path:'/expiry',builder:(c,s)=>const ExpiryPage()),
 ]);
