@@ -42,7 +42,7 @@ Deno.serve(async (req: Request) => {
   const orderId = body.order_id?.trim();
   const provider = body.provider?.trim().toUpperCase();
   let paymentId = body.payment_id?.trim();
-  if (!orderId || !provider || !["ORANGE_MONEY", "MOOV_MONEY"].includes(provider)) {
+  if (!orderId || !provider || provider !== "CINETPAY") {
     return json({ error: "provider_invalid" }, 400);
   }
 
