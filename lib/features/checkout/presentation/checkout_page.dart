@@ -43,7 +43,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   Future<void> _refreshDeliveryQuote(DeliveryAddress address) async {
     final client = ref.read(supabaseProvider);
     final cartItems = ref.read(cartControllerProvider);
-    if (client == null || cartItems.isEmpty || address.id == null) {
+    if (client == null || cartItems.isEmpty) {
       return;
     }
 
