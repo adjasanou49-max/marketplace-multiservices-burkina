@@ -101,7 +101,6 @@ class _AdminDeliveryPricingPageState extends ConsumerState<AdminDeliveryPricingP
 
     final client = ref.read(supabaseProvider);
     if (client == null) return;
-    final messenger = ScaffoldMessenger.of(context);
     try {
       await AdminDeliveryPricingRepository(client).updateRule(
         id: rule.id,
@@ -111,9 +110,13 @@ class _AdminDeliveryPricingPageState extends ConsumerState<AdminDeliveryPricingP
         perStopFee: num.tryParse(stopController.text) ?? 0,
         active: active,
       );
-      if (mounted) setState(() => future = _load());
+      if (!mounted) return;
+      setState(() => future = _load());
     } catch (error) {
-      messenger.showSnackBar(SnackBar(content: Text('Erreur : $error')));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur : $error')),
+      );
     } finally {
       nameController.dispose();
       baseController.dispose();
