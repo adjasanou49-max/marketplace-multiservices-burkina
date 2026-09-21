@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import '../lib/features/verticals/data/vertical_repository.dart';
+import 'package:marketplace_multiservices_burkina/features/verticals/data/vertical_repository.dart';
 
 void main() {
   test('all vertical modules have complete configuration', () {
