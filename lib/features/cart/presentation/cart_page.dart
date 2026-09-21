@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../application/cart_controller.dart';
 
 class CartPage extends ConsumerWidget {
@@ -46,7 +47,7 @@ class CartPage extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: FilledButton(
-            onPressed: () {},
+            onPressed: () => context.push('/checkout'),
             child: Text('Continuer — ${total.toStringAsFixed(0)} XOF'),
           ),
         ),
