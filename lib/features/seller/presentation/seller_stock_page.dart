@@ -17,7 +17,7 @@ class SellerStockPage extends ConsumerWidget {
    builder:(context,s){
     if(s.connectionState==ConnectionState.waiting)return const Center(child:CircularProgressIndicator());
     if(s.hasError)return Center(child:Text('Erreur : ${s.error}'));
-    final items=(s.data as List<Map<String,dynamic>>?)??const [];
+    final items=s.data ?? const <Map<String,dynamic>>[];
     return ListView.builder(padding:const EdgeInsets.all(16),itemCount:items.length,itemBuilder:(_,i){
      final x=items[i]; final p=x['products'] is Map?Map<String,dynamic>.from(x['products']):<String,dynamic>{};
      final q=x['quantity']??0, r=x['reserved_quantity']??0;
