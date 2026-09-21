@@ -7,6 +7,7 @@ import '../../features/cart/presentation/cart_page.dart';
 import '../../features/catalog/presentation/home_page.dart';
 import '../../features/checkout/presentation/checkout_page.dart';
 import '../../features/checkout/presentation/orders_page.dart';
+import '../../features/checkout/presentation/order_details_page.dart';
 import '../../features/common/presentation/module_placeholder_page.dart';
 import '../../features/courier/presentation/courier_page.dart';
 import '../../features/delivery/presentation/delivery_tracking_page.dart';
@@ -54,6 +55,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(path: '/orders', builder: (_, __) => const OrdersPage()),
+      GoRoute(
+        path: '/orders/:orderId',
+        builder: (_, state) {
+          final orderId = state.pathParameters['orderId'];
+          if (orderId == null || orderId.isEmpty) {
+            return const ModulePlaceholderPage(
+              title: 'Commande invalide',
+              icon: Icons.receipt_long_outlined,
+            );
+          }
+          return OrderDetailsPage(orderId: orderId);
+        },
+      ),
       GoRoute(
         path: '/delivery/:orderId',
         builder: (_, state) {
