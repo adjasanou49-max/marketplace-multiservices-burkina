@@ -11,7 +11,7 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(title: const Text('Profil')),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: const [
+        children: [
           ListTile(
             leading: Icon(Icons.person_outline),
             title: Text('Mon profil'),
