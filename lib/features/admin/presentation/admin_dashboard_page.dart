@@ -363,6 +363,12 @@ class _AdminDashboardPageState
                 icon: const Icon(Icons.manage_accounts_outlined),
                 label: const Text('Gérer les comptes utilisateurs'),
               ),
+              const SizedBox(height: 8),
+              FilledButton.icon(
+                onPressed: () => context.push('/admin/refunds'),
+                icon: const Icon(Icons.currency_exchange_outlined),
+                label: const Text('Gérer les remboursements'),
+              ),
               const SizedBox(height: 12),
               const Text(
                 'Les changements de compte, produit, livraison, remboursement, finance et associés passent par les RPC d’administration protégées.',
