@@ -25,6 +25,8 @@ class OrderRepository {
     return cart.checkout(
       deliveryAddress: Map<String, dynamic>.from(address),
       deliveryFee: draft.deliveryFee,
+      couponCode: draft.couponCode,
+      idempotencyKey: draft.idempotencyKey,
     );
   }
 }
