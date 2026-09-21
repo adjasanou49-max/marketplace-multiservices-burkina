@@ -31,6 +31,7 @@ import '../features/follows/presentation/follows_page.dart';
 import '../features/profile/presentation/profile_page.dart';
 import '../features/auth/presentation/auth_page.dart';
 import '../features/restaurants/presentation/restaurants_page.dart';
+import '../features/restaurants/presentation/restaurant_detail_page.dart';
 import '../features/shops/presentation/shop_detail_page.dart';
 import '../features/shops/domain/shop.dart';
 import '../features/transport/presentation/transport_page.dart';
@@ -136,7 +137,7 @@ final appRouter = GoRouter(
  GoRoute(path:'/profile',builder:(c,s)=>const ProfilePage()),
  GoRoute(path:'/auth',builder:(c,s)=>const AuthPage()),
  GoRoute(path:'/restaurants',builder:(c,s)=>const RestaurantsPage()),
- GoRoute(path:'/restaurant/:id',builder:(c,s){final restaurant=s.extra;return restaurant is Map<String,dynamic> ? RestaurantDetailPage(restaurant:restaurant) : const Scaffold(body:Center(child:Text('Restaurant introuvable')));}),
+ GoRoute(path:'/restaurant/:id',builder:(c,s)=>RestaurantDetailPage(restaurantId:s.pathParameters['id']!)),
  GoRoute(path:'/shop/:id',builder:(c,s){final shop=s.extra;return shop is Shop ? ShopDetailPage(shop:shop) : const Scaffold(body:Center(child:Text('Boutique introuvable')));}),
  GoRoute(path:'/transport',builder:(c,s)=>const TransportPage()),
  GoRoute(path:'/mechanics',builder:(c,s)=>const MechanicsPage()),
