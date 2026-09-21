@@ -17,7 +17,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: '3.35.0'
+          flutter-version: '3.47.2'
           cache: true
       - run: flutter --version
       - run: flutter pub get
@@ -43,7 +43,11 @@ jobs:
           flutter-version: '3.35.0'
           cache: true
       - run: flutter pub get
-      - name: Check Android project
-        run: test -f android/app/build.gradle || test -f android/app/build.gradle.kts
+      - name: Ensure Android platform project
+        run: |
+          if [ ! -d android ]; then
+            flutter create --platforms=android --project-name marketplace_multiservices_burkina .
+          fi
+          test -f android/app/build.gradle || test -f android/app/build.gradle.kts
       - run: flutter build apk --debug
       - run: flutter build appbundle --debug
