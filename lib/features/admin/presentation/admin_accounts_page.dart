@@ -167,7 +167,7 @@ class _AdminAccountsPageState extends ConsumerState<AdminAccountsPage> {
                     final fallback = [
                       user['first_name']?.toString(),
                       user['last_name']?.toString(),
-                    ].where((value) => value != null && value!.isNotEmpty).join(' ');
+                    ].where((value) => value != null && value.isNotEmpty).join(' ');
                     final name = (display == null || display.isEmpty)
                         ? (fallback.isEmpty ? user['id'].toString() : fallback)
                         : display;
