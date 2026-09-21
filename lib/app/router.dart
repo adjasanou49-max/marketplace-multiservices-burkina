@@ -32,6 +32,7 @@ import '../features/shops/presentation/shop_detail_page.dart';
 import '../features/shops/domain/shop.dart';
 import '../features/transport/presentation/transport_page.dart';
 import '../features/mechanics/presentation/mechanics_page.dart';
+import '../features/courier/presentation/courier_page.dart';
 import '../features/services/presentation/services_page.dart';
 import '../features/group_buy/presentation/group_buy_page.dart';
 import '../features/expiry/presentation/expiry_page.dart';
@@ -59,6 +60,7 @@ final appRouter=GoRouter(initialLocation:'/',routes:[
  GoRoute(path:'/seller/stock',builder:(c,s)=>SellerStockPage(shopId:s.uri.queryParameters['shopId']??'')),
  GoRoute(path:'/seller/finance',builder:(c,s)=>const SellerFinancePage()),
  GoRoute(path:'/seller/payouts',builder:(c,s)=>const SellerPayoutsPage()),
+ GoRoute(path:'/courier',builder:(c,s)=>const CourierPage()),
  GoRoute(path:'/promotions',builder:(c,s)=>const PromotionsPage()),
  GoRoute(path:'/follows',builder:(c,s)=>const FollowsPage()),
  GoRoute(path:'/profile',builder:(c,s)=>const ProfilePage()),
