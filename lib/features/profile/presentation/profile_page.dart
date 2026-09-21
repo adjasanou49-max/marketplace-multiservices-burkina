@@ -37,11 +37,19 @@ class ProfilePage extends StatelessWidget {
             leading: Icon(Icons.logout),
             title: Text('Déconnexion'),
             onTap: () async {
-              await Supabase.instance.client.auth.signOut();
+              try {
+                await Supabase.instance.client.auth.signOut();
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Déconnexion effectuée.')),
                 );
+              }
+              } catch (_) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Supabase n’est pas configuré.')),
+                  );
+                }
               }
             },
           ),
