@@ -104,7 +104,6 @@ class _TransportPageState extends ConsumerState<TransportPage> {
       return;
     }
 
-    final messenger = ScaffoldMessenger.of(context);
     try {
       final bookingId = await repository.createBooking(
         tripId: tripId,
@@ -112,12 +111,12 @@ class _TransportPageState extends ConsumerState<TransportPage> {
         passengerName: nameController.text,
       );
       if (!mounted) return;
-      messenger.showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Réservation créée : $bookingId')),
       );
     } catch (error) {
       if (!mounted) return;
-      messenger.showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Réservation impossible : $error')),
       );
     } finally {
