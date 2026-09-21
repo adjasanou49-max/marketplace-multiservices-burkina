@@ -10,7 +10,6 @@ import '../../products/domain/product.dart';
 import '../../products/presentation/product_grid.dart';
 import '../../shops/application/shop_controller.dart';
 import '../../shops/presentation/shop_card.dart';
-import '../../modules/presentation/service_module_sliver.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -196,7 +195,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           _selectCategory(index, categories),
                     ),
                   ),
-                  const ServiceModuleSliver(),
+                  const _ServiceModuleSliver(),
                   if (categories.isEmpty)
                     SliverToBoxAdapter(
                       child: ProductGrid(products: products),
@@ -366,3 +365,57 @@ class _CategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
       oldDelegate.selectedIndex != selectedIndex;
 }
 
+
+class _ServiceModuleSliver extends ConsumerWidget {
+  const _ServiceModuleSliver();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(enabledModulesProvider);
+    return state.when(
+      loading: () => const SliverToBoxAdapter(child: SizedBox(height: 0)),
+      error: (_, __) => const SliverToBoxAdapter(child: SizedBox(height: 0)),
+      data: (modules) {
+        final visible = modules
+            .where(
+              (module) => const <String>{
+                '/restaurants',
+                '/transport',
+                '/mechanics',
+                '/expiry',
+              }.contains(module.route),
+            )
+            .toList();
+
+        if (visible.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox(height: 0));
+        }
+
+        return SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
+                child: Text(
+                  'Services',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              SizedBox(
+                height: 94,
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: visible.length,
+                  itemBuilder: (_, index) =>
+                      _ModuleShortcut(module: visible[index]),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
