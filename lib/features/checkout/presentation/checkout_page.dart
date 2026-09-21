@@ -6,6 +6,8 @@ import '../../../core/providers/repository_providers.dart';
 import '../../addresses/application/address_controller.dart';
 import '../../addresses/domain/delivery_address.dart';
 import '../../cart/application/cart_controller.dart';
+import '../../cart/data/cart_repository.dart';
+import '../../delivery/data/delivery_quote_repository.dart';
 import '../../orders/data/order_repository.dart';
 import '../../orders/domain/order_draft.dart';
 import '../domain/checkout_state.dart';
@@ -29,6 +31,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       'checkout-${DateTime.now().microsecondsSinceEpoch}';
   CheckoutState state = const CheckoutState();
   bool submitting = false;
+  bool quoteLoading = false;
 
   @override
   void dispose() {
@@ -37,12 +40,63 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     super.dispose();
   }
 
+  Future<void> _refreshDeliveryQuote(DeliveryAddress address) async {
+    final client = ref.read(supabaseProvider);
+    final cartItems = ref.read(cartControllerProvider);
+    if (client == null || cartItems.isEmpty || address.id == null) {
+      return;
+    }
+
+    setState(() => quoteLoading = true);
+    try {
+      final cartRepository = CartRepository(client);
+      await cartRepository.syncItems(cartItems);
+
+      final quoteRepository = DeliveryQuoteRepository(client);
+      final quote = await quoteRepository.quote(
+        cartId: await quoteRepository.activeCartId(),
+        deliveryAddress: {
+          'id': address.id,
+          'recipient_name': address.recipientName,
+          'phone': address.phone,
+          'address_line': address.addressLine,
+          'city': address.city,
+          'latitude': address.latitude,
+          'longitude': address.longitude,
+        },
+      );
+
+      if (!mounted) return;
+      setState(() {
+        state = state.copyWith(
+          addressId: address.id,
+          deliveryFee: quote.customerFee,
+          deliveryDistanceKm: quote.distanceKm,
+          deliveryStopCount: quote.stopCount,
+        );
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        state = state.copyWith(
+          deliveryFee: 0,
+          deliveryDistanceKm: null,
+          deliveryStopCount: 0,
+        );
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Frais de livraison indisponibles : $error')),
+      );
+    } finally {
+      if (mounted) setState(() => quoteLoading = false);
+    }
+  }
   Future<void> submit() async {
     final items = ref.read(cartControllerProvider);
     final repository = ref.read(orderRepositoryProvider);
     final addressId = state.addressId;
 
-    if (items.isEmpty || repository == null || addressId == null) {
+    if (items.isEmpty || repository == null || addressId == null || quoteLoading) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Sélectionnez une adresse de livraison.')),
       );
@@ -112,9 +166,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           if (selected != state.addressId) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted && state.addressId != selected) {
+                final selectedAddress = items.firstWhere(
+                  (item) => item.id == selected,
+                );
                 setState(
                   () => state = state.copyWith(addressId: selected),
                 );
+                _refreshDeliveryQuote(selectedAddress);
               }
             });
           }
@@ -139,9 +197,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                     ? null
                     : (value) {
                         if (value != null) {
+                          final selectedAddress = items.firstWhere(
+                            (item) => item.id == value,
+                          );
                           setState(
                             () => state = state.copyWith(addressId: value),
                           );
+                          _refreshDeliveryQuote(selectedAddress);
                         }
                       },
               ),
@@ -168,9 +230,25 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               ),
               const SizedBox(height: 24),
               Text('Sous-total : ${subtotal.toStringAsFixed(0)} XOF'),
-              Text(
-                'Livraison : ${state.deliveryFee.toStringAsFixed(0)} XOF',
+              Row(
+                children: [
+                  const Icon(Icons.local_shipping_outlined, size: 18),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      quoteLoading
+                          ? 'Calcul des frais de livraison...'
+                          : 'Livraison : ${state.deliveryFee.toStringAsFixed(0)} XOF',
+                    ),
+                  ),
+                ],
               ),
+              if (!quoteLoading && state.deliveryDistanceKm != null)
+                Text(
+                  '${state.deliveryStopCount} point(s) vendeur • '
+                  '${state.deliveryDistanceKm!.toStringAsFixed(1)} km max',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               const Divider(),
               Text(
                 'Total : ${total.toStringAsFixed(0)} XOF',
@@ -178,7 +256,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               ),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: submitting ? null : submit,
+                onPressed: submitting || quoteLoading ? null : submit,
                 child: submitting
                     ? const SizedBox(
                         width: 20,
