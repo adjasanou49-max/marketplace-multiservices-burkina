@@ -27,7 +27,7 @@ jobs:
       - name: Dependencies
         run: flutter pub get
       - name: Build Android APK
-        run: flutter build apk --release
+        run: flutter build appbundle --release
 
   ios-release:
     runs-on: macos-latest
