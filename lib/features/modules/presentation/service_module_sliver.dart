@@ -140,7 +140,7 @@ IconData _iconFor(String? name) {
     case 'directions_car':
       return Icons.directions_car_outlined;
     case 'car_rental':
-      return Icons.car_rental_outlined;
+      return Icons.directions_car_outlined;
     case 'home_work':
       return Icons.home_work_outlined;
     case 'hotel':
