@@ -132,11 +132,174 @@ class _VerticalDiscoveryPageState
             address: {'label': address},
           );
           _success('Demande à domicile créée : $id');
+        case VerticalModule.freight:
+          await _createFreight(repo);
+        case VerticalModule.parcels:
+          await _createParcel(repo);
         default:
           break;
       }
     } catch (error) {
       _info('Opération impossible : $error');
+    }
+  }
+
+  Future<void> _createFreight(VerticalRepository repo) async {
+    final pickup = await _addressDialog();
+    if (pickup == null) return;
+    final destination = await _addressDialog();
+    if (destination == null) return;
+    final weight = TextEditingController();
+    final description = TextEditingController();
+
+    final values = await showDialog<List<String>>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Nouvelle demande de fret'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: weight,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: 'Poids en kg (facultatif)',
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: description,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Description de la marchandise',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(
+              dialogContext,
+              <String>[weight.text.trim(), description.text.trim()],
+            ),
+            child: const Text('Envoyer'),
+          ),
+        ],
+      ),
+    );
+    weight.dispose();
+    description.dispose();
+    if (values == null) return;
+
+    try {
+      final id = await repo.createFreight(
+        pickup: {'label': pickup},
+        delivery: {'label': destination},
+        weightKg: num.tryParse(values[0]),
+        description: values[1].isEmpty ? null : values[1],
+      );
+      _success('Demande de fret créée : $id');
+    } catch (error) {
+      _info('Demande de fret impossible : $error');
+    }
+  }
+
+  Future<void> _createParcel(VerticalRepository repo) async {
+    final name = TextEditingController();
+    final phone = TextEditingController();
+    final pickup = TextEditingController();
+    final delivery = TextEditingController();
+    final weight = TextEditingController();
+
+    final values = await showDialog<List<String>>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Envoyer un colis'),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(
+                controller: name,
+                decoration: const InputDecoration(labelText: 'Nom du destinataire'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: phone,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(labelText: 'Téléphone du destinataire'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: pickup,
+                decoration: const InputDecoration(labelText: 'Lieu de dépôt / départ'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: delivery,
+                decoration: const InputDecoration(labelText: 'Lieu de livraison'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: weight,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(labelText: 'Poids en kg (facultatif)'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (name.text.trim().isEmpty ||
+                  pickup.text.trim().isEmpty ||
+                  delivery.text.trim().isEmpty) {
+                return;
+              }
+              Navigator.pop(
+                dialogContext,
+                <String>[
+                  name.text.trim(),
+                  phone.text.trim(),
+                  pickup.text.trim(),
+                  delivery.text.trim(),
+                  weight.text.trim(),
+                ],
+              );
+            },
+            child: const Text('Créer le colis'),
+          ),
+        ],
+      ),
+    );
+
+    name.dispose();
+    phone.dispose();
+    pickup.dispose();
+    delivery.dispose();
+    weight.dispose();
+
+    if (values == null) return;
+
+    try {
+      final id = await repo.createParcel(
+        recipientName: values[0],
+        recipientPhone: values[1],
+        pickupAddress: {'label': values[2]},
+        deliveryAddress: {'label': values[3]},
+        weightKg: num.tryParse(values[4]),
+      );
+      _success('Colis créé : $id');
+    } catch (error) {
+      _info('Création du colis impossible : $error');
     }
   }
 
@@ -391,6 +554,8 @@ class _VerticalDiscoveryPageState
         VerticalModule.homeServices,
         VerticalModule.digital,
         VerticalModule.training,
+        VerticalModule.freight,
+        VerticalModule.parcels,
       }.contains(module);
 
   String _actionLabel(VerticalModule module) {
@@ -412,6 +577,10 @@ class _VerticalDiscoveryPageState
         return 'Commander';
       case VerticalModule.training:
         return 'S’inscrire';
+      case VerticalModule.freight:
+        return 'Demander';
+      case VerticalModule.parcels:
+        return 'Envoyer';
       default:
         return 'Voir';
     }
