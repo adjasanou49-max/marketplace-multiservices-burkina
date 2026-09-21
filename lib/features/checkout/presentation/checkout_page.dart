@@ -80,7 +80,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       setState(() {
         state = state.copyWith(
           deliveryFee: 0,
-          deliveryDistanceKm: null,
+          clearDeliveryDistanceKm: true,
           deliveryStopCount: 0,
         );
       });
