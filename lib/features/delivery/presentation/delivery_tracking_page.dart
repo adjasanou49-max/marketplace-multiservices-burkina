@@ -233,7 +233,9 @@ class _DeliveryTrackingPageState
       final lng = num.tryParse(
         (raw['longitude'] ?? raw['lng'] ?? raw['lon']).toString(),
       );
-      if (lat != null && lng != null && _valid(lat.toDouble(), lng.toDouble())) {
+      if (lat != null &&
+          lng != null &&
+          _valid(lat.toDouble(), lng.toDouble())) {
         return LatLng(lat.toDouble(), lng.toDouble());
       }
     }
@@ -241,7 +243,9 @@ class _DeliveryTrackingPageState
     if (raw is List && raw.length >= 2) {
       final lng = num.tryParse(raw[0].toString());
       final lat = num.tryParse(raw[1].toString());
-      if (lat != null && lng != null && _valid(lat.toDouble(), lng.toDouble())) {
+      if (lat != null &&
+          lng != null &&
+          _valid(lat.toDouble(), lng.toDouble())) {
         return LatLng(lat.toDouble(), lng.toDouble());
       }
     }
@@ -255,24 +259,7 @@ class _DeliveryTrackingPageState
           .trim();
 
       final match = RegExp(
-        r'^POINT\s*\(\s*([-+]?\d+(?:\.\d+)?)\s+([-+]?\d+(?:\.\d+)?)\s*\)    switch (status) {
-      case 'CREATED':
-        return 0.15;
-      case 'READY_FOR_PICKUP':
-      case 'ASSIGNED':
-        return 0.35;
-      case 'PICKED_UP':
-        return 0.55;
-      case 'IN_TRANSIT':
-        return 0.75;
-      case 'DELIVERED':
-        return 1;
-      default:
-        return 0.1;
-    }
-  }
-}
-,
+        r'^POINT\s*\(\s*([-+]?\d+(?:\.\d+)?)\s+([-+]?\d+(?:\.\d+)?)\s*\)$',
         caseSensitive: false,
       ).firstMatch(normalized);
 
