@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/repository_providers.dart';
 import '../../../core/widgets/app_error_view.dart';
+import '../../modules/presentation/service_module_sliver.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -224,6 +225,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   onCategorySelected: _selectCategory,
                 ),
               ),
+              const ServiceModuleSliver(),
               if (_products.isEmpty && !_loadingProducts)
                 const SliverFillRemaining(
                   hasScrollBody: false,
@@ -304,10 +306,10 @@ class _CatalogHeaderDelegate extends SliverPersistentHeaderDelegate {
   final ValueChanged<String?> onCategorySelected;
 
   @override
-  double get minExtent => 132;
+  double get minExtent => 152;
 
   @override
-  double get maxExtent => 132;
+  double get maxExtent => 152;
 
   @override
   Widget build(
@@ -323,7 +325,7 @@ class _CatalogHeaderDelegate extends SliverPersistentHeaderDelegate {
         child: Column(
           children: [
             SizedBox(
-              height: 48,
+              height: 42,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: types.length,
@@ -341,24 +343,45 @@ class _CatalogHeaderDelegate extends SliverPersistentHeaderDelegate {
               ),
             ),
             SizedBox(
-              height: 62,
+              height: 92,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: categories.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
                 itemBuilder: (_, index) {
                   final category = categories[index];
                   final id = category['id']?.toString();
+                  final selected = id == selectedCategoryId;
 
-                  return FilterChip(
-                    selected: id == selectedCategoryId,
-                    onSelected: (_) => onCategorySelected(
-                      id == selectedCategoryId ? null : id,
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(42),
+                    onTap: () => onCategorySelected(
+                      selected ? null : id,
                     ),
-                    avatar: const CircleAvatar(
-                      child: Icon(Icons.category_outlined, size: 16),
+                    child: SizedBox(
+                      width: 72,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 28,
+                            child: Icon(
+                              selected
+                                  ? Icons.check
+                                  : Icons.category_outlined,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            category['name']?.toString() ?? '',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                        ],
+                      ),
                     ),
-                    label: Text(category['name']?.toString() ?? ''),
                   );
                 },
               ),
