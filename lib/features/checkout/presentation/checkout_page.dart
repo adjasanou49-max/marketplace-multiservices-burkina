@@ -24,12 +24,16 @@ class CheckoutPage extends ConsumerStatefulWidget {
 
 class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   final noteController = TextEditingController();
+  final couponController = TextEditingController();
+  late final String idempotencyKey =
+      'checkout-${DateTime.now().microsecondsSinceEpoch}';
   CheckoutState state = const CheckoutState();
   bool submitting = false;
 
   @override
   void dispose() {
     noteController.dispose();
+    couponController.dispose();
     super.dispose();
   }
 
@@ -57,6 +61,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         note: noteController.text.trim().isEmpty
             ? null
             : noteController.text.trim(),
+        couponCode: couponController.text.trim().isEmpty
+            ? null
+            : couponController.text.trim(),
+        idempotencyKey: idempotencyKey,
       );
 
       final orderId = await repository.createOrder(draft);
@@ -138,6 +146,17 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       },
               ),
               const SizedBox(height: 16),
+              TextField(
+                controller: couponController,
+                enabled: !submitting,
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(
+                  labelText: 'Code promo (optionnel)',
+                  prefixIcon: Icon(Icons.local_offer_outlined),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
               TextField(
                 controller: noteController,
                 enabled: !submitting,
