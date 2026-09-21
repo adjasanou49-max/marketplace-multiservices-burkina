@@ -247,6 +247,9 @@ class _HomePageState extends ConsumerState<HomePage> {
         selectedIndex: 0,
         onDestinationSelected: (index) {
           switch (index) {
+            case 1:
+              context.push('/follows');
+              break;
             case 3:
               context.push('/messages');
               break;
