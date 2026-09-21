@@ -101,6 +101,14 @@ class PushNotificationService {
     }
   }
 
+  Future<void> openSystemNotificationSettings() async {
+    await _local
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+    await _local.openAppNotificationSettings();
+  }
+
   Future<void> _initializeLocalNotifications() async {
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings();
