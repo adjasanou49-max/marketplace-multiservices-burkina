@@ -113,7 +113,9 @@ revoke all on function public.verify_push_dispatch_secret(text) from anon;
 revoke all on function public.verify_push_dispatch_secret(text) from authenticated;
 grant execute on function public.verify_push_dispatch_secret(text) to service_role;
 
-create or replace function public.trigger_push_notification()
+drop function if exists public.trigger_push_notification();
+
+create or replace function private.trigger_push_notification()
 returns trigger
 language plpgsql
 security definer
@@ -146,7 +148,7 @@ drop trigger if exists notifications_push_after_insert on public.notifications;
 create trigger notifications_push_after_insert
 after insert on public.notifications
 for each row
-execute function public.trigger_push_notification();
+execute function private.trigger_push_notification();
 
 select cron.schedule(
   'dispatch-notifications-every-minute',
