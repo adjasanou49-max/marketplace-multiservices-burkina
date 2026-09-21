@@ -124,6 +124,30 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/seller/orders',
         builder: (_, __) => const SellerOrdersPage(),
       ),
+      GoRoute(path: '/promotions', builder: (_, __) => const PromotionsPage()),
+      GoRoute(path: '/seller/finance', builder: (_, __) => const SellerFinancePage()),
+      for (final item in const <({String path, VerticalModule module})>[
+        (path: '/rides', module: VerticalModule.rides),
+        (path: '/rentals', module: VerticalModule.rentals),
+        (path: '/real-estate', module: VerticalModule.realEstate),
+        (path: '/accommodations', module: VerticalModule.accommodations),
+        (path: '/events', module: VerticalModule.events),
+        (path: '/jobs', module: VerticalModule.jobs),
+        (path: '/professionals', module: VerticalModule.professionals),
+        (path: '/agriculture', module: VerticalModule.agriculture),
+        (path: '/freight', module: VerticalModule.freight),
+        (path: '/health', module: VerticalModule.health),
+        (path: '/beauty', module: VerticalModule.beauty),
+        (path: '/home-services', module: VerticalModule.homeServices),
+        (path: '/digital', module: VerticalModule.digital),
+        (path: '/training', module: VerticalModule.training),
+        (path: '/creative', module: VerticalModule.creative),
+        (path: '/parcels', module: VerticalModule.parcels),
+      ])
+        GoRoute(
+          path: item.path,
+          builder: (_, __) => VerticalDiscoveryPage(module: item.module),
+        ),
       GoRoute(path: '/seller/stock', builder: (_, __) => const SellerProductsPage()),
       GoRoute(path: '/seller/payouts', builder: (_, __) => const SellerFinancePage()),
       GoRoute(path: '/seller/commissions', builder: (_, __) => const SellerFinancePage()),
@@ -132,21 +156,3 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
-IconData _placeholderIcon(int value) {
-  switch (value) {
-    case 4:
-      return Icons.local_offer_outlined;
-    case 7:
-      return Icons.inventory_2_outlined;
-    case 8:
-      return Icons.payments_outlined;
-    case 9:
-      return Icons.account_balance_wallet_outlined;
-    case 10:
-      return Icons.percent_outlined;
-    case 11:
-      return Icons.settings_outlined;
-    default:
-      return Icons.apps_outlined;
-  }
-}
