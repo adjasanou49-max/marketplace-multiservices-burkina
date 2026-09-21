@@ -29,6 +29,9 @@ import '../../features/seller/presentation/seller_finance_page.dart';
 import '../../features/seller/presentation/seller_shop_page.dart';
 import '../../features/seller/presentation/seller_coupons_page.dart';
 import '../../features/seller/presentation/seller_promotions_page.dart';
+import '../../features/seller/presentation/seller_clients_page.dart';
+import '../../features/seller/presentation/seller_reviews_page.dart';
+import '../../features/seller/presentation/seller_stats_page.dart';
 import '../../features/verticals/data/vertical_repository.dart';
 import '../../features/verticals/presentation/vertical_discovery_page.dart';
 import '../../features/admin/presentation/admin_dashboard_page.dart';
@@ -145,6 +148,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/seller/shop', builder: (_, __) => const SellerShopPage()),
       GoRoute(path: '/seller/coupons', builder: (_, __) => const SellerCouponsPage()),
       GoRoute(path: '/seller/promotions', builder: (_, __) => const SellerPromotionsPage()),
+      GoRoute(path: '/seller/clients', builder: (_, __) => const SellerClientsPage()),
+      GoRoute(path: '/seller/reviews', builder: (_, __) => const SellerReviewsPage()),
+      GoRoute(path: '/seller/stats', builder: (_, __) => const SellerStatsPage()),
       GoRoute(path: '/seller/finance', builder: (_, __) => const SellerFinancePage()),
       for (final item in const <({String path, VerticalModule module})>[
         (path: '/rides', module: VerticalModule.rides),
