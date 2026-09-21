@@ -1,0 +1,42 @@
+name: Bootstrap native platforms
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.x'
+          channel: stable
+          cache: true
+
+      - name: Generate Android and iOS runners
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -d android ] || [ ! -d ios ]; then
+            flutter create . --platforms=android,ios --org com.marketplaceburkina
+          fi
+
+      - name: Commit generated platforms
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git status --porcelain | grep -q '^?? android/\|^?? ios/\|^ M android/\|^ M ios/'; then
+            git add android ios
+            git commit -m "chore: add Flutter Android and iOS runners"
+            git push origin HEAD:main
+          else
+            echo "Native platforms already present"
+          fi
