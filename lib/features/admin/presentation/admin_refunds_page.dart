@@ -86,6 +86,45 @@ class _AdminRefundsPageState extends ConsumerState<AdminRefundsPage> {
     );
   }
 
+  Future<void> _completeManual(String refundId) async {
+    final controller = TextEditingController();
+    final reference = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Confirmer le remboursement fournisseur'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Référence fournisseur',
+            hintText: 'Référence CinetPay / opérateur',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text.trim()),
+            child: const Text('Confirmer'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (reference == null || reference.isEmpty) return;
+
+    await _runAction(
+      () => ref.read(supabaseProvider)?.rpc(
+        'admin_complete_manual_refund',
+        params: {
+          'p_refund_id': refundId,
+          'p_provider_reference': reference,
+        },
+      ),
+      'Remboursement fournisseur confirmé.',
+    );
+  }
   Future<void> _execute(String refundId) async {
     final client = ref.read(supabaseProvider);
     if (client == null) return;
@@ -193,6 +232,7 @@ class _AdminRefundsPageState extends ConsumerState<AdminRefundsPage> {
                       if (value == 'approve') _approve(id);
                       if (value == 'reject') _reject(id);
                       if (value == 'execute') _execute(id);
+                      if (value == 'manual_complete') _completeManual(id);
                     },
                     itemBuilder: (_) => [
                       if (status == 'REQUESTED')
@@ -209,6 +249,14 @@ class _AdminRefundsPageState extends ConsumerState<AdminRefundsPage> {
                         const PopupMenuItem(
                           value: 'execute',
                           child: Text('Exécuter'),
+                        ),
+                      if (provider == 'CINETPAY' &&
+                          (status == 'APPROVED' ||
+                              status == 'PROCESSING' ||
+                              status == 'FAILED'))
+                        const PopupMenuItem(
+                          value: 'manual_complete',
+                          child: Text('Confirmer remboursement manuel'),
                         ),
                     ],
                   ),
