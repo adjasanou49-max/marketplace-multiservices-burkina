@@ -28,6 +28,7 @@ import '../features/seller/presentation/seller_finance_page.dart';
 import '../features/seller/presentation/seller_payouts_page.dart';
 import '../features/seller/presentation/seller_navigation.dart';
 import '../features/seller/presentation/seller_tools_page.dart';
+import '../features/seller/presentation/seller_create_shop_page.dart';
 import '../features/promotions/presentation/promotions_page.dart';
 import '../features/follows/presentation/follows_page.dart';
 import '../features/profile/presentation/profile_page.dart';
@@ -127,6 +128,7 @@ final appRouter = GoRouter(
  GoRoute(path:'/notifications',builder:(c,s)=>const NotificationsPage()),
  GoRoute(path:'/messages',builder:(c,s)=>const MessagesPage()),
  GoRoute(path:'/seller',builder:(c,s)=>const SellerNavigation()),
+ GoRoute(path:'/seller/create-shop',builder:(c,s)=>const SellerCreateShopPage()),
  GoRoute(path:'/seller/orders',builder:(c,s)=>const SellerOrdersPage()),
  GoRoute(path:'/seller/order/:id',builder:(c,s)=>SellerOrderDetailPage(groupId:s.pathParameters['id']!)),
  GoRoute(path:'/seller/stock',builder:(c,s)=>SellerStockPage(shopId:s.uri.queryParameters['shopId']??'')),
