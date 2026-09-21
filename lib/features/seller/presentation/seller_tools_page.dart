@@ -32,7 +32,7 @@ class SellerToolsPage extends StatelessWidget {
             leading: const Icon(Icons.storefront_outlined),
             title: const Text('Ma boutique'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/seller/settings'),
+            onTap: () => context.push('/seller/shop'),
           ),
           ListTile(
             leading: const Icon(Icons.payments_outlined),
@@ -45,6 +45,12 @@ class SellerToolsPage extends StatelessWidget {
             title: const Text('Demandes de paiement'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/seller/payouts'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.local_offer_outlined),
+            title: const Text('Coupons'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/seller/coupons'),
           ),
           ListTile(
             leading: const Icon(Icons.percent_outlined),
