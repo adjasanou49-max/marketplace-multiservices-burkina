@@ -144,6 +144,104 @@ class _VerticalDiscoveryPageState
     }
   }
 
+  Future<void> _trackParcel() async {
+    final controller = TextEditingController();
+    final code = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Suivre un colis'),
+        content: TextField(
+          controller: controller,
+          textCapitalization: TextCapitalization.characters,
+          decoration: const InputDecoration(
+            labelText: 'Code de suivi',
+            hintText: 'PKG-XXXXXXXXXXXX',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final value = controller.text.trim();
+              if (value.isNotEmpty) {
+                Navigator.pop(dialogContext, value);
+              }
+            },
+            child: const Text('Suivre'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (code == null) return;
+
+    final repo = ref.read(verticalRepositoryProvider);
+    if (repo == null) return;
+
+    try {
+      final tracking = await repo.trackParcel(code);
+      if (!mounted) return;
+      final rawEvents = tracking['events'];
+      final events = rawEvents is List
+          ? rawEvents
+              .whereType<Map>()
+              .map((row) => Map<String, dynamic>.from(row))
+              .toList()
+          : const <Map<String, dynamic>>[];
+
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(
+            'Colis ' + (tracking['tracking_code']?.toString() ?? code),
+          ),
+          content: SizedBox(
+            width: 460,
+            child: events.isEmpty
+                ? Text(
+                    'Statut actuel : ' +
+                        (tracking['status']?.toString() ?? '-'),
+                  )
+                : ListView(
+                    shrinkWrap: true,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.inventory_2_outlined),
+                        title: const Text('Statut actuel'),
+                        subtitle: Text(
+                          tracking['status']?.toString() ?? '-',
+                        ),
+                      ),
+                      const Divider(),
+                      for (final event in events)
+                        ListTile(
+                          leading: const Icon(Icons.route_outlined),
+                          title: Text(
+                            event['status']?.toString() ?? '-',
+                          ),
+                          subtitle: Text(
+                            event['created_at']?.toString() ?? '-',
+                          ),
+                        ),
+                    ],
+                  ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Fermer'),
+            ),
+          ],
+        ),
+      );
+    } catch (error) {
+      _info('Suivi impossible : ' + error.toString());
+    }
+  }
+
   Future<void> _createFreight(VerticalRepository repo) async {
     final pickup = await _addressDialog();
     if (pickup == null) return;
@@ -656,6 +754,12 @@ class _VerticalDiscoveryPageState
       appBar: AppBar(
         title: Text(config.title),
         actions: [
+          if (widget.module == VerticalModule.parcels)
+            IconButton(
+              tooltip: 'Suivre un colis',
+              onPressed: _trackParcel,
+              icon: const Icon(Icons.qr_code_scanner_outlined),
+            ),
           IconButton(
             tooltip: 'Actualiser',
             onPressed: _refresh,
