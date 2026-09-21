@@ -28,6 +28,7 @@ import '../features/shops/presentation/shop_detail_page.dart';
 import '../features/shops/domain/shop.dart';
 import '../features/transport/presentation/transport_page.dart';
 import '../features/mechanics/presentation/mechanics_page.dart';
+import '../features/services/presentation/services_page.dart';
 import '../features/expiry/presentation/expiry_page.dart';
 
 final appRouter=GoRouter(initialLocation:'/',routes:[
@@ -59,5 +60,6 @@ final appRouter=GoRouter(initialLocation:'/',routes:[
  GoRoute(path:'/shop/:id',builder:(c,s){final shop=s.extra;return shop is Shop ? ShopDetailPage(shop:shop) : const Scaffold(body:Center(child:Text('Boutique introuvable')));}),
  GoRoute(path:'/transport',builder:(c,s)=>const TransportPage()),
  GoRoute(path:'/mechanics',builder:(c,s)=>const MechanicsPage()),
+ GoRoute(path:'/services',builder:(c,s)=>const ServicesPage()),
  GoRoute(path:'/expiry',builder:(c,s)=>const ExpiryPage()),
 ]);
