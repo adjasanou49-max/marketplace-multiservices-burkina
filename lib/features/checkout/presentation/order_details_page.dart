@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/providers/repository_providers.dart';
 import '../data/checkout_repository.dart';
@@ -17,11 +18,50 @@ class OrderDetailsPage extends ConsumerStatefulWidget {
 
 class _OrderDetailsPageState extends ConsumerState<OrderDetailsPage> {
   late Future<_OrderDetails> _future;
+  RealtimeChannel? _orderChannel;
 
   @override
   void initState() {
     super.initState();
     _future = _load();
+    _startRealtime();
+  }
+
+  void _startRealtime() {
+    final client = ref.read(supabaseProvider);
+    if (client?.auth.currentUser == null) return;
+
+    _orderChannel = client!
+        .channel('order-payment-' + widget.orderId)
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'payments',
+          callback: (_) {
+            if (!mounted) return;
+            setState(() => _future = _load());
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'orders',
+          callback: (_) {
+            if (!mounted) return;
+            setState(() => _future = _load());
+          },
+        )
+        .subscribe();
+  }
+
+  @override
+  void dispose() {
+    final client = ref.read(supabaseProvider);
+    final channel = _orderChannel;
+    if (client != null && channel != null) {
+      client.removeChannel(channel);
+    }
+    super.dispose();
   }
 
   Future<_OrderDetails> _load() async {
