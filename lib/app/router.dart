@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../features/home/presentation/home_page.dart';
 import '../features/products/domain/product.dart';
 import '../features/products/presentation/product_detail_page.dart';
@@ -39,7 +40,69 @@ import '../features/services/presentation/services_page.dart';
 import '../features/group_buy/presentation/group_buy_page.dart';
 import '../features/expiry/presentation/expiry_page.dart';
 
-final appRouter=GoRouter(initialLocation:'/',routes:[
+class _AuthRefreshNotifier extends ChangeNotifier {
+  _AuthRefreshNotifier() {
+    try {
+      _subscription = Supabase.instance.client.auth.onAuthStateChange.listen(
+        (_) => notifyListeners(),
+      );
+    } catch (_) {
+      _subscription = null;
+    }
+  }
+
+  StreamSubscription<AuthState>? _subscription;
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+}
+
+final _authRefreshNotifier = _AuthRefreshNotifier();
+
+String? _routeGuard(GoRouterState state) {
+  const protectedPrefixes = [
+    '/checkout',
+    '/orders',
+    '/addresses',
+    '/messages',
+    '/follows',
+    '/profile',
+    '/refunds',
+    '/review',
+    '/payment',
+    '/seller',
+    '/admin',
+    '/courier',
+  ];
+
+  bool protected = false;
+  for (final prefix in protectedPrefixes) {
+    if (state.uri.path == prefix || state.uri.path.startsWith('$prefix/')) {
+      protected = true;
+      break;
+    }
+  }
+
+  bool authenticated;
+  try {
+    authenticated = Supabase.instance.client.auth.currentSession != null;
+  } catch (_) {
+    return null;
+  }
+
+  if (!authenticated && protected) return '/auth';
+  if (authenticated && state.uri.path == '/auth') return '/';
+  return null;
+}
+
+final appRouter = GoRouter(
+  initialLocation: '/',
+  refreshListenable: _authRefreshNotifier,
+  redirect: _routeGuard,
+  routes: [
  GoRoute(path:'/',builder:(c,s)=>const HomePage()),
  GoRoute(path:'/search',builder:(c,s)=>const SearchPage()),
  GoRoute(path:'/product/:id',builder:(c,s){final product=s.extra;return product is Product ? ProductDetailPage(product:product) : const Scaffold(body:Center(child:Text('Produit introuvable')));}),
