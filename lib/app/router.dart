@@ -51,6 +51,7 @@ final appRouter=GoRouter(initialLocation:'/',routes:[
  GoRoute(path:'/admin/products',builder:(c,s)=>const AdminProductsPage()),
  GoRoute(path:'/admin/modules',builder:(c,s)=>const AdminModulesPage()),
  GoRoute(path:'/orders',builder:(c,s)=>const OrdersPage()),
+ GoRoute(path:'/order/:id',builder:(c,s)=>OrderDetailPage(orderId:s.pathParameters['id']!)),
  GoRoute(path:'/addresses',builder:(c,s)=>const AddressesPage()),
  GoRoute(path:'/notifications',builder:(c,s)=>const NotificationsPage()),
  GoRoute(path:'/messages',builder:(c,s)=>const MessagesPage()),
