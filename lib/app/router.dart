@@ -22,6 +22,9 @@ import '../features/promotions/presentation/promotions_page.dart';
 import '../features/follows/presentation/follows_page.dart';
 import '../features/profile/presentation/profile_page.dart';
 import '../features/auth/presentation/auth_page.dart';
+import '../features/restaurants/presentation/restaurants_page.dart';
+import '../features/transport/presentation/transport_page.dart';
+import '../features/mechanics/presentation/mechanics_page.dart';
 
 final appRouter=GoRouter(initialLocation:'/',routes:[
  GoRoute(path:'/',builder:(c,s)=>const HomePage()),
