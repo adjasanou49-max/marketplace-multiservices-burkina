@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -33,7 +34,7 @@ import '../features/promotions/presentation/promotions_page.dart';
 import '../features/follows/presentation/follows_page.dart';
 import '../features/profile/presentation/profile_page.dart';
 import '../features/auth/presentation/auth_page.dart';
-import '../features/restaurants/presentation/restaurants_page.dart';
+import '../features/restaurants/presentation/restaurants_page.dart' show RestaurantsPage;
 import '../features/restaurants/presentation/restaurant_detail_page.dart';
 import '../features/shops/presentation/shop_detail_page.dart';
 import '../features/shops/domain/shop.dart';
@@ -67,7 +68,7 @@ class _AuthRefreshNotifier extends ChangeNotifier {
 
 final _authRefreshNotifier = _AuthRefreshNotifier();
 
-String? _routeGuard(GoRouterState state) {
+String? _routeGuard(BuildContext context, GoRouterState state) {
   const protectedPrefixes = [
     '/checkout',
     '/orders',
