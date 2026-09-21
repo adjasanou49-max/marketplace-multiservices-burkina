@@ -8,7 +8,7 @@ class SearchRepository {
   Future<List<Product>> search(String query, {int limit = 40}) async {
     final term = query.trim();
     if (term.isEmpty) return const [];
-    final rows = await client.from('products').select().eq('is_active', true)
+    final rows = await client.from('products').select().eq('status', 'ACTIVE')
         .ilike('name', '%$term%').order('created_at', ascending: false).limit(limit);
     return (rows as List).map((row) => Product.fromMap(Map<String, dynamic>.from(row as Map))).toList();
   }
