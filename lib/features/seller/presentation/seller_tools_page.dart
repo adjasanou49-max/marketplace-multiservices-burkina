@@ -7,43 +7,51 @@ class SellerToolsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Plus vendeur')),
+      appBar: AppBar(title: const Text('Espace vendeur')),
       body: ListView(
         children: [
+          ListTile(
+            leading: const Icon(Icons.storefront_outlined),
+            title: const Text('Ma boutique'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/seller/settings'),
+          ),
           ListTile(
             leading: const Icon(Icons.inventory_2_outlined),
             title: const Text('Stock'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => GoRouter.of(context).push('/seller/stock'),
+            onTap: () => context.push('/seller/stock'),
           ),
           ListTile(
             leading: const Icon(Icons.payments_outlined),
             title: const Text('Finance'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => GoRouter.of(context).push('/seller/finance'),
+            onTap: () => context.push('/seller/finance'),
           ),
           ListTile(
             leading: const Icon(Icons.account_balance_wallet_outlined),
             title: const Text('Demandes de paiement'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => GoRouter.of(context).push('/seller/payouts'),
+            onTap: () => context.push('/seller/payouts'),
           ),
           ListTile(
             leading: const Icon(Icons.percent_outlined),
             title: const Text('Commissions'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => GoRouter.of(context).push('/seller/commissions'),
+            onTap: () => context.push('/seller/commissions'),
           ),
           ListTile(
             leading: const Icon(Icons.chat_outlined),
             title: const Text('Messages administration'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => GoRouter.of(context).push('/messages'),
+            onTap: () => context.push('/messages'),
           ),
           const Divider(),
-          const ListTile(
-            leading: Icon(Icons.settings_outlined),
-            title: Text('Paramètres vendeur'),
+          ListTile(
+            leading: const Icon(Icons.settings_outlined),
+            title: const Text('Paramètres vendeur'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/seller/settings'),
           ),
         ],
       ),

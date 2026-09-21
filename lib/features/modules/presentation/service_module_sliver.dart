@@ -11,6 +11,7 @@ class ServiceModuleSliver extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(enabledModulesProvider);
+
     return state.when(
       loading: () => const SliverToBoxAdapter(child: SizedBox(height: 0)),
       error: (_, __) => const SliverToBoxAdapter(child: SizedBox(height: 0)),
@@ -18,9 +19,11 @@ class ServiceModuleSliver extends ConsumerWidget {
         final visible = modules
             .where((module) => _supportedRoutes.contains(module.route))
             .toList();
+
         if (visible.isEmpty) {
           return const SliverToBoxAdapter(child: SizedBox(height: 0));
         }
+
         return SliverToBoxAdapter(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,7 +31,7 @@ class ServiceModuleSliver extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
                 child: Text(
-                  'Services',
+                  'Modules',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
@@ -38,10 +41,8 @@ class ServiceModuleSliver extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   scrollDirection: Axis.horizontal,
                   itemCount: visible.length,
-                  itemBuilder: (_, index) {
-                    final module = visible[index];
-                    return _ModuleShortcut(module: module);
-                  },
+                  itemBuilder: (_, index) =>
+                      _ModuleShortcut(module: visible[index]),
                 ),
               ),
             ],
@@ -57,6 +58,10 @@ const _supportedRoutes = <String>{
   '/transport',
   '/mechanics',
   '/expiry',
+  '/group-buy',
+  '/promotions',
+  '/follows',
+  '/services',
 };
 
 class _ModuleShortcut extends StatelessWidget {
@@ -67,7 +72,7 @@ class _ModuleShortcut extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 140,
+      width: 150,
       child: Card(
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
@@ -98,6 +103,8 @@ class _ModuleShortcut extends StatelessWidget {
 
 IconData _iconFor(String? name) {
   switch (name) {
+    case 'storefront':
+      return Icons.storefront_outlined;
     case 'restaurant':
       return Icons.restaurant_outlined;
     case 'directions_bus':
@@ -106,6 +113,14 @@ IconData _iconFor(String? name) {
       return Icons.build_outlined;
     case 'event_busy':
       return Icons.event_busy_outlined;
+    case 'groups':
+      return Icons.groups_outlined;
+    case 'local_offer':
+      return Icons.local_offer_outlined;
+    case 'favorite':
+      return Icons.favorite_outline;
+    case 'handyman':
+      return Icons.handyman_outlined;
     default:
       return Icons.apps_outlined;
   }

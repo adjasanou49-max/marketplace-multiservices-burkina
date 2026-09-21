@@ -26,25 +26,44 @@ class _GroupBuyPageState extends ConsumerState<GroupBuyPage> {
   }
 
   Future<List<Map<String, dynamic>>> _load() async {
-    final repository = ref.read(groupBuyRepositoryProvider);
-    if (repository == null) return const [];
-    return repository.active();
+    return ref.read(groupBuyRepositoryProvider)?.active() ?? const [];
   }
 
   Future<void> _join(Map<String, dynamic> group) async {
     final repository = ref.read(groupBuyRepositoryProvider);
-    if (repository == null) return;
-    final messenger = ScaffoldMessenger.of(context);
+    final client = ref.read(supabaseProvider);
+
+    if (repository == null || client?.auth.currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Connectez-vous pour rejoindre un achat groupé.'),
+        ),
+      );
+      return;
+    }
+
     try {
-      final memberId = await repository.join(
+      await repository.join(
         groupBuyId: group['id'].toString(),
       );
-      messenger.showSnackBar(
-        SnackBar(content: Text('Participation enregistrée : $memberId')),
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Participation enregistrée.')),
       );
-      if (mounted) setState(() => future = _load());
+
+      setState(() => future = _load());
     } catch (error) {
-      messenger.showSnackBar(SnackBar(content: Text('Erreur : $error')));
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Impossible de rejoindre : ' + error.toString(),
+          ),
+        ),
+      );
     }
   }
 
@@ -58,14 +77,20 @@ class _GroupBuyPageState extends ConsumerState<GroupBuyPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+
           if (snapshot.hasError) {
-            return Center(child: Text('Erreur : ${snapshot.error}'));
+            return Center(
+              child: Text('Erreur : ' + snapshot.error.toString()),
+            );
           }
+
           final groups =
               snapshot.data ?? const <Map<String, dynamic>>[];
+
           if (groups.isEmpty) {
             return const Center(child: Text('Aucun achat groupé actif.'));
           }
+
           return RefreshIndicator(
             onRefresh: () async {
               setState(() => future = _load());
@@ -77,13 +102,22 @@ class _GroupBuyPageState extends ConsumerState<GroupBuyPage> {
               separatorBuilder: (_, __) => const SizedBox(height: 10),
               itemBuilder: (_, index) {
                 final group = groups[index];
-                final target = group['target_quantity'] ?? 0;
-                final current = group['current_quantity'] ?? 0;
+                final target =
+                    int.tryParse(group['target_quantity']?.toString() ?? '') ??
+                        0;
+                final current =
+                    int.tryParse(group['current_quantity']?.toString() ?? '') ??
+                        0;
+
                 return Card(
                   child: ListTile(
-                    title: Text(group['title']?.toString() ?? 'Achat groupé'),
+                    title: Text(
+                      group['title']?.toString() ?? 'Achat groupé',
+                    ),
                     subtitle: Text(
-                      '$current / $target participants • ${group['group_price'] ?? 0} XOF',
+                      '$current / $target unités • ' +
+                          (group['group_price']?.toString() ?? '0') +
+                          ' XOF',
                     ),
                     trailing: FilledButton(
                       onPressed: () => _join(group),

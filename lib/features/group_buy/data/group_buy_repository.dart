@@ -7,20 +7,32 @@ class GroupBuyRepository {
 
   Future<List<Map<String, dynamic>>> active() async {
     final now = DateTime.now().toUtc().toIso8601String();
+
     final rows = await client
         .from('group_buys')
-        .select('id,product_id,seller_id,title,target_quantity,current_quantity,group_price,starts_at,ends_at,status')
+        .select(
+          'id,product_id,seller_id,title,target_quantity,current_quantity,'
+          'group_price,starts_at,ends_at,status',
+        )
         .eq('status', 'OPEN')
         .lte('starts_at', now)
         .gt('ends_at', now)
         .order('ends_at')
         .limit(100);
+
     return (rows as List)
         .map((row) => Map<String, dynamic>.from(row as Map))
         .toList();
   }
 
-  Future<String> join({required String groupBuyId, int quantity = 1}) async {
+  Future<String> join({
+    required String groupBuyId,
+    int quantity = 1,
+  }) async {
+    if (quantity <= 0 || quantity > 1000) {
+      throw ArgumentError('Quantité invalide.');
+    }
+
     final result = await client.rpc(
       'join_group_buy',
       params: {
@@ -28,6 +40,7 @@ class GroupBuyRepository {
         'p_quantity': quantity,
       },
     );
-    return result as String;
+
+    return result.toString();
   }
 }
