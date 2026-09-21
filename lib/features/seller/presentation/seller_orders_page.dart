@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/providers/repository_providers.dart';
 import '../data/seller_order_repository.dart';
 
@@ -17,6 +18,7 @@ class SellerOrdersPage extends ConsumerWidget {
           final x=rows[i]; return ListTile(
             title:Text('Commande #${(x['order_id']??'').toString().substring(0,8)}'),
             subtitle:Text('Statut: ${x['status']??'—'} • Sous-total: ${x['subtotal']??0} XOF'),
+            onTap:()=>GoRouter.of(context).push('/seller/order/${x['id']}'),
             trailing:const Icon(Icons.chevron_right),
           );
         });
