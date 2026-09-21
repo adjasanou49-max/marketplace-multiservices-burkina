@@ -130,6 +130,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const AdminDashboardPage(),
       ),
       GoRoute(
+        path: '/admin/accounts',
+        builder: (_, __) => const AdminAccountsPage(),
+      ),
+      GoRoute(
         path: '/seller',
         builder: (_, __) => const SellerToolsPage(),
       ),
