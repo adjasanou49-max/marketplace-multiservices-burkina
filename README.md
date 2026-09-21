@@ -14,8 +14,8 @@ flutter run --dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.co --dart-d
 
 Ne jamais placer une clé service_role dans l’application mobile.
 
-## Première phase intégrée
+## Fonctionnel dans le jalon actuel
 
-Le client Flutter possède maintenant un socle de navigation, authentification, catalogue paginé, catégories persistantes, panier, achats groupés, services et modules dynamiques.
+Navigation centrale, authentification, catalogue paginé, catégories persistantes et rondes, modules dynamiques, panier, adresses de livraison, devis de livraison serveur, checkout idempotent, création d'intention de paiement et historique des commandes.
 
 Les fonctions sensibles comme le calcul de livraison, le checkout, les changements d'état de commande, les paiements, les commissions et l'administration restent côté Supabase.
