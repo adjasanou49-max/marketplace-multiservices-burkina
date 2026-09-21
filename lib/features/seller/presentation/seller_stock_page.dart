@@ -21,7 +21,7 @@ class SellerStockPage extends ConsumerWidget {
     return ListView.builder(padding:const EdgeInsets.all(16),itemCount:items.length,itemBuilder:(_,i){
      final x=items[i]; final p=x['products'] is Map?Map<String,dynamic>.from(x['products']):<String,dynamic>{};
      final q=x['quantity']??0, r=x['reserved_quantity']??0;
-     return Card(child:ListTile(title:Text(p['name'] as String???'Produit'),subtitle:Text('Disponible: $q • Réservé: $r'),trailing:Text('Net: ${q-r}')));
+     return Card(child:ListTile(title:Text(p['name'] as String? ?? 'Produit'),subtitle:Text('Disponible: $q • Réservé: $r'),trailing:Text('Net: ${q-r}')));
     });
    }));
  }
