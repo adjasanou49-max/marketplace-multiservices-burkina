@@ -17,11 +17,38 @@ class PaymentPage extends ConsumerStatefulWidget {
 class _PaymentPageState extends ConsumerState<PaymentPage> {
   String provider = 'ORANGE_MONEY';
   bool loading = false;
+  late Future<Map<String, dynamic>?> orderFuture;
   String? paymentIntentId;
 
-  Future<void> preparePayment() async {
+  @override
+  void initState() {
+    super.initState();
+    orderFuture = _loadOrder();
+  }
+
+  Future<Map<String, dynamic>?> _loadOrder() async {
+    final client = ref.read(supabaseProvider);
+    if (client == null) return null;
+    final user = client.auth.currentUser;
+    if (user == null) return null;
+    final row = await client
+        .from('orders')
+        .select('id,status,total,currency')
+        .eq('id', widget.orderId)
+        .eq('customer_id', user.id)
+        .maybeSingle();
+    return row == null ? null : Map<String, dynamic>.from(row);
+  }
+
+  Future<void> preparePayment(Map<String, dynamic> order) async {
     final client = ref.read(supabaseProvider);
     if (client == null) return;
+    if (order['status']?.toString() != 'PENDING_PAYMENT') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cette commande n’attend plus de paiement.')),
+      );
+      return;
+    }
 
     setState(() => loading = true);
     try {
@@ -30,7 +57,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
         PaymentRequest(
           orderId: widget.orderId,
           provider: provider,
-          amount: 0,
+          amount: (order['total'] as num?)?.toDouble() ?? 0,
         ),
       );
       if (!mounted) return;
@@ -59,42 +86,93 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Paiement')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text('Commande : ${widget.orderId}', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 20),
-          DropdownButtonFormField<String>(
-            initialValue: provider,
-            decoration: const InputDecoration(
-              labelText: 'Moyen de paiement',
-              border: OutlineInputBorder(),
-            ),
-            items: const [
-              DropdownMenuItem(value: 'ORANGE_MONEY', child: Text('Orange Money')),
-              DropdownMenuItem(value: 'WAVE', child: Text('Wave')),
-              DropdownMenuItem(value: 'MOOV_MONEY', child: Text('Moov Money')),
-            ],
-            onChanged: loading ? null : (value) => setState(() => provider = value ?? provider),
-          ),
-          const SizedBox(height: 20),
-          FilledButton(
-            onPressed: loading ? null : preparePayment,
-            child: loading
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Préparer le paiement'),
-          ),
-          if (paymentIntentId != null) ...[
-            const SizedBox(height: 20),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.pending_actions_outlined),
-                title: const Text('Paiement en attente'),
-                subtitle: Text('Référence interne : $paymentIntentId'),
+      body: FutureBuilder<Map<String, dynamic>?>( 
+        future: orderFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Erreur commande : ${snapshot.error}'));
+          }
+          final order = snapshot.data;
+          if (order == null) {
+            return const Center(child: Text('Commande introuvable.'));
+          }
+          final total = (order['total'] as num?)?.toDouble() ?? 0;
+          final currency = order['currency']?.toString() ?? 'XOF';
+          final status = order['status']?.toString() ?? '—';
+          final canPay = status == 'PENDING_PAYMENT';
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.receipt_long_outlined),
+                  title: Text('Commande #${widget.orderId.substring(0, widget.orderId.length > 8 ? 8 : widget.orderId.length)}'),
+                  subtitle: Text('Statut : $status'),
+                  trailing: Text(
+                    '${total.toStringAsFixed(0)} $currency',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
               ),
-            ),
-          ],
-        ],
+              const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                initialValue: provider,
+                decoration: const InputDecoration(
+                  labelText: 'Moyen de paiement',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'ORANGE_MONEY',
+                    child: Text('Orange Money'),
+                  ),
+                  DropdownMenuItem(value: 'WAVE', child: Text('Wave')),
+                  DropdownMenuItem(
+                    value: 'MOOV_MONEY',
+                    child: Text('Moov Money'),
+                  ),
+                ],
+                onChanged: loading || !canPay
+                    ? null
+                    : (value) => setState(() => provider = value ?? provider),
+              ),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: loading || !canPay
+                    ? null
+                    : () => preparePayment(order),
+                child: loading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Préparer le paiement'),
+              ),
+              if (paymentIntentId != null) ...[
+                const SizedBox(height: 20),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.pending_actions_outlined),
+                    title: const Text('Paiement en attente'),
+                    subtitle: Text('Référence interne : $paymentIntentId'),
+                  ),
+                ),
+              ],
+              if (!canPay)
+                const Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Text(
+                    'Le paiement mobile sera accessible lorsque la commande sera en attente de paiement.',
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
