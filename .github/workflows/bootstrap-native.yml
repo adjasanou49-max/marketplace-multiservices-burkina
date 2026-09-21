@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   bootstrap:
-    if: ${{ github.actor != 'github-actions[bot]' }}
+    if: ${{ github.actor != 'github-actions[bot]' && (!hashFiles('android/settings.gradle.kts') || !hashFiles('ios/Runner.xcodeproj/project.pbxproj')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
