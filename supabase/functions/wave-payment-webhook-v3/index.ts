@@ -61,15 +61,29 @@ Deno.serve(async (req: Request) => {
   }
 
   const timestamp = Number(parts.t);
-  const received = parts.v1 ?? "";
   const now = Math.floor(Date.now() / 1000);
-  if (!Number.isInteger(timestamp) || Math.abs(now - timestamp) > 300 || !received) {
+  if (!Number.isInteger(timestamp) || Math.abs(now - timestamp) > 300) {
     return json({ error: "invalid_signature_timestamp" }, 401);
   }
 
-  const expected = await hmacHex(String(timestamp) + rawBody, webhookSecret);
-  if (!constantTimeEqual(expected, received)) {
-    return json({ error: "invalid_signature" }, 401);
+  const signatures = signatureHeader
+    .split(",")
+    .filter((part) => part.trim().startsWith("v1="))
+    .map((part) => part.trim().slice(3));
+
+  if (signatures.length === 0) {
+    const authorization = req.headers.get("Authorization") ?? "";
+    const bearer = authorization.startsWith("Bearer ")
+      ? authorization.slice(7).trim()
+      : "";
+    if (!bearer || !constantTimeEqual(bearer, webhookSecret)) {
+      return json({ error: "invalid_signature" }, 401);
+    }
+  } else {
+    const expected = await hmacHex(String(timestamp) + rawBody, webhookSecret);
+    if (!signatures.some((signature) => constantTimeEqual(expected, signature))) {
+      return json({ error: "invalid_signature" }, 401);
+    }
   }
 
   let event: Record<string, unknown>;
