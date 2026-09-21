@@ -32,6 +32,7 @@ import '../../features/seller/presentation/seller_promotions_page.dart';
 import '../../features/seller/presentation/seller_clients_page.dart';
 import '../../features/seller/presentation/seller_reviews_page.dart';
 import '../../features/seller/presentation/seller_stats_page.dart';
+import '../../features/seller/presentation/seller_settings_page.dart';
 import '../../features/verticals/data/vertical_repository.dart';
 import '../../features/verticals/presentation/vertical_discovery_page.dart';
 import '../../features/admin/presentation/admin_dashboard_page.dart';
@@ -182,7 +183,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/seller/stock', builder: (_, __) => const SellerProductsPage()),
       GoRoute(path: '/seller/payouts', builder: (_, __) => const SellerFinancePage()),
       GoRoute(path: '/seller/commissions', builder: (_, __) => const SellerFinancePage()),
-      GoRoute(path: '/seller/settings', builder: (_, __) => const SellerToolsPage()),
+      GoRoute(path: '/seller/settings', builder: (_, __) => const SellerSettingsPage()),
     ],
   );
 });
