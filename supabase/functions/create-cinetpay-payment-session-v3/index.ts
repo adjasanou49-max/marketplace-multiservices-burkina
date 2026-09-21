@@ -137,7 +137,7 @@ Deno.serve(async (req: Request) => {
 
   const response = await checkout.json().catch(() => null);
   const paymentUrl = String(response?.data?.payment_url ?? "").trim();
-  if (!checkout.ok || response?.code !== "201" || !paymentUrl) {
+  if (!checkout.ok || String(response?.code ?? "") !== "201" || !paymentUrl) {
     return json({
       error: "cinetpay_api_error",
       provider_status: checkout.status,
