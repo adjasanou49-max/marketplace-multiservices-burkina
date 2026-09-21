@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/providers/repository_providers.dart';
+import '../data/checkout_repository.dart';
 
 class OrderDetailsPage extends ConsumerStatefulWidget {
   const OrderDetailsPage({required this.orderId, super.key});
@@ -82,6 +84,56 @@ class _OrderDetailsPageState extends ConsumerState<OrderDetailsPage> {
     );
   }
 
+  Future<void> _resumePayment(Map<String, dynamic>? payment) async {
+    final provider = payment?['provider']?.toString();
+    final selected = provider == 'WAVE' || provider == 'CINETPAY'
+        ? provider
+        : await showDialog<String>(
+            context: context,
+            builder: (dialogContext) => SimpleDialog(
+              title: const Text('Choisir le paiement'),
+              children: [
+                SimpleDialogOption(
+                  onPressed: () => Navigator.pop(dialogContext, 'CINETPAY'),
+                  child: const Text('Orange Money / Moov Money'),
+                ),
+                SimpleDialogOption(
+                  onPressed: () => Navigator.pop(dialogContext, 'WAVE'),
+                  child: const Text('Wave'),
+                ),
+              ],
+            ),
+          );
+    if (selected == null) return;
+
+    try {
+      final repo = ref.read(checkoutRepositoryProvider);
+      if (repo == null) throw StateError('Service de paiement indisponible.');
+      final session = await repo.createPaymentSession(
+        orderId: widget.orderId,
+        provider: selected,
+      );
+      final url = session['checkout_url']?.toString();
+      if (url == null || url.isEmpty) {
+        throw StateError('Lien de paiement indisponible.');
+      }
+      final opened = await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+      );
+      if (!opened) throw StateError('Impossible d’ouvrir le guichet.');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Guichet de paiement ouvert.')),
+      );
+      setState(() => _future = _load());
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Paiement impossible : ' + error.toString())),
+      );
+    }
+  }
   Future<void> _openDispute() async {
     final controller = TextEditingController();
     final reason = await showDialog<String>(
@@ -292,6 +344,14 @@ class _OrderDetailsPageState extends ConsumerState<OrderDetailsPage> {
                     ),
                   ),
                 ),
+              if (status == 'PENDING_PAYMENT') ...[
+                const SizedBox(height: 8),
+                FilledButton.icon(
+                  onPressed: () => _resumePayment(data.payment),
+                  icon: const Icon(Icons.payment_outlined),
+                  label: const Text('Reprendre le paiement'),
+                ),
+              ],
               if ((order['delivery_address'] as dynamic) != null)
                 Card(
                   child: ListTile(
