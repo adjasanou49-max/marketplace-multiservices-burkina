@@ -50,7 +50,9 @@ class PushNotificationService {
     }
 
     try {
-      await Firebase.initializeApp();
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp();
+      }
     } on FirebaseException catch (_) {
       return;
     }
@@ -168,9 +170,9 @@ class PushNotificationService {
 
   Future<void> _configureForegroundPresentation() {
     return _messaging.setForegroundNotificationPresentationOptions(
-      alert: true,
+      alert: false,
       badge: true,
-      sound: true,
+      sound: false,
     );
   }
 
@@ -209,7 +211,7 @@ class PushNotificationService {
     final data = Map<String, dynamic>.from(message.data);
 
     await _local.show(
-      message.messageId?.hashCode.abs() ?? DateTime.now().millisecond,
+      (message.messageId?.hashCode ?? DateTime.now().millisecondsSinceEpoch) & 0x7fffffff,
       notification.title ?? 'Marketplace Burkina',
       notification.body ?? '',
       const NotificationDetails(
