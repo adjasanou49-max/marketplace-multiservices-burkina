@@ -45,7 +45,11 @@ class _CartPageState extends ConsumerState<CartPage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Mise à jour impossible : ' + error.toString())),
+        SnackBar(
+          content: Text(
+            'Mise à jour impossible : ' + error.toString(),
+          ),
+        ),
       );
     }
   }
@@ -70,7 +74,16 @@ class _CartPageState extends ConsumerState<CartPage> {
     final signedIn = client?.auth.currentUser != null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mon panier')),
+      appBar: AppBar(
+        title: const Text('Mon panier'),
+        actions: [
+          IconButton(
+            tooltip: 'Mes commandes',
+            onPressed: () => context.push('/orders'),
+            icon: const Icon(Icons.receipt_long_outlined),
+          ),
+        ],
+      ),
       body: !signedIn
           ? Center(
               child: FilledButton(
@@ -119,12 +132,11 @@ class _CartPageState extends ConsumerState<CartPage> {
                     }
 
                     if (index == items.length + 1) {
-                      return const FilledButton.icon(
-                        onPressed: null,
-                        icon: Icon(Icons.lock_outline),
-                        label: Text(
-                          'Finaliser la commande — prochaine phase',
-                        ),
+                      return FilledButton.icon(
+                        onPressed: () =>
+                            context.push('/checkout/' + cart!['id'].toString()),
+                        icon: const Icon(Icons.lock_outline),
+                        label: const Text('Choisir la livraison et payer'),
                       );
                     }
 

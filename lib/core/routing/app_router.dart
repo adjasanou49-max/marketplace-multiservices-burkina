@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/sign_in_page.dart';
 import '../../features/cart/presentation/cart_page.dart';
 import '../../features/catalog/presentation/home_page.dart';
+import '../../features/checkout/presentation/checkout_page.dart';
+import '../../features.checkout/presentation/orders_page.dart';
 import '../../features/common/presentation/module_placeholder_page.dart';
 import '../../features/group_buy/presentation/group_buy_page.dart';
 import '../../features/services/presentation/services_page.dart';
@@ -24,6 +27,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/cart',
         builder: (_, __) => const CartPage(),
+      ),
+      GoRoute(
+        path: '/checkout/:cartId',
+        builder: (_, state) {
+          final cartId = state.pathParameters['cartId'];
+          if (cartId == null || cartId.isEmpty) {
+            return const ModulePlaceholderPage(
+              title: 'Panier invalide',
+              icon: Icons.shopping_cart_outlined,
+            );
+          }
+          return CheckoutPage(cartId: cartId);
+        },
+      ),
+      GoRoute(
+        path: '/orders',
+        builder: (_, __) => const OrdersPage(),
       ),
       GoRoute(
         path: '/group-buy',
