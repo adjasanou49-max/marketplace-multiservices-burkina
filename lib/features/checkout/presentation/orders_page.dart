@@ -78,11 +78,6 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                 final status = order['status']?.toString() ?? '';
                 final orderId = order['order_id']?.toString() ?? '';
 
-                final trackable =
-                    status != 'PENDING_PAYMENT' &&
-                    status != 'CANCELLED' &&
-                    status != 'REFUNDED';
-
                 return Card(
                   child: ListTile(
                     leading: const CircleAvatar(
