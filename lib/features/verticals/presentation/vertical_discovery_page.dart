@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/location/device_location_service.dart';
@@ -404,7 +406,9 @@ class _VerticalDiscoveryPageState
   Future<void> _requestRide(VerticalRepository repo) async {
     try {
       final position = await DeviceLocationService.current();
-      final destination = await _destinationDialog();
+      final destination = await _destinationDialog(
+        LatLng(position.latitude, position.longitude),
+      );
       if (destination == null) return;
 
       final id = await repo.createRide(
@@ -494,74 +498,180 @@ class _VerticalDiscoveryPageState
     return value;
   }
 
-  Future<_Destination?> _destinationDialog() async {
+  Future<_Destination?> _destinationDialog(LatLng initialCenter) async {
     final lat = TextEditingController();
     final lng = TextEditingController();
     final label = TextEditingController();
+    LatLng selected = initialCenter;
+
     final value = await showDialog<_Destination>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Destination'),
-        content: SingleChildScrollView(
-          child: Column(
-            children: [
-              TextField(
-                controller: label,
-                decoration: const InputDecoration(
-                  labelText: 'Repère / destination',
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: lat,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                  signed: true,
-                ),
-                decoration: const InputDecoration(labelText: 'Latitude'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: lng,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                  signed: true,
-                ),
-                decoration: const InputDecoration(labelText: 'Longitude'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Annuler'),
-          ),
-          FilledButton(
-            onPressed: () {
-              final parsedLat = double.tryParse(lat.text.trim());
-              final parsedLng = double.tryParse(lng.text.trim());
-              if (parsedLat != null &&
-                  parsedLng != null &&
-                  parsedLat >= -90 &&
-                  parsedLat <= 90 &&
-                  parsedLng >= -180 &&
-                  parsedLng <= 180) {
-                Navigator.pop(
-                  dialogContext,
-                  _Destination(
-                    latitude: parsedLat,
-                    longitude: parsedLng,
-                    label: label.text.trim(),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Destination'),
+          content: SizedBox(
+            width: 520,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const Text(
+                    'Touchez la carte pour choisir la destination.',
                   ),
-                );
-              }
-            },
-            child: const Text('Demander'),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      height: 260,
+                      child: FlutterMap(
+                        options: MapOptions(
+                          initialCenter: selected,
+                          initialZoom: 14,
+                          minZoom: 5,
+                          maxZoom: 19,
+                          onTap: (_, point) {
+                            setDialogState(() {
+                              selected = point;
+                              lat.text = point.latitude.toStringAsFixed(6);
+                              lng.text = point.longitude.toStringAsFixed(6);
+                            });
+                          },
+                        ),
+                        children: [
+                          TileLayer(
+                            urlTemplate:
+                                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                            userAgentPackageName:
+                                'marketplace_multiservices_burkina',
+                            maxZoom: 19,
+                          ),
+                          MarkerLayer(
+                            markers: [
+                              Marker(
+                                point: selected,
+                                width: 48,
+                                height: 48,
+                                child: const Icon(
+                                  Icons.location_pin,
+                                  size: 44,
+                                ),
+                              ),
+                              Marker(
+                                point: initialCenter,
+                                width: 40,
+                                height: 40,
+                                child: const Icon(
+                                  Icons.my_location_outlined,
+                                  size: 30,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SimpleAttributionWidget(
+                            source: const Text(
+                              'OpenStreetMap contributors',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: label,
+                    decoration: const InputDecoration(
+                      labelText: 'Repère / destination',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: lat,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                      signed: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Latitude',
+                    ),
+                    onChanged: (value) {
+                      final parsed = double.tryParse(value);
+                      if (parsed != null &&
+                          parsed >= -90 &&
+                          parsed <= 90) {
+                        setDialogState(() {
+                          selected = LatLng(parsed, selected.longitude);
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: lng,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                      signed: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Longitude',
+                    ),
+                    onChanged: (value) {
+                      final parsed = double.tryParse(value);
+                      if (parsed != null &&
+                          parsed >= -180 &&
+                          parsed <= 180) {
+                        setDialogState(() {
+                          selected = LatLng(selected.latitude, parsed);
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Sélection : ' +
+                          selected.latitude.toStringAsFixed(6) +
+                          ', ' +
+                          selected.longitude.toStringAsFixed(6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Annuler'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final parsedLat = double.tryParse(lat.text.trim());
+                final parsedLng = double.tryParse(lng.text.trim());
+
+                final finalLat = parsedLat ?? selected.latitude;
+                final finalLng = parsedLng ?? selected.longitude;
+
+                if (finalLat >= -90 &&
+                    finalLat <= 90 &&
+                    finalLng >= -180 &&
+                    finalLng <= 180) {
+                  Navigator.pop(
+                    dialogContext,
+                    _Destination(
+                      latitude: finalLat,
+                      longitude: finalLng,
+                      label: label.text.trim(),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Demander'),
+            ),
+          ],
+        ),
       ),
     );
+
     lat.dispose();
     lng.dispose();
     label.dispose();
