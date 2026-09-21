@@ -129,6 +129,10 @@ class OrderDetailPage extends ConsumerWidget {
               .whereType<Map>()
               .map((row) => Map<String, dynamic>.from(row))
               .toList();
+          final packages = (data['packages'] as List? ?? const [])
+              .whereType<Map>()
+              .map((row) => Map<String, dynamic>.from(row))
+              .toList();
           final status = order['status']?.toString() ?? '—';
           final canCancel =
               status == 'PENDING_PAYMENT' || status == 'PAID';
@@ -144,7 +148,48 @@ class OrderDetailPage extends ConsumerWidget {
               Text(
                 'Total : ${order['total'] ?? 0} ${order['currency'] ?? 'XOF'}',
               ),
-              const Divider(height: 28),
+              if (packages.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Livraison',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                for (final package in packages) ...[
+                  Builder(
+                    builder: (context) {
+                      final assignment = package['assignment'] is Map
+                          ? Map<String, dynamic>.from(package['assignment'])
+                          : const <String, dynamic>{};
+                      final courierId = assignment['courier_id']?.toString();
+                      final packageStatus = package['status']?.toString() ?? '—';
+                      if (courierId == null || courierId.isEmpty) {
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.local_shipping_outlined),
+                          title: Text('Colis • $packageStatus'),
+                          subtitle: const Text('En attente d’un livreur'),
+                        );
+                      }
+                      return Card(
+                        child: ListTile(
+                          leading: const Icon(Icons.local_shipping_outlined),
+                          title: Text('Colis • $packageStatus'),
+                          subtitle: Text(
+                            'Livreur • ${assignment['status'] ?? 'ASSIGNED'}',
+                          ),
+                          trailing: FilledButton.tonal(
+                            onPressed: () => GoRouter.of(context).push(
+                              '/delivery/$orderId/$courierId',
+                            ),
+                            child: const Text('Suivre'),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ],              const Divider(height: 28),
               for (final group in groups) ...[
                 Text(
                   group['shops'] is Map
