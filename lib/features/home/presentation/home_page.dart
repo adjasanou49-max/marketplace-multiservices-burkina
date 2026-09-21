@@ -182,17 +182,40 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                     ),
                   ),
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _CategoryHeaderDelegate(
-                      categories: categories,
-                      selectedIndex: categories.isEmpty
-                          ? 0
-                          : _selectedCategory
-                              .clamp(0, categories.length - 1)
-                              .toInt(),
-                      onSelected: (index) =>
-                          _selectCategory(index, categories),
+$marker
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
+                      child: Text(
+                        'Services',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 94,
+                      child: ListView(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          _ServiceShortcut(
+                            icon: Icons.restaurant_outlined,
+                            label: 'Restaurants',
+                            onTap: () => context.push('/restaurants'),
+                          ),
+                          _ServiceShortcut(
+                            icon: Icons.directions_bus_outlined,
+                            label: 'Transport',
+                            onTap: () => context.push('/transport'),
+                          ),
+                          _ServiceShortcut(
+                            icon: Icons.build_outlined,
+                            label: 'Mécaniciens',
+                            onTap: () => context.push('/mechanics'),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   if (categories.isEmpty)
@@ -362,4 +385,46 @@ class _CategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant _CategoryHeaderDelegate oldDelegate) =>
       oldDelegate.categories != categories ||
       oldDelegate.selectedIndex != selectedIndex;
+}
+
+class _ServiceShortcut extends StatelessWidget {
+  const _ServiceShortcut({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: SizedBox(
+        width: 130,
+        child: Card(
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: onTap,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
