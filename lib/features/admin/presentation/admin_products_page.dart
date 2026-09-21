@@ -26,8 +26,19 @@ class _AdminProductsPageState extends ConsumerState<AdminProductsPage> {
         return ListView.separated(itemCount:rows.length,separatorBuilder:(_,__)=>const Divider(),itemBuilder:(context,i){
           final row=rows[i],status=row['status']?.toString()??'DRAFT',active=status=='ACTIVE';
           return ListTile(title:Text(row['name']?.toString()??'Produit'),subtitle:Text('${row['price']??0} • $status'),trailing:Switch(value:active,onChanged:(value)async{
-            try{await AdminProductRepository(c).setStatus(row['id'].toString(),value?'ACTIVE':'INACTIVE','Modification depuis administration');if(mounted)setState(()=>future=_load());}
-            catch(e){if(mounted)ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('Erreur : $e')));}
+            final messenger = ScaffoldMessenger.of(context);
+            try {
+              await AdminProductRepository(c).setStatus(
+                row['id'].toString(),
+                value ? 'ACTIVE' : 'INACTIVE',
+                'Modification depuis administration',
+              );
+              if (mounted) {
+                setState(() => future = _load());
+              }
+            } catch (e) {
+              messenger.showSnackBar(SnackBar(content: Text('Erreur : $e')));
+            }
           }));
         });
       },
