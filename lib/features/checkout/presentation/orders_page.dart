@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/repository_providers.dart';
 import '../data/checkout_repository.dart';
@@ -75,17 +76,22 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
               separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (_, index) {
                 final order = orders[index];
+                final status = order['status']?.toString() ?? '';
+                final orderId = order['order_id']?.toString() ?? '';
+
+                final trackable =
+                    status != 'PENDING_PAYMENT' &&
+                    status != 'CANCELLED' &&
+                    status != 'REFUNDED';
 
                 return Card(
                   child: ListTile(
                     leading: const CircleAvatar(
                       child: Icon(Icons.receipt_long_outlined),
                     ),
-                    title: Text(
-                      order['order_id']?.toString() ?? 'Commande',
-                    ),
+                    title: Text(orderId),
                     subtitle: Text(
-                      (order['status']?.toString() ?? '') +
+                      status +
                           ' • ' +
                           (order['created_at']?.toString() ?? ''),
                     ),
@@ -94,6 +100,9 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                           ' ' +
                           (order['currency']?.toString() ?? 'XOF'),
                     ),
+                    onTap: trackable && orderId.isNotEmpty
+                        ? () => context.push('/delivery/' + orderId)
+                        : null,
                   ),
                 );
               },

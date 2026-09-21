@@ -12,6 +12,7 @@ dependencies:
   flutter_riverpod: ^3.4.3
   go_router: ^18.0.1
   supabase_flutter: ^2.17.2
+  geolocator: ^14.0.3
 
 dev_dependencies:
   flutter_test:

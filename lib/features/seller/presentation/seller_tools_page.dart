@@ -11,6 +11,12 @@ class SellerToolsPage extends StatelessWidget {
       body: ListView(
         children: [
           ListTile(
+            leading: const Icon(Icons.dashboard_outlined),
+            title: const Text('Tableau de bord'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/seller/dashboard'),
+          ),
+          ListTile(
             leading: const Icon(Icons.storefront_outlined),
             title: const Text('Ma boutique'),
             trailing: const Icon(Icons.chevron_right),

@@ -1,33 +1,34 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/sign_in_page.dart';
 import '../../features/cart/presentation/cart_page.dart';
-import '../../features/catalog/presentation/home_page.dart';
-import '../../features/checkout/presentation/checkout_page.dart';
+import '../../features.catalog/presentation/home_page.dart';
+import '../../features.checkout/presentation/checkout_page.dart';
 import '../../features.checkout/presentation/orders_page.dart';
-import '../../features/common/presentation/module_placeholder_page.dart';
-import '../../features/group_buy/presentation/group_buy_page.dart';
-import '../../features/services/presentation/services_page.dart';
-import '../../features/seller/presentation/seller_tools_page.dart';
+import '../../features.common/presentation/module_placeholder_page.dart';
+import '../../features.courier/presentation/courier_page.dart';
+import '../../features.delivery/presentation/delivery_tracking_page.dart';
+import '../../features.expiry/presentation/expiry_page.dart';
+import '../../features.group_buy/presentation/group_buy_page.dart';
+import '../../features.mechanics/presentation/mechanics_page.dart';
+import '../../features.messaging/presentation/messages_page.dart';
+import '../../features.notifications/presentation/notifications_page.dart';
+import '../../features.restaurants/presentation/restaurants_page.dart';
+import '../../features.seller/presentation/seller_dashboard_page.dart';
+import '../../features.seller/presentation/seller_tools_page.dart';
+import '../../features.services/presentation/services_page.dart';
+import '../../features.transport/presentation/transport_page.dart';
+import '../../features.admin/presentation/admin_dashboard_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (_, __) => const HomePage(),
-      ),
-      GoRoute(
-        path: '/auth',
-        builder: (_, __) => const SignInPage(),
-      ),
-      GoRoute(
-        path: '/cart',
-        builder: (_, __) => const CartPage(),
-      ),
+      GoRoute(path: '/', builder: (_, __) => const HomePage()),
+      GoRoute(path: '/auth', builder: (_, __) => const SignInPage()),
+      GoRoute(path: '/cart', builder: (_, __) => const CartPage()),
       GoRoute(
         path: '/checkout/:cartId',
         builder: (_, state) {
@@ -41,9 +42,36 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return CheckoutPage(cartId: cartId);
         },
       ),
+      GoRoute(path: '/orders', builder: (_, __) => const OrdersPage()),
       GoRoute(
-        path: '/orders',
-        builder: (_, __) => const OrdersPage(),
+        path: '/delivery/:orderId',
+        builder: (_, state) {
+          final orderId = state.pathParameters['orderId'];
+          if (orderId == null || orderId.isEmpty) {
+            return const ModulePlaceholderPage(
+              title: 'Commande invalide',
+              icon: Icons.local_shipping_outlined,
+            );
+          }
+          return DeliveryTrackingPage(orderId: orderId);
+        },
+      ),
+      GoRoute(path: '/courier', builder: (_, __) => const CourierPage()),
+      GoRoute(
+        path: '/restaurants',
+        builder: (_, __) => const RestaurantsPage(),
+      ),
+      GoRoute(
+        path: '/transport',
+        builder: (_, __) => const TransportPage(),
+      ),
+      GoRoute(
+        path: '/mechanics',
+        builder: (_, __) => const MechanicsPage(),
+      ),
+      GoRoute(
+        path: '/expiry',
+        builder: (_, __) => const ExpiryPage(),
       ),
       GoRoute(
         path: '/group-buy',
@@ -54,17 +82,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const ServicesPage(),
       ),
       GoRoute(
+        path: '/messages',
+        builder: (_, __) => const MessagesPage(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (_, __) => const NotificationsPage(),
+      ),
+      GoRoute(
+        path: '/admin',
+        builder: (_, __) => const AdminDashboardPage(),
+      ),
+      GoRoute(
         path: '/seller',
         builder: (_, __) => const SellerToolsPage(),
       ),
+      GoRoute(
+        path: '/seller/dashboard',
+        builder: (_, __) => const SellerDashboardPage(),
+      ),
       for (final item in const <Map<String, Object>>[
-        {'path': '/restaurants', 'title': 'Restaurants', 'icon': 0},
-        {'path': '/transport', 'title': 'Compagnies de transport', 'icon': 1},
-        {'path': '/mechanics', 'title': 'Mécaniciens', 'icon': 2},
-        {'path': '/expiry', 'title': 'Expiration proche', 'icon': 3},
         {'path': '/promotions', 'title': 'Promotions', 'icon': 4},
         {'path': '/follows', 'title': 'Suivis', 'icon': 5},
-        {'path': '/messages', 'title': 'Messages', 'icon': 6},
         {'path': '/seller/stock', 'title': 'Stock vendeur', 'icon': 7},
         {'path': '/seller/finance', 'title': 'Finance vendeur', 'icon': 8},
         {'path': '/seller/payouts', 'title': 'Demandes de paiement', 'icon': 9},
@@ -84,18 +123,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
 IconData _placeholderIcon(int value) {
   switch (value) {
-    case 1:
-      return Icons.directions_bus_outlined;
-    case 2:
-      return Icons.build_outlined;
-    case 3:
-      return Icons.event_busy_outlined;
     case 4:
       return Icons.local_offer_outlined;
     case 5:
       return Icons.favorite_outline;
-    case 6:
-      return Icons.chat_outlined;
     case 7:
       return Icons.inventory_2_outlined;
     case 8:
@@ -107,6 +138,6 @@ IconData _placeholderIcon(int value) {
     case 11:
       return Icons.settings_outlined;
     default:
-      return Icons.restaurant_outlined;
+      return Icons.apps_outlined;
   }
 }
