@@ -5,7 +5,6 @@ import '../../../core/providers/repository_providers.dart';
 import '../data/seller_shop_repository.dart';
 import 'seller_create_shop_page.dart';
 import 'seller_dashboard_page.dart';
-import 'seller_finance_page.dart';
 import 'seller_orders_page.dart';
 import 'seller_products_page.dart';
 import 'seller_shop_page.dart';
