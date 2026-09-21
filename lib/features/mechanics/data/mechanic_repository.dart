@@ -5,6 +5,26 @@ class MechanicRepository {
 
   final SupabaseClient client;
 
+  Future<String> createRequest({
+    required String vehicleType,
+    required String problemType,
+    String? description,
+    double? latitude,
+    double? longitude,
+  }) async {
+    final result = await client.rpc(
+      'create_mechanic_request',
+      params: {
+        'p_vehicle_type': vehicleType,
+        'p_problem_type': problemType,
+        'p_description': description,
+        'p_latitude': latitude,
+        'p_longitude': longitude,
+      },
+    );
+    return result as String;
+  }
+
   Future<List<Map<String, dynamic>>> activeMechanics({
     int limit = 50,
   }) async {
