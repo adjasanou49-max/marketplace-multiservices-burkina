@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers/repository_providers.dart';
+
 import '../data/seller_shop_repository.dart';
 import 'seller_dashboard_page.dart';
 import 'seller_finance_page.dart';
