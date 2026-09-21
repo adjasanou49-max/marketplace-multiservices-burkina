@@ -390,6 +390,7 @@ class _ServiceModuleSliver extends ConsumerWidget {
                 '/mechanics',
                 '/expiry',
                 '/group-buy',
+                '/services',
               }.contains(module.route),
             )
             .toList();
@@ -424,5 +425,61 @@ class _ServiceModuleSliver extends ConsumerWidget {
         );
       },
     );
+  }
+}
+
+class _ModuleShortcut extends StatelessWidget {
+  const _ModuleShortcut({required this.module});
+
+  final MarketplaceModule module;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 140,
+      child: Card(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => GoRouter.of(context).push(module.route),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(_moduleIcon(module.iconName)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    module.label,
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _moduleIcon(String? name) {
+    switch (name) {
+      case 'restaurant':
+        return Icons.restaurant_outlined;
+      case 'directions_bus':
+        return Icons.directions_bus_outlined;
+      case 'build':
+        return Icons.build_outlined;
+      case 'event_busy':
+        return Icons.event_busy_outlined;
+      case 'groups':
+        return Icons.groups_outlined;
+      case 'handyman':
+        return Icons.handyman_outlined;
+      default:
+        return Icons.apps_outlined;
+    }
   }
 }
