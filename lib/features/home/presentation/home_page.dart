@@ -186,10 +186,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                     pinned: true,
                     delegate: _CategoryHeaderDelegate(
                       categories: categories,
-                      selectedIndex: _selectedCategory.clamp(
-                        0,
-                        categories.isEmpty ? 0 : categories.length - 1,
-                      ),
+                      selectedIndex: categories.isEmpty
+                          ? 0
+                          : _selectedCategory
+                              .clamp(0, categories.length - 1)
+                              .toInt(),
                       onSelected: (index) =>
                           _selectCategory(index, categories),
                     ),
