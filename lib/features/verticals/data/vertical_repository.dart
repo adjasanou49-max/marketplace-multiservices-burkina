@@ -26,6 +26,7 @@ class VerticalConfig {
     required this.icon,
     required this.select,
     this.ownOnly = false,
+    this.ownUserColumn = 'customer_id',
   });
 
   final String table;
@@ -33,6 +34,7 @@ class VerticalConfig {
   final int icon;
   final String select;
   final bool ownOnly;
+  final String ownUserColumn;
 }
 
 class VerticalRepository {
@@ -138,7 +140,8 @@ class VerticalRepository {
       title: 'Colis & Points relais',
       icon: 15,
       select: 'id,recipient_name,recipient_phone,pickup_address,delivery_address,weight_kg,status,tracking_code,created_at',
-      ownOnly: false,
+      ownOnly: true,
+      ownUserColumn: 'sender_id',
     ),
   };
 
@@ -150,7 +153,7 @@ class VerticalRepository {
       final rows = await client
           .from(config.table)
           .select(config.select)
-          .eq('customer_id', user.id)
+          .eq(config.ownUserColumn, user.id)
           .order('created_at', ascending: false)
           .limit(100);
       return _maps(rows);
