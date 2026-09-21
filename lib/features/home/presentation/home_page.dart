@@ -39,6 +39,10 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void _handleScroll() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.extentAfter < 700) {
+      ref.read(productsFeedProvider.notifier).loadMore();
+    }
     if (_programmaticScroll) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _programmaticScroll) return;
@@ -117,7 +121,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final categoriesState = ref.watch(categoriesProvider);
-    final productsState = ref.watch(productsProvider);
+    final productsState = ref.watch(productsFeedProvider);
     final shopsState = ref.watch(shopsProvider);
 
     return Scaffold(
@@ -138,6 +142,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         onRefresh: () async {
           ref.invalidate(categoriesProvider);
           ref.invalidate(productsProvider);
+          ref.invalidate(productsFeedProvider);
           ref.invalidate(shopsProvider);
         },
         child: categoriesState.when(
