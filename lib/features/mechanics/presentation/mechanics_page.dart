@@ -139,7 +139,6 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
       return;
     }
 
-    final messenger = ScaffoldMessenger.of(context);
     try {
       final id = await repository.createRequest(
         vehicleType: selectedVehicle,
@@ -149,12 +148,12 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
         longitude: longitude.toDouble(),
       );
       if (!mounted) return;
-      messenger.showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Demande créée : $id')),
       );
     } catch (error) {
       if (!mounted) return;
-      messenger.showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur : $error')),
       );
     } finally {
