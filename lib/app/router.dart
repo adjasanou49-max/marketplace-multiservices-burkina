@@ -25,6 +25,7 @@ import '../features/profile/presentation/profile_page.dart';
 import '../features/auth/presentation/auth_page.dart';
 import '../features/restaurants/presentation/restaurants_page.dart';
 import '../features/shops/presentation/shop_detail_page.dart';
+import '../features/shops/domain/shop.dart';
 import '../features/transport/presentation/transport_page.dart';
 import '../features/mechanics/presentation/mechanics_page.dart';
 import '../features/expiry/presentation/expiry_page.dart';
