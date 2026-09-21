@@ -84,7 +84,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Impossible de calculer la livraison : ' + error.toString(),
+            'Impossible de calculer la livraison : ' +
+                error.toString(),
           ),
         ),
       );
@@ -121,7 +122,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Création de l’adresse impossible : ' + error.toString(),
+            'Création de l’adresse impossible : ' +
+                error.toString(),
           ),
         ),
       );
@@ -171,24 +173,32 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
             'Commande : ' +
                 orderId +
                 '\nIntention de paiement : ' +
-                paymentId +
-                '\n\nLe paiement opérateur sera finalisé dans le module de paiement.',
+                paymentId,
           ),
           actions: [
-            FilledButton(
+            TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Continuer'),
+              child: const Text('Fermer'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                context.push('/payment/' + paymentId);
+              },
+              child: const Text('Voir le paiement'),
             ),
           ],
         ),
       );
-
-      if (mounted) context.go('/orders');
     } catch (error) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Checkout impossible : ' + error.toString())),
+        SnackBar(
+          content: Text(
+            'Checkout impossible : ' + error.toString(),
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -214,7 +224,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                'Erreur des adresses : ' + snapshot.error.toString(),
+                'Erreur des adresses : ' +
+                    snapshot.error.toString(),
               ),
             );
           }
@@ -266,7 +277,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                             (item['address_line']?.toString() ?? '') +
                             (item['city']?.toString().isEmpty == true
                                 ? ''
-                                : ' — ' + (item['city']?.toString() ?? '')),
+                                : ' — ' +
+                                    (item['city']?.toString() ?? '')),
                       ),
                     ),
                   ),

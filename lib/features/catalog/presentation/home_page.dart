@@ -116,29 +116,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     _loadProducts(reset: true);
   }
 
-  void _cycleType(_CatalogMetadata metadata, int delta) {
-    if (metadata.types.isEmpty) return;
-
-    final currentIndex = metadata.types.indexWhere(
-      (item) => item['id']?.toString() == _selectedTypeId,
-    );
-
-    final safeIndex = currentIndex < 0 ? 0 : currentIndex;
-    final nextIndex = (safeIndex + delta) % metadata.types.length;
-    final normalizedIndex = nextIndex < 0
-        ? nextIndex + metadata.types.length
-        : nextIndex;
-    final nextId = metadata.types[normalizedIndex]['id']?.toString();
-
-    if (nextId == null) return;
-
-    setState(() {
-      _selectedTypeId = nextId;
-      _selectedCategoryId = null;
-    });
-    _loadProducts(reset: true);
-  }
-
   List<Map<String, dynamic>> _visibleCategories(
     _CatalogMetadata metadata,
   ) {
@@ -246,7 +223,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                     _loadProducts(reset: true);
                   },
                   onCategorySelected: _selectCategory,
-                  onTypeSwipe: (direction) => _cycleType(metadata, direction),
                 ),
               ),
               const ServiceModuleSliver(),
@@ -320,7 +296,6 @@ class _CatalogHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.selectedCategoryId,
     required this.onTypeSelected,
     required this.onCategorySelected,
-    required this.onTypeSwipe,
   });
 
   final List<Map<String, dynamic>> types;
@@ -329,7 +304,6 @@ class _CatalogHeaderDelegate extends SliverPersistentHeaderDelegate {
   final String? selectedCategoryId;
   final ValueChanged<String?> onTypeSelected;
   final ValueChanged<String?> onCategorySelected;
-  final ValueChanged<int> onTypeSwipe;
 
   @override
   double get minExtent => 152;
@@ -346,14 +320,7 @@ class _CatalogHeaderDelegate extends SliverPersistentHeaderDelegate {
     return Material(
       elevation: overlapsContent ? 2 : 0,
       color: Theme.of(context).scaffoldBackgroundColor,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onVerticalDragEnd: (details) {
-          final velocity = details.primaryVelocity ?? 0;
-          if (velocity < -100) onTypeSwipe(1);
-          if (velocity > 100) onTypeSwipe(-1);
-        },
-        child: Padding(
+      child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
         child: Column(
           children: [
@@ -430,8 +397,7 @@ class _CatalogHeaderDelegate extends SliverPersistentHeaderDelegate {
     return oldDelegate.types != types ||
         oldDelegate.categories != categories ||
         oldDelegate.selectedTypeId != selectedTypeId ||
-        oldDelegate.selectedCategoryId != selectedCategoryId ||
-        oldDelegate.onTypeSwipe != onTypeSwipe;
+        oldDelegate.selectedCategoryId != selectedCategoryId;
   }
 }
 
@@ -467,7 +433,14 @@ class _ProductCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: _ProductImage(storagePath: storagePath),
+            child: storagePath != null && storagePath.startsWith('https://')
+                ? Image.network(
+                    storagePath,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        const _ProductImagePlaceholder(),
+                  )
+                : const _ProductImagePlaceholder(),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 8, 10, 4),
@@ -507,87 +480,6 @@ class _ProductCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ProductImage extends ConsumerStatefulWidget {
-  const _ProductImage({required this.storagePath});
-
-  final String? storagePath;
-
-  @override
-  ConsumerState<_ProductImage> createState() => _ProductImageState();
-}
-
-class _ProductImageState extends ConsumerState<_ProductImage> {
-  String? _signedUrl;
-  bool _loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    final path = widget.storagePath;
-
-    if (path == null || path.isEmpty) {
-      if (mounted) setState(() => _loading = false);
-      return;
-    }
-
-    if (path.startsWith('https://')) {
-      if (mounted) {
-        setState(() {
-          _signedUrl = path;
-          _loading = false;
-        });
-      }
-      return;
-    }
-
-    final client = ref.read(supabaseProvider);
-
-    if (client == null) {
-      if (mounted) setState(() => _loading = false);
-      return;
-    }
-
-    try {
-      final url = await client.storage
-          .from('product-media')
-          .createSignedUrl(path, 3600);
-
-      if (!mounted) return;
-
-      setState(() {
-        _signedUrl = url;
-        _loading = false;
-      });
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(strokeWidth: 2),
-      );
-    }
-
-    if (_signedUrl == null) {
-      return const _ProductImagePlaceholder();
-    }
-
-    return Image.network(
-      _signedUrl!,
-      fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) =>
-          const _ProductImagePlaceholder(),
     );
   }
 }
