@@ -58,6 +58,15 @@ class _OrderDetailsPageState extends ConsumerState<OrderDetailsPage> {
         .eq('order_id', widget.orderId)
         .order('created_at', ascending: false);
 
+    final paymentRows = await client.rpc(
+      'get_customer_payment_status',
+      params: {'p_order_id': widget.orderId},
+    );
+
+    final payment = paymentRows is List && paymentRows.isNotEmpty
+        ? Map<String, dynamic>.from(paymentRows.first as Map)
+        : null;
+
     return _OrderDetails(
       order: Map<String, dynamic>.from(order),
       groups: (groups as List)
@@ -69,6 +78,7 @@ class _OrderDetailsPageState extends ConsumerState<OrderDetailsPage> {
       disputes: (disputes as List)
           .map((row) => Map<String, dynamic>.from(row as Map))
           .toList(),
+      payment: payment,
     );
   }
 
@@ -265,6 +275,23 @@ class _OrderDetailsPageState extends ConsumerState<OrderDetailsPage> {
                   ),
                 ),
               ),
+              if (data.payment != null)
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.payment_outlined),
+                    title: const Text('Paiement'),
+                    subtitle: Text(
+                      (data.payment!['provider']?.toString() ?? '-') +
+                          ' • ' +
+                          (data.payment!['status']?.toString() ?? '-'),
+                    ),
+                    trailing: Text(
+                      (data.payment!['amount']?.toString() ?? '0') +
+                          ' ' +
+                          (data.payment!['currency']?.toString() ?? 'XOF'),
+                    ),
+                  ),
+                ),
               if ((order['delivery_address'] as dynamic) != null)
                 Card(
                   child: ListTile(
@@ -412,12 +439,14 @@ class _OrderDetails {
     required this.groups,
     required this.returns,
     required this.disputes,
+    required this.payment,
   });
 
   final Map<String, dynamic> order;
   final List<Map<String, dynamic>> groups;
   final List<Map<String, dynamic>> returns;
   final List<Map<String, dynamic>> disputes;
+  final Map<String, dynamic>? payment;
 }
 
 class _ReviewForm {
