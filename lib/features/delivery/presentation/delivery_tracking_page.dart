@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/repository_providers.dart';
@@ -116,6 +118,9 @@ class _DeliveryTrackingPageState
                       package['latest_location'] as Map,
                     )
                   : null;
+              final point = location == null
+                  ? null
+                  : _parsePoint(location['location']);
 
               return Card(
                 child: Padding(
@@ -163,6 +168,50 @@ class _DeliveryTrackingPageState
                               ' m\nMise à jour : ' +
                               (location['recorded_at']?.toString() ?? '-'),
                         ),
+                        if (point != null) ...[
+                          const SizedBox(height: 10),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: SizedBox(
+                              height: 220,
+                              child: FlutterMap(
+                                options: MapOptions(
+                                  initialCenter: point,
+                                  initialZoom: 15,
+                                  minZoom: 5,
+                                  maxZoom: 19,
+                                ),
+                                children: [
+                                  TileLayer(
+                                    urlTemplate:
+                                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                    userAgentPackageName:
+                                        'marketplace_multiservices_burkina',
+                                    maxZoom: 19,
+                                  ),
+                                  MarkerLayer(
+                                    markers: [
+                                      Marker(
+                                        point: point,
+                                        width: 48,
+                                        height: 48,
+                                        child: const Icon(
+                                          Icons.location_on,
+                                          size: 44,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SimpleAttributionWidget(
+                                    source: const Text(
+                                      'OpenStreetMap contributors',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ],
                   ),
@@ -174,6 +223,77 @@ class _DeliveryTrackingPageState
       ),
     );
   }
+
+  LatLng? _parsePoint(dynamic raw) {
+    if (raw is Map) {
+      final lat = num.tryParse(
+        (raw['latitude'] ?? raw['lat']).toString(),
+      );
+      final lng = num.tryParse(
+        (raw['longitude'] ?? raw['lng'] ?? raw['lon']).toString(),
+      );
+      if (lat != null && lng != null && _valid(lat.toDouble(), lng.toDouble())) {
+        return LatLng(lat.toDouble(), lng.toDouble());
+      }
+    }
+
+    if (raw is List && raw.length >= 2) {
+      final lng = num.tryParse(raw[0].toString());
+      final lat = num.tryParse(raw[1].toString());
+      if (lat != null && lng != null && _valid(lat.toDouble(), lng.toDouble())) {
+        return LatLng(lat.toDouble(), lng.toDouble());
+      }
+    }
+
+    if (raw is String) {
+      final normalized = raw
+          .replaceFirst(
+            RegExp(r'^SRID=[^;]+;', caseSensitive: false),
+            '',
+          )
+          .trim();
+
+      final match = RegExp(
+        r'^POINT\s*\(\s*([-+]?\d+(?:\.\d+)?)\s+([-+]?\d+(?:\.\d+)?)\s*\)    switch (status) {
+      case 'CREATED':
+        return 0.15;
+      case 'READY_FOR_PICKUP':
+      case 'ASSIGNED':
+        return 0.35;
+      case 'PICKED_UP':
+        return 0.55;
+      case 'IN_TRANSIT':
+        return 0.75;
+      case 'DELIVERED':
+        return 1;
+      default:
+        return 0.1;
+    }
+  }
+}
+,
+        caseSensitive: false,
+      ).firstMatch(normalized);
+
+      if (match != null) {
+        final lng = double.tryParse(match.group(1)!);
+        final lat = double.tryParse(match.group(2)!);
+        if (lat != null && lng != null && _valid(lat, lng)) {
+          return LatLng(lat, lng);
+        }
+      }
+    }
+
+    return null;
+  }
+
+  bool _valid(double lat, double lng) =>
+      lat.isFinite &&
+      lng.isFinite &&
+      lat >= -90 &&
+      lat <= 90 &&
+      lng >= -180 &&
+      lng <= 180;
 
   double _progress(String? status) {
     switch (status) {
