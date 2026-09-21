@@ -29,6 +29,7 @@ import '../features/shops/domain/shop.dart';
 import '../features/transport/presentation/transport_page.dart';
 import '../features/mechanics/presentation/mechanics_page.dart';
 import '../features/services/presentation/services_page.dart';
+import '../features/group_buy/presentation/group_buy_page.dart';
 import '../features/expiry/presentation/expiry_page.dart';
 
 final appRouter=GoRouter(initialLocation:'/',routes:[
@@ -61,5 +62,6 @@ final appRouter=GoRouter(initialLocation:'/',routes:[
  GoRoute(path:'/transport',builder:(c,s)=>const TransportPage()),
  GoRoute(path:'/mechanics',builder:(c,s)=>const MechanicsPage()),
  GoRoute(path:'/services',builder:(c,s)=>const ServicesPage()),
+ GoRoute(path:'/group-buy',builder:(c,s)=>const GroupBuyPage()),
  GoRoute(path:'/expiry',builder:(c,s)=>const ExpiryPage()),
 ]);
