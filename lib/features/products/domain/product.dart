@@ -33,6 +33,6 @@ class Product {
         imageUrl: map['image_url'] as String?,
         categoryId: map['category_id'] as String?,
         shopId: map['shop_id'] as String?,
-        isActive: map['is_active'] as bool? ?? true,
+        isActive: map['status'] == null || map['status'] == 'ACTIVE',
       );
 }
