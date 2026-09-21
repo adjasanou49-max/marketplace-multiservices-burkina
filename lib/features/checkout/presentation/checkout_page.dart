@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/location/device_location_service.dart';
 import '../../../core/providers/repository_providers.dart';
@@ -22,7 +23,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   String? _selectedAddressId;
   Map<String, dynamic>? _selectedAddress;
   Map<String, dynamic>? _quote;
-  String _paymentProvider = 'ORANGE_MONEY';
+  String _paymentProvider = 'CINETPAY';
   final TextEditingController _couponController = TextEditingController();
   bool _loading = false;
 
