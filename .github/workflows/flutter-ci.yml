@@ -69,12 +69,6 @@ jobs:
     needs: analyze-and-test
     steps:
       - uses: actions/checkout@v6
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: gradle
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -88,5 +82,11 @@ jobs:
             flutter create --platforms=android --project-name marketplace_multiservices_burkina .
           fi
           test -f android/app/build.gradle || test -f android/app/build.gradle.kts
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
       - run: flutter build apk --debug
       - run: flutter build appbundle --debug
