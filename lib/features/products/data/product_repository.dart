@@ -27,6 +27,34 @@ class ProductRepository {
     return hydrateRows(rows);
   }
 
+  Future<List<Product>> fetchActivePage({
+    String? categoryId,
+    int limit = 24,
+    int offset = 0,
+  }) async {
+    if (limit <= 0 || offset < 0) {
+      throw ArgumentError('Pagination produit invalide.');
+    }
+
+    var query = client
+        .from('products')
+        .select(
+          'id,name,slug,description,price,status,category_id,shop_id,'
+          'product_images(storage_path,sort_order)',
+        )
+        .eq('status', 'ACTIVE');
+
+    if (categoryId != null) {
+      query = query.eq('category_id', categoryId);
+    }
+
+    final end = offset + limit - 1;
+    final rows = await query
+        .order('created_at', ascending: false)
+        .range(offset, end);
+    return hydrateRows(rows);
+  }
+
   Future<List<Product>> hydrateRows(Iterable<dynamic> rows) async {
     final products = <Product>[];
 
