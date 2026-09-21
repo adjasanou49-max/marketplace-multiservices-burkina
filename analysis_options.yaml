@@ -5,4 +5,3 @@ linter:
     avoid_print: true
     prefer_single_quotes: true
     curly_braces_in_flow_control_structures: false
-    unnecessary_cast: false
