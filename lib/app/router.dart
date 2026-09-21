@@ -21,6 +21,7 @@ import '../features/seller/presentation/seller_payouts_page.dart';
 import '../features/promotions/presentation/promotions_page.dart';
 import '../features/follows/presentation/follows_page.dart';
 import '../features/profile/presentation/profile_page.dart';
+import '../features/auth/presentation/auth_page.dart';
 
 final appRouter=GoRouter(initialLocation:'/',routes:[
  GoRoute(path:'/',builder:(c,s)=>const HomePage()),
@@ -45,4 +46,5 @@ final appRouter=GoRouter(initialLocation:'/',routes:[
  GoRoute(path:'/promotions',builder:(c,s)=>const PromotionsPage()),
  GoRoute(path:'/follows',builder:(c,s)=>const FollowsPage()),
  GoRoute(path:'/profile',builder:(c,s)=>const ProfilePage()),
+ GoRoute(path:'/auth',builder:(c,s)=>const AuthPage()),
 ]);
