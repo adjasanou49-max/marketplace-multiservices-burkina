@@ -226,6 +226,10 @@ class _AdminDashboardPageState
       ),
     );
 
+    final parsedShares = num.tryParse(sharesController.text.trim());
+    final parsedAmount = num.tryParse(amountController.text.trim());
+    final paymentReference = referenceController.text.trim();
+
     sharesController.dispose();
     amountController.dispose();
     referenceController.dispose();
@@ -233,7 +237,10 @@ class _AdminDashboardPageState
     if (values != true ||
         companyId == null ||
         shareClassId == null ||
-        shareholderId == null) {
+        shareholderId == null ||
+        parsedShares == null ||
+        parsedAmount == null ||
+        paymentReference.isEmpty) {
       return;
     }
 
@@ -244,9 +251,9 @@ class _AdminDashboardPageState
           'p_company_id': companyId,
           'p_shareholder_id': shareholderId,
           'p_share_class_id': shareClassId,
-          'p_shares': num.parse(sharesController.text.trim()),
-          'p_paid_amount': num.parse(amountController.text.trim()),
-          'p_payment_reference': referenceController.text.trim(),
+          'p_shares': parsedShares,
+          'p_paid_amount': parsedAmount,
+          'p_payment_reference': paymentReference,
         },
       );
 
