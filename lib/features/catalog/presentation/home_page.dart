@@ -467,14 +467,7 @@ class _ProductCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: storagePath != null && storagePath.startsWith('https://')
-                ? Image.network(
-                    storagePath,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) =>
-                        const _ProductImagePlaceholder(),
-                  )
-                : const _ProductImagePlaceholder(),
+            child: _ProductImage(storagePath: storagePath),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 8, 10, 4),
@@ -514,6 +507,87 @@ class _ProductCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ProductImage extends ConsumerStatefulWidget {
+  const _ProductImage({required this.storagePath});
+
+  final String? storagePath;
+
+  @override
+  ConsumerState<_ProductImage> createState() => _ProductImageState();
+}
+
+class _ProductImageState extends ConsumerState<_ProductImage> {
+  String? _signedUrl;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final path = widget.storagePath;
+
+    if (path == null || path.isEmpty) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
+
+    if (path.startsWith('https://')) {
+      if (mounted) {
+        setState(() {
+          _signedUrl = path;
+          _loading = false;
+        });
+      }
+      return;
+    }
+
+    final client = ref.read(supabaseProvider);
+
+    if (client == null) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
+
+    try {
+      final url = await client.storage
+          .from('product-media')
+          .createSignedUrl(path, 3600);
+
+      if (!mounted) return;
+
+      setState(() {
+        _signedUrl = url;
+        _loading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Center(
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    if (_signedUrl == null) {
+      return const _ProductImagePlaceholder();
+    }
+
+    return Image.network(
+      _signedUrl!,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) =>
+          const _ProductImagePlaceholder(),
     );
   }
 }
