@@ -24,15 +24,19 @@ class ProductRepository {
     }
 
     final rows = await query.order('created_at', ascending: false).limit(limit);
+    return hydrateRows(rows);
+  }
+
+  Future<List<Product>> hydrateRows(Iterable<dynamic> rows) async {
     final products = <Product>[];
 
-    for (final raw in rows as List) {
+    for (final raw in rows) {
       final row = Map<String, dynamic>.from(raw as Map);
-      final imageRows = row.remove('product_images');
+      final rawImages = row.remove('product_images');
       String? imageUrl;
 
-      if (imageRows is List && imageRows.isNotEmpty) {
-        final images = imageRows
+      if (rawImages is List && rawImages.isNotEmpty) {
+        final images = rawImages
             .whereType<Map>()
             .map((item) => Map<String, dynamic>.from(item))
             .toList()
