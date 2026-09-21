@@ -267,6 +267,44 @@ class VerticalRepository {
       ))
           .toString();
 
+  Future<String> createFreight({
+    required Map<String, dynamic> pickup,
+    required Map<String, dynamic> delivery,
+    num? weightKg,
+    num? volumeM3,
+    String? description,
+  }) async =>
+      (await client.rpc(
+        'create_freight_request',
+        params: {
+          'p_pickup': pickup,
+          'p_delivery': delivery,
+          'p_weight_kg': weightKg,
+          'p_volume_m3': volumeM3,
+          'p_description': description,
+        },
+      ))
+          .toString();
+
+  Future<String> createParcel({
+    required String recipientName,
+    required String recipientPhone,
+    required Map<String, dynamic> pickupAddress,
+    required Map<String, dynamic> deliveryAddress,
+    num? weightKg,
+  }) async =>
+      (await client.rpc(
+        'create_parcel_request',
+        params: {
+          'p_recipient_name': recipientName,
+          'p_recipient_phone': recipientPhone,
+          'p_pickup_address': pickupAddress,
+          'p_delivery_address': deliveryAddress,
+          'p_weight_kg': weightKg,
+        },
+      ))
+          .toString();
+
   String _date(DateTime value) => value.toIso8601String().substring(0, 10);
 
   List<Map<String, dynamic>> _maps(dynamic rows) {
