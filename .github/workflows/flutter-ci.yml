@@ -4,6 +4,10 @@ on:
     branches: [main, codex/bootstrap]
   pull_request:
     branches: [main, codex/bootstrap]
+
+permissions:
+  contents: read
+
 jobs:
   analyze-and-test:
     runs-on: ubuntu-latest
@@ -20,3 +24,26 @@ jobs:
       - run: dart format --output=none --set-exit-if-changed lib test
       - run: flutter analyze
       - run: flutter test
+
+  android-debug:
+    runs-on: ubuntu-latest
+    needs: analyze-and-test
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.35.0'
+          cache: true
+      - run: flutter pub get
+      - name: Check Android project
+        run: test -f android/app/build.gradle || test -f android/app/build.gradle.kts
+      - run: flutter build apk --debug
+      - run: flutter build appbundle --debug
