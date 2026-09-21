@@ -107,7 +107,7 @@ class CheckoutRepository {
   }) async {
     if (provider == 'WAVE') {
       final response = await client.functions.invoke(
-        'create-wave-payment-session-v2',
+        'create-wave-payment-session-v3',
         body: {'order_id': orderId},
       );
       if (response.data is Map) {
@@ -115,7 +115,7 @@ class CheckoutRepository {
       }
     } else if (provider == 'CINETPAY') {
       final response = await client.functions.invoke(
-        'create-cinetpay-payment-session-v2',
+        'create-cinetpay-payment-session-v3',
         body: {
           'order_id': orderId,
           'provider': 'CINETPAY',
