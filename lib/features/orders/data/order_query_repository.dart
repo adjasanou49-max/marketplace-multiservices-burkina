@@ -73,12 +73,45 @@ class OrderQueryRepository {
             .map((row) => Map<String, dynamic>.from(row as Map))
             .toList();
 
+    final packages = groupIds.isEmpty
+        ? const <Map<String, dynamic>>[]
+        : (await client
+                .from('order_packages')
+                .select('id,order_group_id,status,picked_up_at,delivered_at')
+                .inFilter('order_group_id', groupIds) as List)
+            .map((row) => Map<String, dynamic>.from(row as Map))
+            .toList();
+
+    final packageIds = packages
+        .map((row) => row['id'])
+        .whereType<String>()
+        .toList();
+    final assignments = packageIds.isEmpty
+        ? const <Map<String, dynamic>>[]
+        : (await client
+                .from('delivery_assignments')
+                .select('id,package_id,courier_id,status,assigned_at,accepted_at,completed_at')
+                .inFilter('package_id', packageIds) as List)
+            .map((row) => Map<String, dynamic>.from(row as Map))
+            .toList();
+
+    final assignmentByPackage = <String, Map<String, dynamic>>{};
+    for (final assignment in assignments) {
+      assignmentByPackage[assignment['package_id'].toString()] = assignment;
+    }
+
+    for (final package in packages) {
+      package['assignment'] =
+          assignmentByPackage[package['id']?.toString()];
+    }
+
     return {
       'order': Map<String, dynamic>.from(order),
       'groups': (groups as List)
           .map((row) => Map<String, dynamic>.from(row as Map))
           .toList(),
       'items': items,
+      'packages': packages,
     };
   }
 
