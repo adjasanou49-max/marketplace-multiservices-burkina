@@ -101,19 +101,34 @@ class CheckoutRepository {
     return raw.toString();
   }
 
-  Future<String> createPaymentIntent({
+  Future<Map<String, dynamic>> createPaymentSession({
     required String orderId,
     required String provider,
   }) async {
-    final raw = await client.rpc(
-      'create_payment_intent',
-      params: {
-        'p_order_id': orderId,
-        'p_provider': provider,
-      },
-    );
+    if (provider == 'WAVE') {
+      final response = await client.functions.invoke(
+        'create-wave-payment-session',
+        body: {'order_id': orderId},
+      );
+      if (response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } else if (provider == 'CINETPAY') {
+      final response = await client.functions.invoke(
+        'create-cinetpay-payment-session',
+        body: {
+          'order_id': orderId,
+          'provider': 'CINETPAY',
+        },
+      );
+      if (response.data is Map) {
+        return Map<String, dynamic>.from(response.data as Map);
+      }
+    } else {
+      throw StateError('Mode de paiement non pris en charge.');
+    }
 
-    return raw.toString();
+    throw StateError('Réponse de paiement invalide.');
   }
 
   Future<List<Map<String, dynamic>>> orders({
