@@ -61,26 +61,26 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
       context: context,
       builder: (dialogContext) => SimpleDialog(
         title: const Text('Ma disponibilité'),
-        children: const [
+        children: [
           SimpleDialogOption(
-            value: 'AVAILABLE',
-            child: Text('Disponible maintenant'),
+            onPressed: () => Navigator.pop(dialogContext, 'AVAILABLE'),
+            child: const Text('Disponible maintenant'),
           ),
           SimpleDialogOption(
-            value: 'IN_10_MIN',
-            child: Text('Disponible dans 10 min'),
+            onPressed: () => Navigator.pop(dialogContext, 'IN_10_MIN'),
+            child: const Text('Disponible dans 10 min'),
           ),
           SimpleDialogOption(
-            value: 'IN_20_MIN',
-            child: Text('Disponible dans 20 min'),
+            onPressed: () => Navigator.pop(dialogContext, 'IN_20_MIN'),
+            child: const Text('Disponible dans 20 min'),
           ),
           SimpleDialogOption(
-            value: 'IN_30_MIN',
-            child: Text('Disponible dans 30 min'),
+            onPressed: () => Navigator.pop(dialogContext, 'IN_30_MIN'),
+            child: const Text('Disponible dans 30 min'),
           ),
           SimpleDialogOption(
-            value: 'UNAVAILABLE',
-            child: Text('Indisponible'),
+            onPressed: () => Navigator.pop(dialogContext, 'UNAVAILABLE'),
+            child: const Text('Indisponible'),
           ),
         ],
       ),
