@@ -176,7 +176,7 @@ class _AdminAccountsPageState extends ConsumerState<AdminAccountsPage> {
                       child: ListTile(
                         leading: CircleAvatar(
                           child: Text(
-                            name.isEmpty ? '?' : name.characters.first.toUpperCase(),
+                            name.isEmpty ? '?' : name.substring(0, 1).toUpperCase(),
                           ),
                         ),
                         title: Text(name),
