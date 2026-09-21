@@ -167,34 +167,33 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         idempotencyKey: _idempotencyKey,
       );
 
-      final paymentId = await repo.createPaymentIntent(
+      final paymentSession = await repo.createPaymentSession(
         orderId: orderId,
         provider: _paymentProvider,
       );
 
-      if (!mounted) return;
+      final checkoutUrl = paymentSession['checkout_url']?.toString();
+      if (checkoutUrl == null || checkoutUrl.isEmpty) {
+        throw StateError('Le guichet de paiement n’a pas été fourni.');
+      }
 
-      await showDialog<void>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Commande créée'),
+      final opened = await launchUrl(
+        Uri.parse(checkoutUrl),
+        mode: LaunchMode.externalApplication,
+      );
+      if (!opened) {
+        throw StateError('Impossible d’ouvrir le guichet de paiement.');
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
           content: Text(
-            'Commande : ' +
-                orderId +
-                '\nIntention de paiement : ' +
-                paymentId +
-                '\n\nLe paiement opérateur sera finalisé dans le module de paiement.',
+            'Guichet de paiement ouvert. Revenez dans l’application après le paiement.',
           ),
-          actions: [
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Continuer'),
-            ),
-          ],
         ),
       );
-
-      if (mounted) context.go('/orders');
+      context.go('/orders/' + orderId);
     } catch (error) {
       if (!mounted) return;
 
