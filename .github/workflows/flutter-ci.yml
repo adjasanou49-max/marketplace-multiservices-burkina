@@ -1,0 +1,60 @@
+name: Flutter CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: flutter-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.2'
+          cache: true
+      - run: flutter --version
+      - run: flutter pub get
+      - name: Check generated dependency changes
+        run: git diff --exit-code -- pubspec.yaml pubspec.lock
+      - name: Format Dart sources
+        run: dart format lib test
+      - run: flutter analyze
+      - run: flutter test
+
+  android-debug:
+    runs-on: ubuntu-latest
+    needs: analyze-and-test
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.2'
+          cache: true
+      - run: flutter pub get
+      - name: Ensure Android platform project
+        run: |
+          if [ ! -d android ]; then
+            flutter create --platforms=android --project-name marketplace_multiservices_burkina .
+          fi
+          test -f android/app/build.gradle || test -f android/app/build.gradle.kts
+      - run: flutter build apk --debug
+      - run: flutter build appbundle --debug
