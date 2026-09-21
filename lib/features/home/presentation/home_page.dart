@@ -182,7 +182,19 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                     ),
                   ),
-$marker
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _CategoryHeaderDelegate(
+                      categories: categories,
+                      selectedIndex: categories.isEmpty
+                          ? 0
+                          : _selectedCategory
+                                .clamp(0, categories.length - 1)
+                                .toInt(),
+                      onSelected: (index) =>
+                          _selectCategory(index, categories),
+                    ),
+                  ),
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
