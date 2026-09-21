@@ -18,6 +18,8 @@ import '../../features/messaging/presentation/messages_page.dart';
 import '../../features/notifications/presentation/notifications_page.dart';
 import '../../features/restaurants/presentation/restaurants_page.dart';
 import '../../features/seller/presentation/seller_dashboard_page.dart';
+import '../../features/seller/presentation/seller_orders_page.dart';
+import '../../features/seller/presentation/seller_products_page.dart';
 import '../../features/seller/presentation/seller_tools_page.dart';
 import '../../features/services/presentation/services_page.dart';
 import '../../features/transport/presentation/transport_page.dart';
@@ -34,12 +36,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/checkout/:cartId',
         builder: (_, state) {
           final cartId = state.pathParameters['cartId'];
+
           if (cartId == null || cartId.isEmpty) {
             return const ModulePlaceholderPage(
               title: 'Panier invalide',
               icon: Icons.shopping_cart_outlined,
             );
           }
+
           return CheckoutPage(cartId: cartId);
         },
       ),
@@ -48,12 +52,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/delivery/:orderId',
         builder: (_, state) {
           final orderId = state.pathParameters['orderId'];
+
           if (orderId == null || orderId.isEmpty) {
             return const ModulePlaceholderPage(
               title: 'Commande invalide',
               icon: Icons.local_shipping_outlined,
             );
           }
+
           return DeliveryTrackingPage(orderId: orderId);
         },
       ),
@@ -105,6 +111,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/seller/dashboard',
         builder: (_, __) => const SellerDashboardPage(),
+      ),
+      GoRoute(
+        path: '/seller/products',
+        builder: (_, __) => const SellerProductsPage(),
+      ),
+      GoRoute(
+        path: '/seller/orders',
+        builder: (_, __) => const SellerOrdersPage(),
       ),
       for (final item in const <Map<String, Object>>[
         {'path': '/promotions', 'title': 'Promotions', 'icon': 4},

@@ -17,16 +17,22 @@ class SellerToolsPage extends StatelessWidget {
             onTap: () => context.push('/seller/dashboard'),
           ),
           ListTile(
+            leading: const Icon(Icons.receipt_long_outlined),
+            title: const Text('Commandes'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/seller/orders'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.inventory_2_outlined),
+            title: const Text('Produits et stock'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/seller/products'),
+          ),
+          ListTile(
             leading: const Icon(Icons.storefront_outlined),
             title: const Text('Ma boutique'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/seller/settings'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.inventory_2_outlined),
-            title: const Text('Stock'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/seller/stock'),
           ),
           ListTile(
             leading: const Icon(Icons.payments_outlined),
