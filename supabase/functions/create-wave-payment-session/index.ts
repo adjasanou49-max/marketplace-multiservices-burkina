@@ -86,9 +86,10 @@ Deno.serve(async (req: Request) => {
 
   const apiKey = Deno.env.get("WAVE_API_KEY");
   const signingSecret = Deno.env.get("WAVE_SIGNING_SECRET") ?? "";
-  const successUrl = Deno.env.get("WAVE_SUCCESS_URL");
-  const errorUrl = Deno.env.get("WAVE_ERROR_URL");
-  if (!apiKey || !successUrl || !errorUrl) {
+  const defaultReturn = url + "/functions/v1/payment-return";
+  const successUrl = Deno.env.get("WAVE_SUCCESS_URL") || defaultReturn + "?status=success";
+  const errorUrl = Deno.env.get("WAVE_ERROR_URL") || defaultReturn + "?status=error";
+  if (!apiKey) {
     return json({ error: "wave_not_configured" }, 503);
   }
 
