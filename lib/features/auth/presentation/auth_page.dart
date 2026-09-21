@@ -18,7 +18,13 @@ class _AuthPageState extends State<AuthPage> {
   bool register = false;
   bool loading = false;
 
-  AuthRepository get repository => AuthRepository(Supabase.instance.client);
+  AuthRepository? get repository {
+    try {
+      return AuthRepository(Supabase.instance.client);
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   void dispose() {
@@ -42,16 +48,24 @@ class _AuthPageState extends State<AuthPage> {
       return;
     }
 
+    final auth = repository;
+    if (auth == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Supabase n’est pas configuré.')),
+      );
+      return;
+    }
+
     setState(() => loading = true);
     try {
       if (register) {
-        await repository.signUp(
+        await auth.signUp(
           email: email,
           password: password,
           displayName: displayName,
         );
       } else {
-        await repository.signIn(email: email, password: password);
+        await auth.signIn(email: email, password: password);
       }
 
       if (!mounted) return;
@@ -89,9 +103,17 @@ class _AuthPageState extends State<AuthPage> {
       return;
     }
 
+    final auth = repository;
+    if (auth == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Supabase n’est pas configuré.')),
+      );
+      return;
+    }
+
     setState(() => loading = true);
     try {
-      await repository.resetPassword(email);
+      await auth.resetPassword(email);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Email de réinitialisation envoyé.')),
