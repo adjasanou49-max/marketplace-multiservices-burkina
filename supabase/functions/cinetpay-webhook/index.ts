@@ -100,7 +100,7 @@ Deno.serve(async (req: Request) => {
 
   if (lookup.error || !lookup.data) return json({ error: "payment_not_found" }, 404);
   const payment = lookup.data as Record<string, unknown>;
-  if (!["ORANGE_MONEY", "MOOV_MONEY"].includes(String(payment.provider))) {
+  if (String(payment.provider) !== "CINETPAY") {
     return json({ error: "provider_invalid" }, 409);
   }
 
@@ -147,7 +147,7 @@ Deno.serve(async (req: Request) => {
     eventType = "cinetpay." + (providerStatus || "pending").toLowerCase();
   }
 
-  const providerReference = String(data.operator_id ?? transactionId);
+  const providerReference = transactionId;
   const { error } = await supabase.rpc("process_payment_event", {
     p_payment_id: payment.id,
     p_event_type: eventType,
