@@ -65,12 +65,12 @@ class TransportRepository {
             .inFilter('id', stationIds);
 
     final companies = <String, Map<String, dynamic>>{};
-    for (final raw in (companyRows as List)) {
+    for (final raw in companyRows) {
       final row = Map<String, dynamic>.from(raw as Map);
       companies[row['id'].toString()] = row;
     }
     final stations = <String, Map<String, dynamic>>{};
-    for (final raw in (stationRows as List)) {
+    for (final raw in stationRows) {
       final row = Map<String, dynamic>.from(raw as Map);
       stations[row['id'].toString()] = row;
     }
