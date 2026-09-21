@@ -388,6 +388,7 @@ class _ServiceModuleSliver extends ConsumerWidget {
                 '/transport',
                 '/mechanics',
                 '/expiry',
+                '/group-buy',
               }.contains(module.route),
             )
             .toList();
