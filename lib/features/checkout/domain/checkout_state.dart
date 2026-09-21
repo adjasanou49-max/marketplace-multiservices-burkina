@@ -20,6 +20,7 @@ class CheckoutState {
     String? addressId,
     num? deliveryFee,
     num? deliveryDistanceKm,
+    bool clearDeliveryDistanceKm = false,
     int? deliveryStopCount,
     String? note,
     String? couponCode,
@@ -27,7 +28,8 @@ class CheckoutState {
       CheckoutState(
         addressId: addressId ?? this.addressId,
         deliveryFee: deliveryFee ?? this.deliveryFee,
-        deliveryDistanceKm: deliveryDistanceKm ?? this.deliveryDistanceKm,
+        deliveryDistanceKm:
+            clearDeliveryDistanceKm ? null : deliveryDistanceKm ?? this.deliveryDistanceKm,
         deliveryStopCount: deliveryStopCount ?? this.deliveryStopCount,
         note: note ?? this.note,
         couponCode: couponCode ?? this.couponCode,
