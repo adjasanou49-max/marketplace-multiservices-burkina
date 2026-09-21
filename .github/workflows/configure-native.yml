@@ -1,0 +1,120 @@
+name: Configure native platforms
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  configure:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.x'
+          channel: stable
+          cache: true
+
+      - name: Ensure native runners exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -d android ] || [ ! -d ios ]; then
+            flutter create . --platforms=android,ios --org com.marketplaceburkina
+          fi
+
+      - name: Configure Android and iOS
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import plistlib
+          import re
+
+          manifest = Path('android/app/src/main/AndroidManifest.xml')
+          text = manifest.read_text()
+          permissions = [
+              '    <uses-permission android:name="android.permission.INTERNET" />',
+              '    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />',
+              '    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />',
+              '    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />',
+          ]
+          for line in reversed(permissions):
+              if line not in text:
+                  text = text.replace('<application', line + '\n    <application', 1)
+          text = text.replace('android:label="marketplace_multiservices_burkina"', 'android:label="Marketplace Burkina"')
+          activity_close = '</activity>'
+          if 'marketplaceburkina' not in text:
+              block = '''        <intent-filter android:autoVerify="false">
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="marketplaceburkina" android:host="orders" />
+        </intent-filter>
+        <intent-filter android:autoVerify="false">
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="marketplaceburkina" android:host="notifications" />
+        </intent-filter>'''
+          text = text.replace(activity_close, block + '\n' + activity_close, 1)
+          manifest.write_text(text)
+
+          plist_path = Path('ios/Runner/Info.plist')
+          with plist_path.open('rb') as f:
+              plist = plistlib.load(f)
+          plist['CFBundleDisplayName'] = 'Marketplace Burkina'
+          plist['NSLocationWhenInUseUsageDescription'] = 'Votre localisation est utilisée pour les livraisons, le suivi des livreurs et les services de proximité.'
+          plist['NSLocationAlwaysAndWhenInUseUsageDescription'] = 'Votre localisation peut être utilisée pour maintenir le suivi d’une mission de livraison active.'
+          plist['UIBackgroundModes'] = sorted(set(plist.get('UIBackgroundModes', [])) | {'fetch', 'remote-notification'})
+          plist['CFBundleURLTypes'] = [{
+              'CFBundleTypeRole': 'Editor',
+              'CFBundleURLSchemes': ['marketplaceburkina'],
+          }]
+          with plist_path.open('wb') as f:
+              plistlib.dump(plist, f, sort_keys=False)
+
+          pbx = Path('ios/Runner.xcodeproj/project.pbxproj')
+          p = pbx.read_text()
+          p = p.replace('IPHONEOS_DEPLOYMENT_TARGET = 13.0;', 'IPHONEOS_DEPLOYMENT_TARGET = 15.0;')
+          pbx.write_text(p)
+          PY
+
+      - name: Add signing templates and ignore private keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p android
+          cat > android/key.properties.example <<'EOF'
+          storePassword=CHANGE_ME
+          keyPassword=CHANGE_ME
+          keyAlias=upload
+          storeFile=upload-keystore.jks
+          EOF
+          cat >> .gitignore <<'EOF'
+
+          # Android signing material
+          android/key.properties
+          android/app/upload-keystore.jks
+          EOF
+
+      - name: Commit native configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add android ios .gitignore
+          if git diff --cached --quiet; then
+            echo "Native configuration already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: configure Android and iOS native platforms"
+          git push origin HEAD:main
