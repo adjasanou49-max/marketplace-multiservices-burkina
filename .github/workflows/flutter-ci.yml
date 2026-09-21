@@ -3,17 +3,19 @@ on:
   push:
     branches: [main, codex/bootstrap]
   pull_request:
-    branches: [main]
+    branches: [main, codex/bootstrap]
 jobs:
   analyze-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - uses: actions/checkout@v6
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.35.0'
           channel: stable
+          flutter-version: '3.35.0'
           cache: true
+      - run: flutter --version
       - run: flutter pub get
       - run: dart format --output=none --set-exit-if-changed lib test
       - run: flutter analyze
