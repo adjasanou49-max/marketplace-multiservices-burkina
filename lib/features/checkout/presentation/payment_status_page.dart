@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/providers/repository_providers.dart';
 
@@ -24,37 +23,14 @@ class _PaymentStatusPageState
     extends ConsumerState<PaymentStatusPage> {
   late Future<Map<String, dynamic>?> _future;
   Timer? _timer;
-  RealtimeChannel? _channel;
 
   @override
   void initState() {
     super.initState();
     _future = _load();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final client = ref.read(supabaseProvider);
-      if (client == null) return;
-
-      _channel = client
-          .channel('payment-' + widget.paymentId)
-          .onPostgresChanges(
-            event: PostgresChangeEvent.all,
-            schema: 'public',
-            table: 'payments',
-            filter: PostgresChangeFilter(
-              type: PostgresChangeFilterType.eq,
-              column: 'id',
-              value: widget.paymentId,
-            ),
-            callback: (_) {
-              if (mounted) setState(() => _future = _load());
-            },
-          )
-          .subscribe();
-    });
-
     _timer = Timer.periodic(
-      const Duration(seconds: 8),
+      const Duration(seconds: 5),
       (_) {
         if (mounted) setState(() => _future = _load());
       },
@@ -65,7 +41,9 @@ class _PaymentStatusPageState
     final client = ref.read(supabaseProvider);
     final user = client?.auth.currentUser;
 
-    if (client == null || user == null) return null;
+    if (client == null || user == null) {
+      return null;
+    }
 
     final rows = await client
         .from('payments')
@@ -83,12 +61,6 @@ class _PaymentStatusPageState
   @override
   void dispose() {
     _timer?.cancel();
-
-    final client = ref.read(supabaseProvider);
-    if (_channel != null && client != null) {
-      client.removeChannel(_channel!);
-    }
-
     super.dispose();
   }
 

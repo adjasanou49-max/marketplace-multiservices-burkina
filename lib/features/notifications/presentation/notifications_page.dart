@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/providers/repository_providers.dart';
 
@@ -15,36 +14,11 @@ class NotificationsPage extends ConsumerStatefulWidget {
 class _NotificationsPageState
     extends ConsumerState<NotificationsPage> {
   late Future<List<Map<String, dynamic>>> _future;
-  RealtimeChannel? _channel;
 
   @override
   void initState() {
     super.initState();
     _future = _load();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final client = ref.read(supabaseProvider);
-      final user = client?.auth.currentUser;
-
-      if (client == null || user == null) return;
-
-      _channel = client
-          .channel('notifications-' + user.id)
-          .onPostgresChanges(
-            event: PostgresChangeEvent.all,
-            schema: 'public',
-            table: 'notifications',
-            filter: PostgresChangeFilter(
-              type: PostgresChangeFilterType.eq,
-              column: 'user_id',
-              value: user.id,
-            ),
-            callback: (_) {
-              if (mounted) setState(() => _future = _load());
-            },
-          )
-          .subscribe();
-    });
   }
 
   Future<List<Map<String, dynamic>>> _load() async {
@@ -73,9 +47,7 @@ class _NotificationsPageState
 
     await client
         .from('notifications')
-        .update({
-          'read_at': DateTime.now().toUtc().toIso8601String(),
-        })
+        .update({'read_at': DateTime.now().toUtc().toIso8601String()})
         .eq('id', id)
         .eq('user_id', user.id);
 
@@ -84,23 +56,11 @@ class _NotificationsPageState
   }
 
   @override
-  void dispose() {
-    final client = ref.read(supabaseProvider);
-    if (_channel != null && client != null) {
-      client.removeChannel(_channel!);
-    }
-
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     if (ref.watch(supabaseProvider)?.auth.currentUser == null) {
       return const Scaffold(
         body: Center(
-          child: Text(
-            'Connectez-vous pour voir vos notifications.',
-          ),
+          child: Text('Connectez-vous pour voir vos notifications.'),
         ),
       );
     }
@@ -119,9 +79,7 @@ class _NotificationsPageState
         future: _future,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           final items =
@@ -153,9 +111,8 @@ class _NotificationsPageState
                   title: Text(
                     item['title']?.toString() ?? 'Notification',
                     style: TextStyle(
-                      fontWeight: unread
-                          ? FontWeight.w700
-                          : FontWeight.w400,
+                      fontWeight:
+                          unread ? FontWeight.w700 : FontWeight.w400,
                     ),
                   ),
                   subtitle: Text(

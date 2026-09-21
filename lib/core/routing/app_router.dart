@@ -117,6 +117,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const NotificationsPage(),
       ),
       GoRoute(
+        path: '/promotions',
+        builder: (_, __) => const PromotionsPage(),
+      ),
+      GoRoute(
         path: '/admin',
         builder: (_, __) => const AdminDashboardPage(),
       ),
@@ -136,10 +140,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/seller/orders',
         builder: (_, __) => const SellerOrdersPage(),
       ),
+      GoRoute(
+        path: '/seller/finance',
+        builder: (_, __) => const SellerFinancePage(),
+      ),
       for (final item in const <Map<String, Object>>[
-        {'path': '/promotions', 'title': 'Promotions', 'icon': 4},
         {'path': '/seller/stock', 'title': 'Stock vendeur', 'icon': 7},
-        {'path': '/seller/finance', 'title': 'Finance vendeur', 'icon': 8},
         {'path': '/seller/payouts', 'title': 'Demandes de paiement', 'icon': 9},
         {'path': '/seller/commissions', 'title': 'Commissions', 'icon': 10},
         {'path': '/seller/settings', 'title': 'Paramètres vendeur', 'icon': 11},
