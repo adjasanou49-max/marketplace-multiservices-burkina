@@ -146,6 +146,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           ref.invalidate(productsProvider);
           ref.invalidate(productsFeedProvider);
           ref.invalidate(shopsProvider);
+          ref.invalidate(enabledModulesProvider);
         },
         child: categoriesState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
