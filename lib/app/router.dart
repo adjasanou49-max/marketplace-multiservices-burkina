@@ -50,4 +50,7 @@ final appRouter=GoRouter(initialLocation:'/',routes:[
  GoRoute(path:'/follows',builder:(c,s)=>const FollowsPage()),
  GoRoute(path:'/profile',builder:(c,s)=>const ProfilePage()),
  GoRoute(path:'/auth',builder:(c,s)=>const AuthPage()),
+ GoRoute(path:'/restaurants',builder:(c,s)=>const RestaurantsPage()),
+ GoRoute(path:'/transport',builder:(c,s)=>const TransportPage()),
+ GoRoute(path:'/mechanics',builder:(c,s)=>const MechanicsPage()),
 ]);
