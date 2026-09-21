@@ -60,6 +60,17 @@ class _OrderDetailsPageState extends ConsumerState<OrderDetailsPage> {
         .eq('order_id', widget.orderId)
         .order('created_at', ascending: false);
 
+    final refundRows = await client.rpc(
+      'get_customer_refunds',
+      params: {'p_order_id': widget.orderId},
+    );
+
+    final refunds = refundRows is List
+        ? refundRows
+            .map((row) => Map<String, dynamic>.from(row as Map))
+            .toList()
+        : const <Map<String, dynamic>>[];
+
     final paymentRows = await client.rpc(
       'get_customer_payment_status',
       params: {'p_order_id': widget.orderId},
@@ -80,6 +91,7 @@ class _OrderDetailsPageState extends ConsumerState<OrderDetailsPage> {
       disputes: (disputes as List)
           .map((row) => Map<String, dynamic>.from(row as Map))
           .toList(),
+      refunds: refunds,
       payment: payment,
     );
   }
@@ -131,6 +143,67 @@ class _OrderDetailsPageState extends ConsumerState<OrderDetailsPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Paiement impossible : ' + error.toString())),
+      );
+    }
+  }
+  Future<void> _requestRefund(num maxAmount) async {
+    final amountController = TextEditingController(text: maxAmount.toString());
+    final reasonController = TextEditingController();
+    final values = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Demander un remboursement'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: amountController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(labelText: 'Montant (XOF)'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: reasonController,
+              maxLines: 4,
+              decoration: const InputDecoration(labelText: 'Motif'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Envoyer'),
+          ),
+        ],
+      ),
+    );
+    final amount = num.tryParse(amountController.text.trim());
+    final reason = reasonController.text.trim();
+    amountController.dispose();
+    reasonController.dispose();
+    if (values != true || amount == null || amount <= 0 || amount > maxAmount) return;
+
+    try {
+      final client = ref.read(supabaseProvider);
+      if (client == null) throw StateError('Service indisponible.');
+      await client.rpc('request_refund', params: {
+        'p_order_id': widget.orderId,
+        'p_amount': amount,
+        'p_reason': reason.isEmpty ? null : reason,
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Demande de remboursement envoyée.')),
+      );
+      setState(() => _future = _load());
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Remboursement refusé : ' + error.toString())),
       );
     }
   }
@@ -400,6 +473,14 @@ class _OrderDetailsPageState extends ConsumerState<OrderDetailsPage> {
                   icon: const Icon(Icons.gavel_outlined),
                   label: const Text('Ouvrir un litige'),
                 ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => _requestRefund(
+                    num.tryParse(order['total']?.toString() ?? '0') ?? 0,
+                  ),
+                  icon: const Icon(Icons.currency_exchange_outlined),
+                  label: const Text('Demander un remboursement'),
+                ),
               ],
               if (data.returns.isNotEmpty) ...[
                 const SizedBox(height: 16),
@@ -412,6 +493,28 @@ class _OrderDetailsPageState extends ConsumerState<OrderDetailsPage> {
                     leading: const Icon(Icons.assignment_return_outlined),
                     title: Text(row['reason']?.toString() ?? '-'),
                     subtitle: Text(row['status']?.toString() ?? '-'),
+                  ),
+                ),
+              ],
+              if (data.refunds.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text(
+                  'Remboursements',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                ...data.refunds.map(
+                  (row) => ListTile(
+                    leading: const Icon(Icons.currency_exchange_outlined),
+                    title: Text(
+                      (row['amount']?.toString() ?? '0') +
+                          ' ' +
+                          (row['currency']?.toString() ?? 'XOF'),
+                    ),
+                    subtitle: Text(
+                      (row['status']?.toString() ?? '-') +
+                          ' • ' +
+                          (row['reason']?.toString() ?? ''),
+                    ),
                   ),
                 ),
               ],
@@ -500,6 +603,7 @@ class _OrderDetails {
     required this.returns,
     required this.disputes,
     required this.payment,
+    required this.refunds,
   });
 
   final Map<String, dynamic> order;
@@ -507,6 +611,7 @@ class _OrderDetails {
   final List<Map<String, dynamic>> returns;
   final List<Map<String, dynamic>> disputes;
   final Map<String, dynamic>? payment;
+  final List<Map<String, dynamic>> refunds;
 }
 
 class _ReviewForm {
