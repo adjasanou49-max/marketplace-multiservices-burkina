@@ -3,6 +3,8 @@ import '../features/home/presentation/home_page.dart';
 import '../features/search/presentation/search_page.dart';
 import '../features/cart/presentation/cart_page.dart';
 import '../features/checkout/presentation/checkout_page.dart';
+import '../features/refunds/presentation/refunds_page.dart';
+import '../features/commissions/presentation/commissions_page.dart';
 import '../features/orders/presentation/orders_page.dart';
 import '../features/addresses/presentation/addresses_page.dart';
 import '../features/notifications/presentation/notifications_page.dart';
@@ -19,6 +21,8 @@ final appRouter=GoRouter(initialLocation:'/',routes:[
  GoRoute(path:'/search',builder:(c,s)=>const SearchPage()),
  GoRoute(path:'/cart',builder:(c,s)=>const CartPage()),
  GoRoute(path:'/checkout',builder:(c,s)=>const CheckoutPage()),
+ GoRoute(path:'/refunds',builder:(c,s)=>const RefundsPage()),
+ GoRoute(path:'/seller/commissions',builder:(c,s)=>const CommissionsPage()),
  GoRoute(path:'/orders',builder:(c,s)=>const OrdersPage()),
  GoRoute(path:'/addresses',builder:(c,s)=>const AddressesPage()),
  GoRoute(path:'/notifications',builder:(c,s)=>const NotificationsPage()),
