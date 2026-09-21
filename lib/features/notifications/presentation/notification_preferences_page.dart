@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/repository_providers.dart';
+import '../../../core/notifications/push_notification_service.dart';
 
 class NotificationPreferencesPage extends ConsumerStatefulWidget {
   const NotificationPreferencesPage({super.key});
@@ -142,6 +143,13 @@ class _NotificationPreferencesPageState
             subtitle: 'Offres, coupons et nouveautés',
             value: _promotions,
             onChanged: (value) => setState(() => _promotions = value),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => PushNotificationService.instance
+                .openSystemNotificationSettings(),
+            icon: const Icon(Icons.notifications_active_outlined),
+            label: const Text('Réglages des notifications du téléphone'),
           ),
           const SizedBox(height: 18),
           FilledButton.icon(
