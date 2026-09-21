@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/repository_providers.dart';
 
@@ -355,6 +356,12 @@ class _AdminDashboardPageState
                 onPressed: _addAssociate,
                 icon: const Icon(Icons.person_add_alt_1_outlined),
                 label: const Text('Ajouter un associé après paiement'),
+              ),
+              const SizedBox(height: 8),
+              FilledButton.icon(
+                onPressed: () => context.push('/admin/accounts'),
+                icon: const Icon(Icons.manage_accounts_outlined),
+                label: const Text('Gérer les comptes utilisateurs'),
               ),
               const SizedBox(height: 12),
               const Text(
