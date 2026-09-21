@@ -10,6 +10,7 @@ import '../../products/domain/product.dart';
 import '../../products/presentation/product_grid.dart';
 import '../../shops/application/shop_controller.dart';
 import '../../shops/presentation/shop_card.dart';
+import '../../modules/presentation/service_module_sliver.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -195,41 +196,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           _selectCategory(index, categories),
                     ),
                   ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
-                      child: Text(
-                        'Services',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 94,
-                      child: ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          _ServiceShortcut(
-                            icon: Icons.restaurant_outlined,
-                            label: 'Restaurants',
-                            onTap: () => context.push('/restaurants'),
-                          ),
-                          _ServiceShortcut(
-                            icon: Icons.directions_bus_outlined,
-                            label: 'Transport',
-                            onTap: () => context.push('/transport'),
-                          ),
-                          _ServiceShortcut(
-                            icon: Icons.build_outlined,
-                            label: 'Mécaniciens',
-                            onTap: () => context.push('/mechanics'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  const ServiceModuleSliver(),
                   if (categories.isEmpty)
                     SliverToBoxAdapter(
                       child: ProductGrid(products: products),
