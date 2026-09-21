@@ -20,7 +20,7 @@
 Les URLs de succès/erreur peuvent utiliser la fonction `payment-return`.
 
 Webhook Wave :
-`https://dzhhsoikzxibmngjzcch.supabase.co/functions/v1/wave-payment-webhook`
+`https://dzhhsoikzxibmngjzcch.supabase.co/functions/v1/wave-payment-webhook-v3`
 
 ### CinetPay
 
