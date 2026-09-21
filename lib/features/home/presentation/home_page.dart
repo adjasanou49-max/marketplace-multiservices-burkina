@@ -10,6 +10,7 @@ import '../../products/domain/product.dart';
 import '../../products/presentation/product_grid.dart';
 import '../../shops/application/shop_controller.dart';
 import '../../shops/presentation/shop_card.dart';
+import '../../modules/application/module_controller.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
