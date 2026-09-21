@@ -6,7 +6,9 @@ class AddressRepository {
   final SupabaseClient client;
 
   Future<List<DeliveryAddress>> listMine() async {
-    final rows = await client.from('delivery_addresses').select().order('is_default', ascending: false).order('created_at', ascending: false);
+    final user = client.auth.currentUser;
+    if (user == null) throw StateError('Utilisateur non authentifié');
+    final rows = await client.from('delivery_addresses').select().eq('customer_id', user.id).order('is_default', ascending: false).order('created_at', ascending: false);
     return (rows as List).map((r) => DeliveryAddress.fromMap(Map<String, dynamic>.from(r as Map))).toList();
   }
 
@@ -20,7 +22,10 @@ class AddressRepository {
     double? longitude,
     bool isDefault = false,
   }) async {
+    final user = client.auth.currentUser;
+    if (user == null) throw StateError('Utilisateur non authentifié');
     final row = await client.from('delivery_addresses').insert({
+      'customer_id': user.id,
       'recipient_name': recipientName,
       'label': label,
       'phone': phone,
