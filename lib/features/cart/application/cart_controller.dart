@@ -12,6 +12,8 @@ class CartController extends Notifier<List<CartItem>> {
     state = updated;
   }
 
+  void clear() => state = const [];
+
   void remove(String productId) => state = state.where((item) => item.productId != productId).toList();
 
   void setQuantity(String productId, int quantity) {
