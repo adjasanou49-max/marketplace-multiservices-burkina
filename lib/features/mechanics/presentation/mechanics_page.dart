@@ -38,47 +38,38 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
     final address = await repository.defaultCustomerAddress();
     if (!mounted) return;
 
-    final vehicle = ValueNotifier('MOTORBIKE');
-    final problem = ValueNotifier('PNEU_CREVE');
+    var selectedVehicle = 'MOTORBIKE';
+    var selectedProblem = 'PNEU_CREVE';
     final descriptionController = TextEditingController();
-    var latitude = address?['latitude'] as num?;
-    var longitude = address?['longitude'] as num?;
+    final latitude = address?['latitude'] as num?;
+    final longitude = address?['longitude'] as num?;
 
     final request = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Demander un mécanicien'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ValueListenableBuilder<String>(
-                valueListenable: vehicle,
-                builder: (_, value, __) => DropdownButtonFormField<String>(
-                  initialValue: value,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: const Text('Demander un mécanicien'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  initialValue: selectedVehicle,
                   decoration: const InputDecoration(labelText: 'Véhicule'),
                   items: const [
-                    DropdownMenuItem(
-                      value: 'MOTORBIKE',
-                      child: Text('Moto'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'CAR',
-                      child: Text('Voiture'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'BICYCLE',
-                      child: Text('Vélo'),
-                    ),
+                    DropdownMenuItem(value: 'MOTORBIKE', child: Text('Moto')),
+                    DropdownMenuItem(value: 'CAR', child: Text('Voiture')),
+                    DropdownMenuItem(value: 'BICYCLE', child: Text('Vélo')),
                   ],
-                  onChanged: (value) => vehicle.value = value ?? vehicle.value,
+                  onChanged: (value) {
+                    if (value != null) {
+                      setDialogState(() => selectedVehicle = value);
+                    }
+                  },
                 ),
-              ),
-              const SizedBox(height: 12),
-              ValueListenableBuilder<String>(
-                valueListenable: problem,
-                builder: (_, value, __) => DropdownButtonFormField<String>(
-                  initialValue: value,
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  initialValue: selectedProblem,
                   decoration: const InputDecoration(labelText: 'Problème'),
                   items: const [
                     DropdownMenuItem(
@@ -94,52 +85,54 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
                       child: Text('Panne mécanique'),
                     ),
                   ],
-                  onChanged: (value) => problem.value = value ?? problem.value,
+                  onChanged: (value) {
+                    if (value != null) {
+                      setDialogState(() => selectedProblem = value);
+                    }
+                  },
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: descriptionController,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: 'Description (optionnel)',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              if (latitude != null && longitude != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    'Position par défaut utilisée : ${address?['city'] ?? 'adresse enregistrée'}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                )
-              else
-                const Padding(
-                  padding: EdgeInsets.only(top: 8),
-                  child: Text(
-                    'Ajoutez une adresse avec GPS pour envoyer votre position.',
+                const SizedBox(height: 12),
+                TextField(
+                  controller: descriptionController,
+                  maxLines: 4,
+                  decoration: const InputDecoration(
+                    labelText: 'Description (optionnel)',
+                    border: OutlineInputBorder(),
                   ),
                 ),
-            ],
+                if (latitude != null && longitude != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Position par défaut : ${address?['city'] ?? 'adresse enregistrée'}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  )
+                else
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Ajoutez une adresse avec GPS pour envoyer votre position.',
+                    ),
+                  ),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Annuler'),
+            ),
+            FilledButton(
+              onPressed: latitude == null || longitude == null
+                  ? null
+                  : () => Navigator.pop(dialogContext, true),
+              child: const Text('Envoyer la demande'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Annuler'),
-          ),
-          FilledButton(
-            onPressed: latitude == null || longitude == null
-                ? null
-                : () => Navigator.pop(dialogContext, true),
-            child: const Text('Envoyer la demande'),
-          ),
-        ],
       ),
     );
-    vehicle.dispose();
-    problem.dispose();
 
     if (request != true || latitude == null || longitude == null) {
       descriptionController.dispose();
@@ -149,11 +142,11 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
     final messenger = ScaffoldMessenger.of(context);
     try {
       final id = await repository.createRequest(
-        vehicleType: vehicle.value,
-        problemType: problem.value,
+        vehicleType: selectedVehicle,
+        problemType: selectedProblem,
         description: descriptionController.text,
-        latitude: latitude!.toDouble(),
-        longitude: longitude!.toDouble(),
+        latitude: latitude.toDouble(),
+        longitude: longitude.toDouble(),
       );
       if (!mounted) return;
       messenger.showSnackBar(
@@ -168,7 +161,6 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
       descriptionController.dispose();
     }
   }
-
   String _availabilityLabel(String? status) {
     switch (status) {
       case 'AVAILABLE':
