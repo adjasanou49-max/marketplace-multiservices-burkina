@@ -6,18 +6,21 @@ class MechanicRepository {
   final SupabaseClient client;
 
   Future<List<Map<String, dynamic>>> mechanics() async {
-    final rows = await client
-        .from('mechanics')
-        .select(
-          'id,display_name,phone,verification_status,active,service_radius_km,mechanic_services(service_type,vehicle_type,base_price),mechanic_availability(status,starts_at,ends_at)',
-        )
-        .eq('active', true)
-        .eq('verification_status', 'VERIFIED')
-        .limit(100);
+    final rows = await client.rpc('get_public_mechanics');
 
-    return (rows as List)
-        .map((row) => Map<String, dynamic>.from(row as Map))
-        .toList();
+    return (rows as List).map((row) {
+      final item = Map<String, dynamic>.from(row as Map);
+      final services = item['services'];
+      item['mechanic_services'] = services is List ? services : const <dynamic>[];
+      item['mechanic_availability'] = [
+        <String, dynamic>{
+          'status': item['availability_status'],
+          'starts_at': item['availability_starts_at'],
+          'ends_at': item['availability_ends_at'],
+        },
+      ];
+      return item;
+    }).toList();
   }
 
   Future<String> createRequest({
