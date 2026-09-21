@@ -99,8 +99,8 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                           ' ' +
                           (order['currency']?.toString() ?? 'XOF'),
                     ),
-                    onTap: trackable && orderId.isNotEmpty
-                        ? () => context.push('/delivery/' + orderId)
+                    onTap: orderId.isNotEmpty
+                        ? () => context.push('/orders/' + orderId)
                         : null,
                   ),
                 );
