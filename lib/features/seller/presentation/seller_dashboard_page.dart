@@ -126,7 +126,7 @@ class _SellerDashboardPageState
         actions: [
           IconButton(
             tooltip: 'Boutique',
-            onPressed: () => context.push('/seller/settings'),
+            onPressed: () => context.push('/seller/shop'),
             icon: const Icon(Icons.storefront_outlined),
           ),
         ],
@@ -228,7 +228,7 @@ class _SellerDashboardPageState
           ),
           const SizedBox(height: 14),
           const Text(
-            'Les écrans détaillés Produits, Stock, Promotions, Coupons, Avis et Commandes seront raccordés au même socle vendeur.',
+            'Produits, Stock, Commandes, Finance, Promotions, Coupons, Avis, Clients et Statistiques sont maintenant raccordés au socle vendeur.',
           ),
         ],
       ),
