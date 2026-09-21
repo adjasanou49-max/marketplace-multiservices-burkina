@@ -46,7 +46,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     try {
       final orderId = await repository.createOrder(draft);
       if (!mounted) return;
-      ref.read(cartControllerProvider.notifier).remove(items.first.productId);
+      ref.read(cartControllerProvider.notifier).clear();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Commande créée : $orderId')));
       Navigator.of(context).pop();
     } catch (error) {
@@ -66,10 +66,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         const SizedBox(height: 12),
         TextField(controller: noteController, decoration: const InputDecoration(labelText: 'Note (optionnel)')),
         const SizedBox(height: 24),
-        Text('Sous-total : \${subtotal.toStringAsFixed(0)} XOF'),
-        Text('Livraison : \${state.deliveryFee.toStringAsFixed(0)} XOF'),
+        Text('Sous-total : ${subtotal.toStringAsFixed(0)} XOF'),
+        Text('Livraison : ${state.deliveryFee.toStringAsFixed(0)} XOF'),
         const Divider(),
-        Text('Total : \${total.toStringAsFixed(0)} XOF', style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text('Total : ${total.toStringAsFixed(0)} XOF', style: const TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 24),
         FilledButton(onPressed: submit, child: const Text('Créer la commande')),
       ]),
