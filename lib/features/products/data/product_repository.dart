@@ -8,7 +8,7 @@ class ProductRepository {
   final SupabaseClient client;
 
   Future<List<Product>> fetchActive({String? categoryId, int limit = 30}) async {
-    var query = client.from('products').select().eq('is_active', true);
+    var query = client.from('products').select().eq('status', 'ACTIVE');
     if (categoryId != null) query = query.eq('category_id', categoryId);
     final rows = await query.order('created_at', ascending: false).limit(limit);
     return (rows as List)
