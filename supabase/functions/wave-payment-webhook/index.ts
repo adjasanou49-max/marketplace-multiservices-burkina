@@ -132,7 +132,7 @@ Deno.serve(async (req: Request) => {
     return json({ error: "payment_amount_invalid" }, 422);
   }
 
-  const providerReference = transactionId || sessionId || clientReference || null;
+  const providerReference = sessionId || transactionId || clientReference || null;
   const { data: result, error } = await supabase.rpc("process_payment_event", {
     p_payment_id: paymentId,
     p_event_type: eventType,
