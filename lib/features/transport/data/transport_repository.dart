@@ -5,6 +5,22 @@ class TransportRepository {
 
   final SupabaseClient client;
 
+  Future<String> bookTrip({
+    required String tripId,
+    required int quantity,
+    required String passengerName,
+  }) async {
+    final result = await client.rpc(
+      'create_transport_booking_secure',
+      params: {
+        'p_trip_id': tripId,
+        'p_quantity': quantity,
+        'p_passenger': {'name': passengerName},
+      },
+    );
+    return result as String;
+  }
+
   Future<List<Map<String, dynamic>>> upcomingTrips({
     int limit = 50,
   }) async {
