@@ -6,8 +6,7 @@ import '../../features/auth/presentation/sign_in_page.dart';
 import '../../features/cart/presentation/cart_page.dart';
 import '../../features/catalog/presentation/home_page.dart';
 import '../../features/checkout/presentation/checkout_page.dart';
-import '../../features.checkout/presentation/orders_page.dart';
-import '../../features.checkout/presentation/payment_status_page.dart';
+import '../../features/checkout/presentation/orders_page.dart';
 import '../../features/common/presentation/module_placeholder_page.dart';
 import '../../features/courier/presentation/courier_page.dart';
 import '../../features/delivery/presentation/delivery_tracking_page.dart';
@@ -19,9 +18,9 @@ import '../../features/messaging/presentation/messages_page.dart';
 import '../../features/notifications/presentation/notifications_page.dart';
 import '../../features/restaurants/presentation/restaurants_page.dart';
 import '../../features/seller/presentation/seller_dashboard_page.dart';
-import '../../features.seller/presentation/seller_orders_page.dart';
-import '../../features.seller/presentation/seller_products_page.dart';
-import '../../features.seller/presentation/seller_tools_page.dart';
+import '../../features/seller/presentation/seller_orders_page.dart';
+import '../../features/seller/presentation/seller_products_page.dart';
+import '../../features/seller/presentation/seller_tools_page.dart';
 import '../../features/services/presentation/services_page.dart';
 import '../../features/transport/presentation/transport_page.dart';
 import '../../features/admin/presentation/admin_dashboard_page.dart';
@@ -49,21 +48,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(path: '/orders', builder: (_, __) => const OrdersPage()),
-      GoRoute(
-        path: '/payment/:paymentId',
-        builder: (_, state) {
-          final paymentId = state.pathParameters['paymentId'];
-
-          if (paymentId == null || paymentId.isEmpty) {
-            return const ModulePlaceholderPage(
-              title: 'Paiement invalide',
-              icon: Icons.payment_outlined,
-            );
-          }
-
-          return PaymentStatusPage(paymentId: paymentId);
-        },
-      ),
       GoRoute(
         path: '/delivery/:orderId',
         builder: (_, state) {
@@ -117,10 +101,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const NotificationsPage(),
       ),
       GoRoute(
-        path: '/promotions',
-        builder: (_, __) => const PromotionsPage(),
-      ),
-      GoRoute(
         path: '/admin',
         builder: (_, __) => const AdminDashboardPage(),
       ),
@@ -140,12 +120,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/seller/orders',
         builder: (_, __) => const SellerOrdersPage(),
       ),
-      GoRoute(
-        path: '/seller/finance',
-        builder: (_, __) => const SellerFinancePage(),
-      ),
       for (final item in const <Map<String, Object>>[
+        {'path': '/promotions', 'title': 'Promotions', 'icon': 4},
         {'path': '/seller/stock', 'title': 'Stock vendeur', 'icon': 7},
+        {'path': '/seller/finance', 'title': 'Finance vendeur', 'icon': 8},
         {'path': '/seller/payouts', 'title': 'Demandes de paiement', 'icon': 9},
         {'path': '/seller/commissions', 'title': 'Commissions', 'icon': 10},
         {'path': '/seller/settings', 'title': 'Paramètres vendeur', 'icon': 11},

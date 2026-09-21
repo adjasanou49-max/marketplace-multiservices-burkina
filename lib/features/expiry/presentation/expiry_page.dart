@@ -19,10 +19,26 @@ class _ExpiryPageState extends ConsumerState<ExpiryPage> {
     _future = _load();
   }
 
-  Future<List<Map<String, dynamic>>> _load() {
+  Future<List<Map<String, dynamic>>> _load() async {
     final repo = ref.read(catalogRepositoryProvider);
-    if (repo == null) return Future.value(const []);
-    return repo.expiringProducts(daysFrom: 5, daysTo: 30);
+    if (repo == null) return const [];
+
+    final rows = await repo.products(limit: 100);
+    final today = DateTime.now();
+    final maxDate = today.add(const Duration(days: 30));
+    final minDate = today.add(const Duration(days: 5));
+
+    return rows.where((product) {
+      if (product['is_expirable'] != true) return false;
+
+      final raw = product['expiry_date'];
+      if (raw == null) return false;
+
+      final date = DateTime.tryParse(raw.toString());
+      if (date == null) return false;
+
+      return !date.isBefore(minDate) && !date.isAfter(maxDate);
+    }).toList();
   }
 
   @override

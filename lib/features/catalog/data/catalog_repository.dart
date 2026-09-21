@@ -39,7 +39,6 @@ class CatalogRepository {
     }
 
     final end = offset + limit - 1;
-    final today = DateTime.now().toUtc().toIso8601String().split('T').first;
 
     var query = client
         .from('products')
@@ -48,10 +47,7 @@ class CatalogRepository {
           'status,is_expirable,expiry_date,created_at,'
           'shops(name,status),product_images(storage_path,sort_order,alt_text)',
         )
-        .eq('status', 'ACTIVE')
-        .or(
-          'is_expirable.eq.false,expiry_date.is.null,expiry_date.gte.' + today,
-        );
+        .eq('status', 'ACTIVE');
 
     if (categoryId != null && categoryId.isNotEmpty) {
       query = query.eq('category_id', categoryId);
@@ -60,43 +56,6 @@ class CatalogRepository {
     final rows = await query
         .order('created_at', ascending: false)
         .range(offset, end);
-
-    return _maps(rows);
-  }
-
-  Future<List<Map<String, dynamic>>> expiringProducts({
-    int daysFrom = 5,
-    int daysTo = 30,
-    int limit = 200,
-  }) async {
-    if (daysFrom < 0 ||
-        daysTo < daysFrom ||
-        daysTo > 3650 ||
-        limit <= 0 ||
-        limit > 500) {
-      throw ArgumentError('Filtre d’expiration invalide.');
-    }
-
-    final now = DateTime.now();
-    final baseDay = DateTime(now.year, now.month, now.day);
-    final from =
-        baseDay.add(Duration(days: daysFrom)).toIso8601String().split('T').first;
-    final to =
-        baseDay.add(Duration(days: daysTo)).toIso8601String().split('T').first;
-
-    final rows = await client
-        .from('products')
-        .select(
-          'id,shop_id,category_id,name,slug,description,price,compare_at_price,'
-          'status,is_expirable,expiry_date,created_at,shops(name,status),'
-          'product_images(storage_path,sort_order,alt_text)',
-        )
-        .eq('status', 'ACTIVE')
-        .eq('is_expirable', true)
-        .gte('expiry_date', from)
-        .lte('expiry_date', to)
-        .order('expiry_date')
-        .limit(limit);
 
     return _maps(rows);
   }
