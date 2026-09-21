@@ -9,12 +9,12 @@ class AppBootstrap {
       defaultValue: 'development',
     );
     const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-    const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+    const publishableKey = String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
 
     final config = AppConfig(
       environment: environment,
       supabaseUrl: supabaseUrl.isEmpty ? null : supabaseUrl,
-      supabaseAnonKey: supabaseAnonKey.isEmpty ? null : supabaseAnonKey,
+      supabaseAnonKey: publishableKey.isEmpty ? null : publishableKey,
     );
 
     if (config.supabaseUrl == null || config.supabaseAnonKey == null) {
@@ -23,7 +23,7 @@ class AppBootstrap {
 
     await Supabase.initialize(
       url: config.supabaseUrl!,
-      anonKey: config.supabaseAnonKey!,
+      publishableKey: config.supabaseAnonKey!,
     );
   }
 }
