@@ -2,14 +2,14 @@ class AppConfig {
   const AppConfig({
     required this.environment,
     this.supabaseUrl,
-    this.supabaseAnonKey,
+    this.supabasePublishableKey,
     this.posthogApiKey,
     this.posthogHost,
   });
 
   final String environment;
   final String? supabaseUrl;
-  final String? supabaseAnonKey;
+  final String? supabasePublishableKey;
   final String? posthogApiKey;
   final String? posthogHost;
 
