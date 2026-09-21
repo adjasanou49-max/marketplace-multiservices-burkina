@@ -4,22 +4,63 @@ import '../../../core/providers/repository_providers.dart';
 import '../data/seller_order_repository.dart';
 
 class SellerOrderDetailPage extends ConsumerWidget {
- const SellerOrderDetailPage({super.key,required this.groupId}); final String groupId;
- @override Widget build(BuildContext context,WidgetRef ref){
-  final c=ref.watch(supabaseProvider);
-  return Scaffold(appBar:AppBar(title:const Text('Détail commande')),body:FutureBuilder(
-   future:c==null?null:SellerOrderRepository(c).detail(groupId),
-   builder:(context,s){
-    if(s.connectionState==ConnectionState.waiting)return const Center(child:CircularProgressIndicator());
-    if(s.hasError)return Center(child:Text('Erreur : ${s.error}'));
-    final d=s.data as Map<String,dynamic>?; if(d==null)return const SizedBox();
-    final g=Map<String,dynamic>.from(d['group'] as Map); final items=(d['items'] as List).cast<Map<String,dynamic>>();
-    return ListView(padding:const EdgeInsets.all(16),children:[
-      Text('Statut: ${g['status']??'—'}',style:Theme.of(context).textTheme.titleLarge),
-      Text('Sous-total: ${g['subtotal']??0} XOF'),
-      const Divider(),
-      ...items.map((x)=>ListTile(title:Text(x['product_name'] as String? ?? 'Produit'),subtitle:Text('Quantité: ${x['quantity']??0}'),trailing:Text('${x['total_price']??0} XOF')))
-    ]);
-   }));
- }
+  const SellerOrderDetailPage({super.key, required this.groupId});
+
+  final String groupId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final client = ref.watch(supabaseProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Détail commande')),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: client == null
+            ? null
+            : SellerOrderRepository(client).detail(groupId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Erreur : ${snapshot.error}'));
+          }
+
+          final data = snapshot.data;
+          if (data == null) {
+            return const SizedBox();
+          }
+
+          final rawGroup = data['group'];
+          final rawItems = data['items'];
+          final group = rawGroup is Map
+              ? Map<String, dynamic>.from(rawGroup)
+              : <String, dynamic>{};
+          final items = rawItems is List
+              ? rawItems
+                  .whereType<Map>()
+                  .map((item) => Map<String, dynamic>.from(item))
+                  .toList()
+              : const <Map<String, dynamic>>[];
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Text(
+                'Statut: ${group['status'] ?? '—'}',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Text('Sous-total: ${group['subtotal'] ?? 0} XOF'),
+              const Divider(),
+              for (final item in items)
+                ListTile(
+                  title: Text(item['product_name']?.toString() ?? 'Produit'),
+                  subtitle: Text('Quantité: ${item['quantity'] ?? 0}'),
+                  trailing: Text('${item['total_price'] ?? 0} XOF'),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 }
