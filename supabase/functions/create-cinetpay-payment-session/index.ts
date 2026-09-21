@@ -27,8 +27,8 @@ Deno.serve(async (req: Request) => {
 
   const apiKey = Deno.env.get("CINETPAY_API_KEY") ?? "";
   const siteId = Deno.env.get("CINETPAY_SITE_ID") ?? "";
-  const returnUrl = Deno.env.get("CINETPAY_RETURN_URL") ?? "";
-  if (!apiKey || !siteId || !returnUrl) {
+  const returnUrl = Deno.env.get("CINETPAY_RETURN_URL") || url + "/functions/v1/payment-return?status=success";
+  if (!apiKey || !siteId) {
     return json({ error: "cinetpay_not_configured" }, 503);
   }
 
