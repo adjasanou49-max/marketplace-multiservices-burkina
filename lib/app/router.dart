@@ -66,6 +66,7 @@ final appRouter=GoRouter(initialLocation:'/',routes:[
  GoRoute(path:'/profile',builder:(c,s)=>const ProfilePage()),
  GoRoute(path:'/auth',builder:(c,s)=>const AuthPage()),
  GoRoute(path:'/restaurants',builder:(c,s)=>const RestaurantsPage()),
+ GoRoute(path:'/restaurant/:id',builder:(c,s){final restaurant=s.extra;return restaurant is Map<String,dynamic> ? RestaurantDetailPage(restaurant:restaurant) : const Scaffold(body:Center(child:Text('Restaurant introuvable')));}),
  GoRoute(path:'/shop/:id',builder:(c,s){final shop=s.extra;return shop is Shop ? ShopDetailPage(shop:shop) : const Scaffold(body:Center(child:Text('Boutique introuvable')));}),
  GoRoute(path:'/transport',builder:(c,s)=>const TransportPage()),
  GoRoute(path:'/mechanics',builder:(c,s)=>const MechanicsPage()),
