@@ -12,7 +12,7 @@ class SellerFinancePage extends ConsumerWidget {
    builder:(context,s){
     if(s.connectionState==ConnectionState.waiting)return const Center(child:CircularProgressIndicator());
     if(s.hasError)return Center(child:Text('Erreur : ${s.error}'));
-    final rows=(s.data as List<Map<String,dynamic>>?)??const [];
+    final rows=s.data ?? const <Map<String,dynamic>>[];
     return ListView.separated(padding:const EdgeInsets.all(16),itemCount:rows.length,separatorBuilder:(_,__)=>const Divider(),itemBuilder:(_,i){
      final x=rows[i]; return ListTile(title:Text(x['entry_type'] as String? ?? 'Opération'),trailing:Text('${x['amount']??0} ${x['currency']??'XOF'}'),subtitle:Text(x['created_at'].toString()));
     });
