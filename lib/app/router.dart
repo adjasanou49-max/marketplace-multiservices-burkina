@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../features/home/presentation/home_page.dart';
 import '../features/search/presentation/search_page.dart';
