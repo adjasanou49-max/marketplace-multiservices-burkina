@@ -85,7 +85,7 @@ Deno.serve(async (req: Request) => {
 
   let status: "SUCCEEDED" | "FAILED" | null = null;
   if (eventType === "checkout.session.completed") status = "SUCCEEDED";
-  if (eventType === "checkout.session.payment_failed") status = "FAILED";
+  if (eventType === "checkout.session.payment_failed") status = "PROCESSING";
   if (!status) return json({ ok: true, ignored: true, event_type: eventType });
 
   const supabase = createClient(url, adminKey, {
