@@ -82,6 +82,30 @@ class _AdminDashboardPageState
     }
   }
 
+  Future<void> _sendPushTest() async {
+    final client = ref.read(supabaseProvider);
+    if (client == null) return;
+
+    try {
+      final id = await client.rpc(
+        'admin_send_test_notification',
+        params: {
+          'p_title': 'Test Marketplace Burkina',
+          'p_body': 'Notification push de test envoyée depuis l’administration.',
+        },
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Notification de test créée : ' + id.toString())),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Test push impossible : ' + error.toString())),
+      );
+    }
+  }
+
   Future<void> _addAssociate() async {
     final client = ref.read(supabaseProvider);
     if (client == null) return;
@@ -368,6 +392,12 @@ class _AdminDashboardPageState
                 onPressed: () => context.push('/admin/refunds'),
                 icon: const Icon(Icons.currency_exchange_outlined),
                 label: const Text('Gérer les remboursements'),
+              ),
+              const SizedBox(height: 8),
+              FilledButton.icon(
+                onPressed: _sendPushTest,
+                icon: const Icon(Icons.notifications_active_outlined),
+                label: const Text('Tester une notification push'),
               ),
               const SizedBox(height: 12),
               const Text(
