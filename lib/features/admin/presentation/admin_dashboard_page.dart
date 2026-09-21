@@ -81,6 +81,188 @@ class _AdminDashboardPageState
     }
   }
 
+  Future<void> _addAssociate() async {
+    final client = ref.read(supabaseProvider);
+    if (client == null) return;
+
+    final results = await Future.wait([
+      client.from('company').select('id,legal_name').order('legal_name').limit(100),
+      client.from('share_classes').select('id,company_id,name,nominal_value').order('name').limit(200),
+      client.from('profiles').select('id,display_name,status').order('display_name').limit(500),
+    ]);
+
+    final companies = (results[0] as List)
+        .map((row) => Map<String, dynamic>.from(row as Map))
+        .toList();
+    final shareClasses = (results[1] as List)
+        .map((row) => Map<String, dynamic>.from(row as Map))
+        .toList();
+    final profiles = (results[2] as List)
+        .map((row) => Map<String, dynamic>.from(row as Map))
+        .toList();
+
+    if (!mounted) return;
+
+    String? companyId;
+    String? shareClassId;
+    String? shareholderId;
+    final sharesController = TextEditingController(text: '1');
+    final amountController = TextEditingController();
+    final referenceController = TextEditingController();
+
+    final values = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final classesForCompany = companyId == null
+              ? const <Map<String, dynamic>>[]
+              : shareClasses.where(
+                  (row) => row['company_id']?.toString() == companyId,
+                ).toList();
+
+          return AlertDialog(
+            title: const Text('Ajouter un associé'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<String>(
+                    initialValue: companyId,
+                    decoration: const InputDecoration(labelText: 'Société'),
+                    items: companies.map((row) {
+                      return DropdownMenuItem<String>(
+                        value: row['id'].toString(),
+                        child: Text(row['legal_name'].toString()),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setDialogState(() {
+                        companyId = value;
+                        shareClassId = null;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    initialValue: shareClassId,
+                    decoration: const InputDecoration(labelText: 'Classe de parts'),
+                    items: classesForCompany.map((row) {
+                      return DropdownMenuItem<String>(
+                        value: row['id'].toString(),
+                        child: Text(
+                          row['name'].toString() +
+                              ' • ' +
+                              row['nominal_value'].toString() +
+                              ' XOF',
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) =>
+                        setDialogState(() => shareClassId = value),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    initialValue: shareholderId,
+                    decoration: const InputDecoration(labelText: 'Utilisateur'),
+                    items: profiles.map((row) {
+                      final name = row['display_name']?.toString();
+                      return DropdownMenuItem<String>(
+                        value: row['id'].toString(),
+                        child: Text(
+                          (name == null || name.isEmpty)
+                              ? row['id'].toString()
+                              : name,
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) =>
+                        setDialogState(() => shareholderId = value),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: sharesController,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(labelText: 'Nombre de parts'),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: amountController,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Montant payé',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: referenceController,
+                    decoration: const InputDecoration(
+                      labelText: 'Référence du paiement vérifié',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Annuler'),
+              ),
+              FilledButton(
+                onPressed: companyId != null &&
+                        shareClassId != null &&
+                        shareholderId != null &&
+                        num.tryParse(sharesController.text.trim()) != null &&
+                        num.tryParse(amountController.text.trim()) != null &&
+                        referenceController.text.trim().isNotEmpty
+                    ? () => Navigator.pop(dialogContext, true)
+                    : null,
+                child: const Text('Valider'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    sharesController.dispose();
+    amountController.dispose();
+    referenceController.dispose();
+
+    if (values != true ||
+        companyId == null ||
+        shareClassId == null ||
+        shareholderId == null) {
+      return;
+    }
+
+    try {
+      final holdingId = await client.rpc(
+        'admin_add_associate_after_payment',
+        params: {
+          'p_company_id': companyId,
+          'p_shareholder_id': shareholderId,
+          'p_share_class_id': shareClassId,
+          'p_shares': num.parse(sharesController.text.trim()),
+          'p_paid_amount': num.parse(amountController.text.trim()),
+          'p_payment_reference': referenceController.text.trim(),
+        },
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Associé activé : ' + holdingId.toString())),
+      );
+      setState(() => _future = _load());
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Activation refusée : ' + error.toString())),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -162,8 +344,14 @@ class _AdminDashboardPageState
                   ),
                 ),
               const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: _addAssociate,
+                icon: const Icon(Icons.person_add_alt_1_outlined),
+                label: const Text('Ajouter un associé après paiement'),
+              ),
+              const SizedBox(height: 12),
               const Text(
-                'Les changements de compte, produit, livraison, remboursement et finance continuent de passer par les RPC d’administration protégées.',
+                'Les changements de compte, produit, livraison, remboursement, finance et associés passent par les RPC d’administration protégées.',
               ),
             ],
           );
