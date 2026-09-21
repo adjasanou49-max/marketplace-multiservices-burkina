@@ -9,179 +9,239 @@ final mechanicRepositoryProvider = Provider<MechanicRepository?>((ref) {
   return client == null ? null : MechanicRepository(client);
 });
 
-class MechanicsPage extends ConsumerWidget {
+class MechanicsPage extends ConsumerStatefulWidget {
   const MechanicsPage({super.key});
 
-  Future<void> _createRequest(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  @override
+  ConsumerState<MechanicsPage> createState() => _MechanicsPageState();
+}
+
+class _MechanicsPageState extends ConsumerState<MechanicsPage> {
+  late Future<List<Map<String, dynamic>>> future;
+
+  @override
+  void initState() {
+    super.initState();
+    future = _load();
+  }
+
+  Future<List<Map<String, dynamic>>> _load() async {
+    final repository = ref.read(mechanicRepositoryProvider);
+    if (repository == null) return const [];
+    return repository.activeMechanics();
+  }
+
+  Future<void> _requestHelp() async {
     final repository = ref.read(mechanicRepositoryProvider);
     if (repository == null) return;
 
-    var vehicleType = 'MOTORCYCLE';
-    final problemController = TextEditingController();
-    final descriptionController = TextEditingController();
+    final address = await repository.defaultCustomerAddress();
+    if (!mounted) return;
 
-    final data = await showDialog<Map<String, String>>(
+    final vehicle = ValueNotifier('MOTORBIKE');
+    final problem = ValueNotifier('PNEU_CREVE');
+    final descriptionController = TextEditingController();
+    var latitude = address?['latitude'] as num?;
+    var longitude = address?['longitude'] as num?;
+
+    final request = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Demander un dépannage'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                DropdownButtonFormField<String>(
-                  initialValue: vehicleType,
-                  decoration: const InputDecoration(
-                    labelText: 'Véhicule',
-                  ),
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Demander un mécanicien'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ValueListenableBuilder<String>(
+                valueListenable: vehicle,
+                builder: (_, value, __) => DropdownButtonFormField<String>(
+                  initialValue: value,
+                  decoration: const InputDecoration(labelText: 'Véhicule'),
                   items: const [
+                    DropdownMenuItem(
+                      value: 'MOTORBIKE',
+                      child: Text('Moto'),
+                    ),
                     DropdownMenuItem(
                       value: 'CAR',
                       child: Text('Voiture'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'MOTORCYCLE',
-                      child: Text('Moto'),
                     ),
                     DropdownMenuItem(
                       value: 'BICYCLE',
                       child: Text('Vélo'),
                     ),
                   ],
-                  onChanged: (value) => setDialogState(
-                    () => vehicleType = value ?? vehicleType,
-                  ),
+                  onChanged: (value) => vehicle.value = value ?? vehicle.value,
                 ),
-                TextField(
-                  controller: problemController,
-                  decoration: const InputDecoration(
-                    labelText: 'Problème',
-                    hintText: 'Pneu crevé, panne, carburant...',
-                  ),
-                ),
-                TextField(
-                  controller: descriptionController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Détails',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Annuler'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(
-                dialogContext,
-                {
-                  'vehicle': vehicleType,
-                  'problem': problemController.text.trim(),
-                  'description': descriptionController.text.trim(),
-                },
               ),
-              child: const Text('Envoyer'),
-            ),
-          ],
+              const SizedBox(height: 12),
+              ValueListenableBuilder<String>(
+                valueListenable: problem,
+                builder: (_, value, __) => DropdownButtonFormField<String>(
+                  initialValue: value,
+                  decoration: const InputDecoration(labelText: 'Problème'),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'PNEU_CREVE',
+                      child: Text('Pneu crevé'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'PLUS_ESSENCE',
+                      child: Text("Panne d'essence"),
+                    ),
+                    DropdownMenuItem(
+                      value: 'PANNE',
+                      child: Text('Panne mécanique'),
+                    ),
+                  ],
+                  onChanged: (value) => problem.value = value ?? problem.value,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: descriptionController,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: 'Description (optionnel)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              if (latitude != null && longitude != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Position par défaut utilisée : ${address?['city'] ?? 'adresse enregistrée'}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                )
+              else
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Ajoutez une adresse avec GPS pour envoyer votre position.',
+                  ),
+                ),
+            ],
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: latitude == null || longitude == null
+                ? null
+                : () => Navigator.pop(dialogContext, true),
+            child: const Text('Envoyer la demande'),
+          ),
+        ],
       ),
     );
+    vehicle.dispose();
+    problem.dispose();
 
-    problemController.dispose();
-    descriptionController.dispose();
-
-    if (!context.mounted || data == null) return;
-
-    final problem = data['problem']?.trim() ?? '';
-    if (problem.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Décrivez le problème rencontré.')),
-      );
+    if (request != true || latitude == null || longitude == null) {
+      descriptionController.dispose();
       return;
     }
 
+    final messenger = ScaffoldMessenger.of(context);
     try {
-      final requestId = await repository.createRequest(
-        vehicleType: data['vehicle'] ?? 'MOTORCYCLE',
-        problemType: problem,
-        description: data['description'],
+      final id = await repository.createRequest(
+        vehicleType: vehicle.value,
+        problemType: problem.value,
+        description: descriptionController.text,
+        latitude: latitude!.toDouble(),
+        longitude: longitude!.toDouble(),
       );
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Demande envoyée : $requestId')),
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Demande créée : $id')),
       );
     } catch (error) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur dépannage : $error')),
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Erreur : $error')),
       );
+    } finally {
+      descriptionController.dispose();
+    }
+  }
+
+  String _availabilityLabel(String? status) {
+    switch (status) {
+      case 'AVAILABLE':
+        return 'Disponible';
+      case 'ETA_10':
+        return 'Arrive dans ~10 min';
+      case 'ETA_20':
+        return 'Arrive dans ~20 min';
+      case 'ETA_30':
+        return 'Arrive dans ~30 min';
+      case 'VACATION':
+        return 'En congés';
+      default:
+        return 'Indisponible';
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final repository = ref.watch(mechanicRepositoryProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mécaniciens'),
         actions: [
           IconButton(
-            onPressed: () => _createRequest(context, ref),
-            icon: const Icon(Icons.sos_outlined),
-            tooltip: 'Dépannage',
+            onPressed: () => setState(() => future = _load()),
+            icon: const Icon(Icons.refresh),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _createRequest(context, ref),
-        icon: const Icon(Icons.build_outlined),
-        label: const Text('Dépannage'),
-      ),
-      body: repository == null
-          ? const Center(child: Text('Supabase non configuré'))
-          : FutureBuilder<List<Map<String, dynamic>>>(
-              future: repository.activeMechanics(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Erreur : ${snapshot.error}'));
-                }
-                final rows = snapshot.data ?? const [];
-                if (rows.isEmpty) {
-                  return const Center(
-                    child: Text('Aucun mécanicien disponible actuellement.'),
-                  );
-                }
-                return ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 92),
-                  itemCount: rows.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
-                  itemBuilder: (_, index) {
-                    final row = rows[index];
-                    return ListTile(
-                      leading: const CircleAvatar(
-                        child: Icon(Icons.build_outlined),
-                      ),
-                      title: Text(
-                        row['display_name']?.toString() ?? 'Mécanicien',
-                      ),
-                      subtitle: Text(
-                        '${row['verification_status'] ?? 'UNVERIFIED'} • Rayon ${row['service_radius_km'] ?? '—'} km',
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
-                    );
-                  },
-                );
-              },
+      floatingActionButton: repository == null
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _requestHelp,
+              icon: const Icon(Icons.warning_amber_outlined),
+              label: const Text('Besoin d’aide'),
             ),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: future,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Erreur : ${snapshot.error}'));
+          }
+          final rows = snapshot.data ?? const <Map<String, dynamic>>[];
+          if (rows.isEmpty) {
+            return const Center(
+              child: Text('Aucun mécanicien disponible actuellement.'),
+            );
+          }
+          return ListView.separated(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
+            itemCount: rows.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (_, index) {
+              final row = rows[index];
+              final status = row['availability_status']?.toString();
+              return ListTile(
+                leading: const CircleAvatar(
+                  child: Icon(Icons.build_outlined),
+                ),
+                title: Text(row['display_name']?.toString() ?? 'Mécanicien'),
+                subtitle: Text(
+                  '${_availabilityLabel(status)} • Rayon ${row['service_radius_km'] ?? '—'} km',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
