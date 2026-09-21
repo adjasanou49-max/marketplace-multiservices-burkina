@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/providers/repository_providers.dart';
@@ -102,6 +103,11 @@ class _NotificationsPageState
       appBar: AppBar(
         title: const Text('Notifications'),
         actions: [
+          IconButton(
+            onPressed: () => context.push('/notifications/preferences'),
+            icon: const Icon(Icons.tune_outlined),
+            tooltip: 'Préférences',
+          ),
           IconButton(
             onPressed: () => setState(() => _future = _load()),
             icon: const Icon(Icons.refresh),
