@@ -23,6 +23,10 @@ import '../../features/seller/presentation/seller_products_page.dart';
 import '../../features/seller/presentation/seller_tools_page.dart';
 import '../../features/services/presentation/services_page.dart';
 import '../../features/transport/presentation/transport_page.dart';
+import '../../features/promotions/presentation/promotions_page.dart';
+import '../../features/seller/presentation/seller_finance_page.dart';
+import '../../features/verticals/data/vertical_repository.dart';
+import '../../features/verticals/presentation/vertical_discovery_page.dart';
 import '../../features/admin/presentation/admin_dashboard_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -120,21 +124,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/seller/orders',
         builder: (_, __) => const SellerOrdersPage(),
       ),
-      for (final item in const <Map<String, Object>>[
-        {'path': '/promotions', 'title': 'Promotions', 'icon': 4},
-        {'path': '/seller/stock', 'title': 'Stock vendeur', 'icon': 7},
-        {'path': '/seller/finance', 'title': 'Finance vendeur', 'icon': 8},
-        {'path': '/seller/payouts', 'title': 'Demandes de paiement', 'icon': 9},
-        {'path': '/seller/commissions', 'title': 'Commissions', 'icon': 10},
-        {'path': '/seller/settings', 'title': 'Paramètres vendeur', 'icon': 11},
-      ])
-        GoRoute(
-          path: item['path'] as String,
-          builder: (_, __) => ModulePlaceholderPage(
-            title: item['title'] as String,
-            icon: _placeholderIcon(item['icon'] as int),
-          ),
-        ),
+      GoRoute(path: '/seller/stock', builder: (_, __) => const SellerProductsPage()),
+      GoRoute(path: '/seller/payouts', builder: (_, __) => const SellerFinancePage()),
+      GoRoute(path: '/seller/commissions', builder: (_, __) => const SellerFinancePage()),
+      GoRoute(path: '/seller/settings', builder: (_, __) => const SellerToolsPage()),
     ],
   );
 });
