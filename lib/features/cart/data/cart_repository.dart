@@ -78,7 +78,7 @@ class CartRepository {
         .eq('product_id', item.productId);
     query = item.variantId == null
         ? query.isFilter('variant_id', null)
-        : query.eq('variant_id', item.variantId);
+        : query.eq('variant_id', item.variantId!);
     final existing = await query.maybeSingle();
 
     if (existing == null) {
