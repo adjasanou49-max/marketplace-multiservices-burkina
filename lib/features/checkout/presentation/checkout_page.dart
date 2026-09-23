@@ -213,7 +213,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 12),
               const SizedBox(height: 24),
               Text('Sous-total : ${subtotal.toStringAsFixed(0)} XOF'),
               Row(
