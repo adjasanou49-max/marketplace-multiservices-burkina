@@ -103,7 +103,10 @@ String? _routeGuard(BuildContext context, GoRouterState state) {
   return null;
 }
 
-final appRouter = GoRouter(
+GoRouter createAppRouter() {
+  final authRefreshNotifier = _AuthRefreshNotifier();
+
+  return GoRouter(
   initialLocation: '/',
   refreshListenable: _authRefreshNotifier,
   redirect: _routeGuard,
@@ -148,4 +151,5 @@ final appRouter = GoRouter(
  GoRoute(path:'/services',builder:(c,s)=>const ServicesPage()),
  GoRoute(path:'/group-buy',builder:(c,s)=>const GroupBuyPage()),
  GoRoute(path:'/expiry',builder:(c,s)=>const ExpiryPage()),
-]);
+  ],
+);\n}
