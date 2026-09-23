@@ -6,7 +6,6 @@ class OrderDraft {
     required this.addressId,
     required this.subtotal,
     required this.deliveryFee,
-    this.note,
     this.couponCode,
     this.idempotencyKey,
   });
@@ -15,7 +14,6 @@ class OrderDraft {
   final String addressId;
   final num subtotal;
   final num deliveryFee;
-  final String? note;
   final String? couponCode;
   final String? idempotencyKey;
 
