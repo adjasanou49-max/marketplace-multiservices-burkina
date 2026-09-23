@@ -58,7 +58,7 @@ class _SellerProductsPageState extends ConsumerState<SellerProductsPage> {
                     if (!mounted) return;
                     setState(() => future = _load());
                   } catch (error) {
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Modification impossible : $error')),
                     );
