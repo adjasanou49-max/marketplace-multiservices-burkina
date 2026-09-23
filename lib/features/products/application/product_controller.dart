@@ -75,3 +75,11 @@ class ProductsFeedController extends AutoDisposeAsyncNotifier<List<Product>> {
     }
   }
 }
+
+
+final productByIdProvider =
+    FutureProvider.autoDispose.family<Product?, String>((ref, id) async {
+  final repository = ref.watch(productRepositoryProvider);
+  if (repository == null) return null;
+  return repository.fetchActiveById(id);
+});
