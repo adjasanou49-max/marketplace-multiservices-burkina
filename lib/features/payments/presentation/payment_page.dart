@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/providers/repository_providers.dart';
 import '../data/payment_repository.dart';
@@ -15,10 +16,11 @@ class PaymentPage extends ConsumerStatefulWidget {
 }
 
 class _PaymentPageState extends ConsumerState<PaymentPage> {
-  String provider = 'ORANGE_MONEY';
+  String provider = 'CINETPAY';
   bool loading = false;
   late Future<Map<String, dynamic>?> orderFuture;
   String? paymentIntentId;
+  String? checkoutUrl;
 
   @override
   void initState() {
@@ -53,17 +55,29 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
     setState(() => loading = true);
     try {
       final repository = PaymentRepository(client);
-      final id = await repository.createPending(
-        PaymentRequest(
-          orderId: widget.orderId,
-          provider: provider,
-          amount: (order['total'] as num?)?.toDouble() ?? 0,
-        ),
+      final session = await repository.createPaymentSession(
+        orderId: widget.orderId,
+        provider: provider,
       );
+      final url = Uri.tryParse(session['checkout_url']?.toString() ?? '');
+      final paymentId = session['payment_id']?.toString();
+      if (url == null || url.scheme != 'https' || url.host.isEmpty) {
+        throw StateError('Lien de paiement invalide.');
+      }
+      final launched = await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        throw StateError('Impossible d’ouvrir le paiement.');
+      }
       if (!mounted) return;
-      setState(() => paymentIntentId = id);
+      setState(() {
+        paymentIntentId = paymentId;
+        checkoutUrl = url.toString();
+      });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Intention de paiement créée.')),
+        const SnackBar(content: Text('Paiement ouvert dans le navigateur.')),
       );
     } catch (error) {
       if (!mounted) return;
@@ -127,13 +141,12 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                 ),
                 items: const [
                   DropdownMenuItem(
-                    value: 'ORANGE_MONEY',
-                    child: Text('Orange Money'),
+                    value: 'WAVE',
+                    child: Text('Wave'),
                   ),
-                  DropdownMenuItem(value: 'WAVE', child: Text('Wave')),
                   DropdownMenuItem(
-                    value: 'MOOV_MONEY',
-                    child: Text('Moov Money'),
+                    value: 'CINETPAY',
+                    child: Text('Orange Money / Moov Money (CinetPay)'),
                   ),
                 ],
                 onChanged: loading || !canPay
@@ -158,8 +171,12 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.pending_actions_outlined),
-                    title: const Text('Paiement en attente'),
-                    subtitle: Text('Référence interne : $paymentIntentId'),
+                    title: const Text('Paiement lancé'),
+                    subtitle: Text(
+                      checkoutUrl == null
+                          ? 'Référence interne : $paymentIntentId'
+                          : 'Le checkout fournisseur a été ouvert.',
+                    ),
                   ),
                 ),
               ],
