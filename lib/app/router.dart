@@ -107,8 +107,8 @@ GoRouter createAppRouter() {
   final authRefreshNotifier = _AuthRefreshNotifier();
 
   return GoRouter(
-  initialLocation: '/',
-  refreshListenable: _authRefreshNotifier,
+    initialLocation: '/',
+    refreshListenable: authRefreshNotifier,
   redirect: _routeGuard,
   routes: [
  GoRoute(path:'/',builder:(c,s)=>const HomePage()),
