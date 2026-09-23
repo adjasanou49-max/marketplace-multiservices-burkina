@@ -7,26 +7,64 @@ class CartRepository {
 
   final SupabaseClient client;
 
+  static final Map<String, Future<String>> _activeCartRequests =
+      <String, Future<String>>{};
+
   Future<String> getOrCreateActiveCart() async {
     final user = client.auth.currentUser;
     if (user == null) throw StateError('Utilisateur non authentifié');
 
-    final existing = await client
+    final existingRequest = _activeCartRequests[user.id];
+    if (existingRequest != null) return existingRequest;
+
+    final request = _resolveActiveCart(user.id);
+    _activeCartRequests[user.id] = request;
+
+    try {
+      return await request;
+    } finally {
+      if (identical(_activeCartRequests[user.id], request)) {
+        _activeCartRequests.remove(user.id);
+      }
+    }
+  }
+
+  Future<String> _resolveActiveCart(String userId) async {
+    final rows = await client
         .from('carts')
-        .select('id')
-        .eq('customer_id', user.id)
+        .select('id,created_at')
+        .eq('customer_id', userId)
         .eq('status', 'ACTIVE')
-        .maybeSingle();
+        .order('created_at', ascending: true)
+        .limit(1);
 
-    if (existing != null) return existing['id'] as String;
+    final existing = (rows as List).cast<Map>().firstOrNull;
+    if (existing != null) {
+      final id = existing['id']?.toString();
+      if (id != null && id.isNotEmpty) return id;
+    }
 
-    final created = await client
-        .from('carts')
-        .insert({'customer_id': user.id, 'status': 'ACTIVE'})
-        .select('id')
-        .single();
+    try {
+      final created = await client
+          .from('carts')
+          .insert({'customer_id': userId, 'status': 'ACTIVE'})
+          .select('id')
+          .single();
+      return created['id'].toString();
+    } catch (_) {
+      final fallback = await client
+          .from('carts')
+          .select('id,created_at')
+          .eq('customer_id', userId)
+          .eq('status', 'ACTIVE')
+          .order('created_at', ascending: true)
+          .limit(1);
 
-    return created['id'] as String;
+      final first = (fallback as List).cast<Map>().firstOrNull;
+      final id = first?['id']?.toString();
+      if (id == null || id.isEmpty) rethrow;
+      return id;
+    }
   }
 
   Future<void> addItem(CartItem item) async {
