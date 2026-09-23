@@ -50,6 +50,7 @@ class _TransportPageState extends ConsumerState<TransportPage> {
             children: [
               TextField(
                 controller: nameController,
+                onChanged: (_) => setDialogState(() {}),
                 decoration: const InputDecoration(
                   labelText: 'Nom du passager',
                   border: OutlineInputBorder(),
