@@ -82,6 +82,7 @@ String? _routeGuard(BuildContext context, GoRouterState state) {
     '/seller',
     '/admin',
     '/courier',
+    '/delivery',
   ];
 
   bool protected = false;
