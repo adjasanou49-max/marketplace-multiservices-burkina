@@ -135,8 +135,7 @@ class OrderDetailPage extends ConsumerWidget {
               .map((row) => Map<String, dynamic>.from(row))
               .toList();
           final status = order['status']?.toString() ?? '—';
-          final canCancel =
-              status == 'PENDING_PAYMENT' || status == 'PAID';
+          final canCancel = status == 'PENDING_PAYMENT';
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
