@@ -31,6 +31,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   CheckoutState state = const CheckoutState();
   bool submitting = false;
   bool quoteLoading = false;
+  bool deliveryQuoteValid = false;
 
   @override
   void dispose() {
@@ -72,6 +73,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           deliveryDistanceKm: quote.distanceKm,
           deliveryStopCount: quote.stopCount,
         );
+        deliveryQuoteValid = true;
       });
     } catch (error) {
       if (!mounted) return;
@@ -81,6 +83,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           clearDeliveryDistanceKm: true,
           deliveryStopCount: 0,
         );
+        deliveryQuoteValid = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Frais de livraison indisponibles : $error')),
@@ -94,9 +97,11 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     final repository = ref.read(orderRepositoryProvider);
     final addressId = state.addressId;
 
-    if (items.isEmpty || repository == null || addressId == null || quoteLoading) {
+    if (items.isEmpty || repository == null || addressId == null || quoteLoading || !deliveryQuoteValid) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sélectionnez une adresse de livraison.')),
+        const SnackBar(
+          content: Text('Calculez d’abord les frais de livraison.'),
+        ),
       );
       return;
     }
@@ -195,9 +200,10 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                           final selectedAddress = items.firstWhere(
                             (item) => item.id == value,
                           );
-                          setState(
-                            () => state = state.copyWith(addressId: value),
-                          );
+                          setState(() {
+                            state = state.copyWith(addressId: value);
+                            deliveryQuoteValid = false;
+                          });
                           _refreshDeliveryQuote(selectedAddress);
                         }
                       },
@@ -241,7 +247,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               ),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: submitting || quoteLoading ? null : submit,
+                onPressed: submitting || quoteLoading || !deliveryQuoteValid
+                    ? null
+                    : submit,
                 child: submitting
                     ? const SizedBox(
                         width: 20,
