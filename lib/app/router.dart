@@ -111,7 +111,15 @@ GoRouter createAppRouter() {
   routes: [
  GoRoute(path:'/',builder:(c,s)=>const HomePage()),
  GoRoute(path:'/search',builder:(c,s)=>const SearchPage()),
- GoRoute(path:'/product/:id',builder:(c,s){final product=s.extra;return product is Product ? ProductDetailPage(product:product) : const Scaffold(body:Center(child:Text('Produit introuvable')));}),
+ GoRoute(
+      path: '/product/:id',
+      builder: (c, s) {
+        final product = s.extra;
+        return product is Product
+            ? ProductDetailPage(product: product)
+            : ProductDetailPage(productId: s.pathParameters['id']!);
+      },
+    ),
  GoRoute(path:'/cart',builder:(c,s)=>const CartPage()),
  GoRoute(path:'/checkout',builder:(c,s)=>const CheckoutPage()),
  GoRoute(path:'/refunds',builder:(c,s)=>const RefundsPage()),
@@ -143,7 +151,15 @@ GoRouter createAppRouter() {
  GoRoute(path:'/auth',builder:(c,s)=>const AuthPage()),
  GoRoute(path:'/restaurants',builder:(c,s)=>const RestaurantsPage()),
  GoRoute(path:'/restaurant/:id',builder:(c,s)=>RestaurantDetailPage(restaurantId:s.pathParameters['id']!)),
- GoRoute(path:'/shop/:id',builder:(c,s){final shop=s.extra;return shop is Shop ? ShopDetailPage(shop:shop) : const Scaffold(body:Center(child:Text('Boutique introuvable')));}),
+ GoRoute(
+      path: '/shop/:id',
+      builder: (c, s) {
+        final shop = s.extra;
+        return shop is Shop
+            ? ShopDetailPage(shop: shop)
+            : ShopDetailPage(shopId: s.pathParameters['id']!);
+      },
+    ),
  GoRoute(path:'/transport',builder:(c,s)=>const TransportPage()),
  GoRoute(path:'/mechanics',builder:(c,s)=>const MechanicsPage()),
  GoRoute(path:'/services',builder:(c,s)=>const ServicesPage()),
