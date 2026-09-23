@@ -31,7 +31,7 @@ class CartController extends Notifier<List<CartItem>> {
   }
 
   void setQuantity(String productId, int quantity, {String? variantId}) {
-    final matches = (item) =>
+    bool matches(CartItem item) =>
         item.productId == productId &&
         (variantId == null || item.variantId == variantId);
 
