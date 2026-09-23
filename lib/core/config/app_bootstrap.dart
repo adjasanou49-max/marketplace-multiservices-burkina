@@ -17,8 +17,23 @@ class AppBootstrap {
       supabasePublishableKey: publishableKey.isEmpty ? null : publishableKey,
     );
 
-    if (config.supabaseUrl == null || config.supabasePublishableKey == null) {
-      return;
+    final missing = <String>[
+      if (config.supabaseUrl == null) 'SUPABASE_URL',
+      if (config.supabasePublishableKey == null) 'SUPABASE_PUBLISHABLE_KEY',
+    ];
+
+    if (missing.isNotEmpty) {
+      throw StateError(
+        'Configuration Supabase manquante : ' +
+        missing.join(', ') +
+        '. Fournissez ces valeurs avec --dart-define ou '
+        '--dart-define-from-file avant de lancer l’application.',
+      );
+    }
+
+    final parsedUrl = Uri.tryParse(config.supabaseUrl!);
+    if (parsedUrl == null || parsedUrl.host.isEmpty) {
+      throw StateError('SUPABASE_URL est invalide.');
     }
 
     await Supabase.initialize(
