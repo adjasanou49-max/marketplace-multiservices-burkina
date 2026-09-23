@@ -45,14 +45,48 @@ class _SellerNavigationState extends ConsumerState<SellerNavigation> {
     return FutureBuilder<Map<String, dynamic>?>( 
       future: shopFuture,
       builder: (context, snapshot) {
-        final shop = snapshot.data;
-        final shopId = shop?['id']?.toString();
-
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
+
+        if (snapshot.hasError) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Espace vendeur')),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Impossible de charger votre boutique.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      snapshot.error.toString(),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: () => setState(() => shopFuture = _loadShop()),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Réessayer'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        final shop = snapshot.data;
+        final shopId = shop?['id']?.toString();
 
         Widget page;
         switch (index) {
