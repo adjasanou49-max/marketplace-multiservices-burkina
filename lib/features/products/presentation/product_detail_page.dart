@@ -3,13 +3,42 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/product.dart';
 import '../../cart/application/cart_controller.dart';
 import '../../cart/domain/cart_item.dart';
+import '../application/product_controller.dart';
 
 class ProductDetailPage extends ConsumerWidget {
-  const ProductDetailPage({super.key, required this.product});
-  final Product product;
+  const ProductDetailPage({
+    super.key,
+    this.product,
+    this.productId,
+  }) : assert(product != null || productId != null);
+
+  final Product? product;
+  final String? productId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (product != null) {
+      return _buildProduct(context, ref, product!);
+    }
+
+    final state = ref.watch(productByIdProvider(productId!));
+    return state.when(
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => Scaffold(
+        appBar: AppBar(title: const Text('Produit')),
+        body: Center(child: Text('Erreur : $error')),
+      ),
+      data: (item) => item == null
+          ? const Scaffold(
+              body: Center(child: Text('Produit introuvable')),
+            )
+          : _buildProduct(context, ref, item),
+    );
+  }
+
+  Widget _buildProduct(BuildContext context, WidgetRef ref, Product product) {
     final price = product.price ?? 0;
     return Scaffold(
       appBar: AppBar(title: const Text('Produit')),
