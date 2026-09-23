@@ -27,6 +27,26 @@ class ProductRepository {
     return hydrateRows(rows);
   }
 
+  Future<Product?> fetchActiveById(String id) async {
+    final normalizedId = id.trim();
+    if (normalizedId.isEmpty) return null;
+
+    final row = await client
+        .from('products')
+        .select(
+          'id,name,slug,description,price,status,category_id,shop_id,'
+          'product_images(storage_path,sort_order)',
+        )
+        .eq('id', normalizedId)
+        .eq('status', 'ACTIVE')
+        .maybeSingle();
+
+    if (row == null) return null;
+
+    final products = await hydrateRows([row]);
+    return products.isEmpty ? null : products.first;
+  }
+
   Future<List<Product>> fetchActivePage({
     String? categoryId,
     int limit = 24,
