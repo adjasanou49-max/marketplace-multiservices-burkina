@@ -142,11 +142,13 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          ref.invalidate(categoriesProvider);
-          ref.invalidate(productsProvider);
-          ref.invalidate(productsFeedProvider);
-          ref.invalidate(shopsProvider);
-          ref.invalidate(enabledModulesProvider);
+          await Future.wait([
+            ref.refresh(categoriesProvider.future),
+            ref.refresh(productsProvider.future),
+            ref.refresh(productsFeedProvider.future),
+            ref.refresh(shopsProvider.future),
+            ref.refresh(enabledModulesProvider.future),
+          ]);
         },
         child: categoriesState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
