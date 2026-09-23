@@ -17,7 +17,7 @@ class CartItem {
 
   num get total => unitPrice * quantity;
 
-  String get lineKey => '${productId}::${variantId ?? ''}';
+  String get lineKey => '$productId::${variantId ?? ''}';
 
   CartItem copyWith({
     String? variantId,
