@@ -71,6 +71,7 @@ String? _routeGuard(BuildContext context, GoRouterState state) {
     '/order',
     '/addresses',
     '/messages',
+    '/notifications',
     '/follows',
     '/profile',
     '/refunds',
