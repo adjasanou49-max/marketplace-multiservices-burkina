@@ -152,4 +152,5 @@ GoRouter createAppRouter() {
  GoRoute(path:'/group-buy',builder:(c,s)=>const GroupBuyPage()),
  GoRoute(path:'/expiry',builder:(c,s)=>const ExpiryPage()),
   ],
-);\n}
+);
+}
