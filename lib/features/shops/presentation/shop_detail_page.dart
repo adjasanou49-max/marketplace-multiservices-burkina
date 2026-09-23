@@ -3,14 +3,42 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../follows/application/follow_controller.dart';
 import '../domain/shop.dart';
+import '../application/shop_controller.dart';
 
 class ShopDetailPage extends ConsumerWidget {
-  const ShopDetailPage({super.key, required this.shop});
+  const ShopDetailPage({
+    super.key,
+    this.shop,
+    this.shopId,
+  }) : assert(shop != null || shopId != null);
 
-  final Shop shop;
+  final Shop? shop;
+  final String? shopId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (shop != null) {
+      return _buildShop(context, ref, shop!);
+    }
+
+    final state = ref.watch(shopByIdProvider(shopId!));
+    return state.when(
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => Scaffold(
+        appBar: AppBar(title: const Text('Boutique')),
+        body: Center(child: Text('Erreur : $error')),
+      ),
+      data: (item) => item == null
+          ? const Scaffold(
+              body: Center(child: Text('Boutique introuvable')),
+            )
+          : _buildShop(context, ref, item),
+    );
+  }
+
+  Widget _buildShop(BuildContext context, WidgetRef ref, Shop shop) {
     return Scaffold(
       appBar: AppBar(title: Text(shop.name)),
       body: ListView(
