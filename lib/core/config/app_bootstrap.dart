@@ -24,9 +24,8 @@ class AppBootstrap {
 
     if (missing.isNotEmpty) {
       throw StateError(
-        'Configuration Supabase manquante : ' +
-        missing.join(', ') +
-        '. Fournissez ces valeurs avec --dart-define ou '
+        'Configuration Supabase manquante : ${missing.join(', ')}. '
+        'Fournissez ces valeurs avec --dart-define ou '
         '--dart-define-from-file avant de lancer l’application.',
       );
     }
