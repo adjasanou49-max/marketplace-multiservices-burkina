@@ -6,6 +6,16 @@ import 'core/config/app_bootstrap.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AppBootstrap.initialize();
-  runApp(const ProviderScope(child: MarketplaceApp()));
+  Object? bootstrapError;
+  try {
+    await AppBootstrap.initialize();
+  } catch (error) {
+    bootstrapError = error;
+  }
+
+  runApp(
+    ProviderScope(
+      child: MarketplaceApp(bootstrapError: bootstrapError),
+    ),
+  );
 }
