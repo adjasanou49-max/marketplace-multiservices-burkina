@@ -44,9 +44,6 @@ class _SellerProductsPageState extends ConsumerState<SellerProductsPage> {
               subtitle: Text('Stock: ${p['inventory'] is Map ? (p['inventory']['quantity'] ?? 0) : 0}'),
               trailing: Switch(
                 value: p['status']?.toString() == 'ACTIVE',
-                activeColor: _updatingProducts.contains(p['id']?.toString())
-                    ? null
-                    : null,
                 onChanged: (v) async {
                   final repo = ref.read(sellerProductRepositoryProvider);
                   final productId = p['id']?.toString();
