@@ -58,24 +58,52 @@ class CartRepository {
 
   Future<void> syncItems(List<CartItem> items) async {
     final cartId = await getOrCreateActiveCart();
+    final desired = <String, CartItem>{
+      for (final item in items)
+        if (item.quantity > 0) item.productId: item,
+    };
 
-    await client.from('cart_items').delete().eq('cart_id', cartId);
-    if (items.isEmpty) return;
+    final existingRows = await client
+        .from('cart_items')
+        .select('id,product_id')
+        .eq('cart_id', cartId);
 
-    final payload = items
-        .where((item) => item.quantity > 0)
-        .map(
-          (item) => {
-            'cart_id': cartId,
-            'product_id': item.productId,
-            'quantity': item.quantity,
-            'unit_price': item.unitPrice,
-          },
-        )
+    final existing = <String, String>{};
+    for (final raw in (existingRows as List)) {
+      final row = Map<String, dynamic>.from(raw as Map);
+      final productId = row['product_id']?.toString();
+      final id = row['id']?.toString();
+      if (productId != null && productId.isNotEmpty && id != null && id.isNotEmpty) {
+        existing[productId] = id;
+      }
+    }
+
+    for (final entry in desired.entries) {
+      final item = entry.value;
+      final rowId = existing[entry.key];
+
+      if (rowId == null) {
+        await client.from('cart_items').insert({
+          'cart_id': cartId,
+          'product_id': item.productId,
+          'quantity': item.quantity,
+          'unit_price': item.unitPrice,
+        });
+      } else {
+        await client.from('cart_items').update({
+          'quantity': item.quantity,
+          'unit_price': item.unitPrice,
+        }).eq('id', rowId);
+      }
+    }
+
+    final staleIds = existing.entries
+        .where((entry) => !desired.containsKey(entry.key))
+        .map((entry) => entry.value)
         .toList();
 
-    if (payload.isNotEmpty) {
-      await client.from('cart_items').insert(payload);
+    if (staleIds.isNotEmpty) {
+      await client.from('cart_items').delete().inFilter('id', staleIds);
     }
   }
 
