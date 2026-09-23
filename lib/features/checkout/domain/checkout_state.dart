@@ -5,7 +5,6 @@ class CheckoutState {
     this.deliveryFee = 0,
     this.deliveryDistanceKm,
     this.deliveryStopCount = 0,
-    this.note,
     this.couponCode,
   });
 
@@ -13,7 +12,6 @@ class CheckoutState {
   final num deliveryFee;
   final num? deliveryDistanceKm;
   final int deliveryStopCount;
-  final String? note;
   final String? couponCode;
 
   CheckoutState copyWith({
@@ -22,7 +20,6 @@ class CheckoutState {
     num? deliveryDistanceKm,
     bool clearDeliveryDistanceKm = false,
     int? deliveryStopCount,
-    String? note,
     String? couponCode,
   }) =>
       CheckoutState(
@@ -31,7 +28,6 @@ class CheckoutState {
         deliveryDistanceKm:
             clearDeliveryDistanceKm ? null : deliveryDistanceKm ?? this.deliveryDistanceKm,
         deliveryStopCount: deliveryStopCount ?? this.deliveryStopCount,
-        note: note ?? this.note,
         couponCode: couponCode ?? this.couponCode,
       );
 }
