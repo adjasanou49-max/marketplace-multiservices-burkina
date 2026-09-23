@@ -71,17 +71,21 @@ class CartRepository {
     if (item.quantity <= 0) return;
 
     final cartId = await getOrCreateActiveCart();
-    final existing = await client
+    var query = client
         .from('cart_items')
         .select('id,quantity')
         .eq('cart_id', cartId)
-        .eq('product_id', item.productId)
-        .maybeSingle();
+        .eq('product_id', item.productId);
+    query = item.variantId == null
+        ? query.isFilter('variant_id', null)
+        : query.eq('variant_id', item.variantId);
+    final existing = await query.maybeSingle();
 
     if (existing == null) {
       await client.from('cart_items').insert({
         'cart_id': cartId,
         'product_id': item.productId,
+        'variant_id': item.variantId,
         'quantity': item.quantity,
         'unit_price': item.unitPrice,
       });
@@ -90,7 +94,7 @@ class CartRepository {
 
     await client
         .from('cart_items')
-        .update({'quantity': (existing['quantity'] as int) + item.quantity})
+        .update({'quantity': (existing['quantity'] as num).toInt() + item.quantity})
         .eq('id', existing['id']);
   }
 
@@ -98,21 +102,25 @@ class CartRepository {
     final cartId = await getOrCreateActiveCart();
     final desired = <String, CartItem>{
       for (final item in items)
-        if (item.quantity > 0) item.productId: item,
+        if (item.quantity > 0) item.lineKey: item,
     };
 
     final existingRows = await client
         .from('cart_items')
-        .select('id,product_id')
+        .select('id,product_id,variant_id')
         .eq('cart_id', cartId);
 
     final existing = <String, String>{};
     for (final raw in (existingRows as List)) {
       final row = Map<String, dynamic>.from(raw as Map);
       final productId = row['product_id']?.toString();
+      final variantId = row['variant_id']?.toString();
       final id = row['id']?.toString();
-      if (productId != null && productId.isNotEmpty && id != null && id.isNotEmpty) {
-        existing[productId] = id;
+      if (productId != null &&
+          productId.isNotEmpty &&
+          id != null &&
+          id.isNotEmpty) {
+        existing[[productId, variantId ?? ''].join('::')] = id;
       }
     }
 
@@ -124,6 +132,7 @@ class CartRepository {
         await client.from('cart_items').insert({
           'cart_id': cartId,
           'product_id': item.productId,
+          'variant_id': item.variantId,
           'quantity': item.quantity,
           'unit_price': item.unitPrice,
         });
