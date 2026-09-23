@@ -32,7 +32,8 @@ class OrdersPage extends ConsumerWidget {
         error: (error, _) => Center(child: Text('Erreur : $error')),
         data: (items) => RefreshIndicator(
           onRefresh: () async {
-            await ref.refresh(myOrdersProvider.future);
+            ref.invalidate(myOrdersProvider);
+            await ref.read(myOrdersProvider.future);
           },
           child: items.isEmpty
               ? ListView(
