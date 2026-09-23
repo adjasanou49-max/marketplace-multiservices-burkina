@@ -21,6 +21,7 @@ import '../features/orders/presentation/orders_page.dart';
 import '../features/addresses/presentation/addresses_page.dart';
 import '../features/notifications/presentation/notifications_page.dart';
 import '../features/messaging/presentation/messages_page.dart';
+import '../features/messaging/presentation/conversation_page.dart';
 import '../features/seller/presentation/seller_orders_page.dart';
 import '../features/seller/presentation/seller_order_detail_page.dart';
 import '../features/seller/presentation/seller_stock_page.dart';
@@ -71,6 +72,7 @@ String? _routeGuard(BuildContext context, GoRouterState state) {
     '/order',
     '/addresses',
     '/messages',
+    '/conversation',
     '/notifications',
     '/follows',
     '/profile',
@@ -137,6 +139,7 @@ GoRouter createAppRouter() {
  GoRoute(path:'/addresses',builder:(c,s)=>const AddressesPage()),
  GoRoute(path:'/notifications',builder:(c,s)=>const NotificationsPage()),
  GoRoute(path:'/messages',builder:(c,s)=>const MessagesPage()),
+ GoRoute(path:'/conversation/:id',builder:(c,s)=>ConversationPage(conversationId:s.pathParameters['id']!)),
  GoRoute(path:'/seller',builder:(c,s)=>const SellerNavigation()),
  GoRoute(path:'/seller/create-shop',builder:(c,s)=>const SellerCreateShopPage()),
  GoRoute(path:'/seller/orders',builder:(c,s)=>const SellerOrdersPage()),
