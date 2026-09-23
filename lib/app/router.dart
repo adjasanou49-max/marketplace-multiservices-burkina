@@ -64,8 +64,6 @@ class _AuthRefreshNotifier extends ChangeNotifier {
   }
 }
 
-final _authRefreshNotifier = _AuthRefreshNotifier();
-
 String? _routeGuard(BuildContext context, GoRouterState state) {
   const protectedPrefixes = [
     '/checkout',
