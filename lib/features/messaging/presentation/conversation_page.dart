@@ -25,6 +25,7 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
 
   RealtimeChannel? _channel;
   List<Map<String, dynamic>> messages = [];
+  bool _sending = false;
 
   @override
   void initState() {
@@ -107,6 +108,31 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
     ].join('|');
   }
 
+  Future<void> _sendMessage() async {
+    final client = ref.read(supabaseProvider);
+    final text = controller.text.trim();
+    if (client == null || text.isEmpty || _sending) return;
+
+    setState(() => _sending = true);
+    try {
+      await MessageSenderRepository(client).send(
+        conversationId: widget.conversationId,
+        body: text,
+      );
+      if (!mounted) return;
+      controller.clear();
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Envoi impossible : $error')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _sending = false);
+      }
+    }
+  }
+
   @override
   void dispose() {
     _channel?.unsubscribe();
@@ -142,16 +168,14 @@ class _ConversationPageState extends ConsumerState<ConversationPage> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: () async {
-                    final client = ref.read(supabaseProvider);
-                    if (client == null) return;
-                    await MessageSenderRepository(client).send(
-                      conversationId: widget.conversationId,
-                      body: controller.text,
-                    );
-                    controller.clear();
-                  },
+                  icon: _sending
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.send),
+                  onPressed: _sending ? null : _sendMessage,
                 ),
               ],
             ),
