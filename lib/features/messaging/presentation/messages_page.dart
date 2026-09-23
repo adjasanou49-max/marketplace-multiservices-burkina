@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/providers/repository_providers.dart';
 import '../data/messaging_repository.dart';
+import 'conversation_page.dart';
 
 final messagingRepositoryProvider = Provider<MessagingRepository?>((ref) {
   final client = ref.watch(supabaseProvider);
@@ -38,10 +40,17 @@ class MessagesPage extends ConsumerWidget {
               final conversation = value is Map
                   ? Map<String, dynamic>.from(value)
                   : <String, dynamic>{};
+              final conversationId = conversation['id']?.toString() ?? '';
               return ListTile(
                 leading: const Icon(Icons.chat_bubble_outline),
                 title: Text(conversation['title'] as String? ?? 'Conversation'),
                 subtitle: Text(conversation['created_at'] as String? ?? ''),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: conversationId.isEmpty
+                    ? null
+                    : () => GoRouter.of(context).push(
+                          '/conversation/$conversationId',
+                        ),
               );
             },
           );
