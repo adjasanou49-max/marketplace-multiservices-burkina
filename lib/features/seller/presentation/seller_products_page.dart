@@ -16,6 +16,7 @@ class SellerProductsPage extends ConsumerStatefulWidget {
 }
 class _SellerProductsPageState extends ConsumerState<SellerProductsPage> {
   late Future<List<Map<String, dynamic>>> future;
+  final Set<String> _updatingProducts = <String>{};
   @override
   void initState() { super.initState(); future = _load(); }
   Future<List<Map<String, dynamic>>> _load() async {
@@ -43,11 +44,32 @@ class _SellerProductsPageState extends ConsumerState<SellerProductsPage> {
               subtitle: Text('Stock: ${p['inventory'] is Map ? (p['inventory']['quantity'] ?? 0) : 0}'),
               trailing: Switch(
                 value: p['status']?.toString() == 'ACTIVE',
+                activeColor: _updatingProducts.contains(p['id']?.toString())
+                    ? null
+                    : null,
                 onChanged: (v) async {
                   final repo = ref.read(sellerProductRepositoryProvider);
-                  if (repo == null) return;
-                  await repo.updateActive(p['id'] as String, v);
-                  setState(() { future = _load(); });
+                  final productId = p['id']?.toString();
+                  if (repo == null || productId == null || productId.isEmpty) {
+                    return;
+                  }
+                  if (_updatingProducts.contains(productId)) return;
+
+                  setState(() => _updatingProducts.add(productId));
+                  try {
+                    await repo.updateActive(productId, v);
+                    if (!mounted) return;
+                    setState(() => future = _load());
+                  } catch (error) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Modification impossible : $error')),
+                    );
+                  } finally {
+                    if (mounted) {
+                      setState(() => _updatingProducts.remove(productId));
+                    }
+                  }
                 },
               ),
             );
