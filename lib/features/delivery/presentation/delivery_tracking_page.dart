@@ -16,10 +16,22 @@ class _DeliveryTrackingPageState extends State<DeliveryTrackingPage>{
   Future<void> _init() async {
     final repo=DeliveryTrackingRepository(Supabase.instance.client);
     try{
-      locations=await repo.recentLocations(widget.courierId);
-      channel=repo.subscribe(widget.courierId,(value){
-        if(mounted)setState((){locations=[value,...locations];if(locations.length>50)locations.removeLast();});
-      });
+      locations = await repo.recentLocations(
+        orderId: widget.orderId,
+        courierId: widget.courierId,
+      );
+      channel = await repo.subscribe(
+        orderId: widget.orderId,
+        courierId: widget.courierId,
+        onLocation: (value) {
+          if (mounted) {
+            setState(() {
+              locations = [value, ...locations];
+              if (locations.length > 50) locations.removeLast();
+            });
+          }
+        },
+      );
     }catch(_){
       if(mounted)setState(()=>locations=[]);
     }finally{
