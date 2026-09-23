@@ -35,7 +35,7 @@ jobs:
           fi
       - name: Persist generated platform projects
         run: |
-          if git diff --quiet -- android ios; then
+          if ! git status --porcelain -- android ios | grep -q .; then
             echo "No platform scaffold changes."
             exit 0
           fi
