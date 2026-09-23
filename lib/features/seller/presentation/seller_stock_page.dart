@@ -8,12 +8,12 @@ final sellerStockRepositoryProvider=Provider<SellerStockRepository?>((ref){
 });
 
 class SellerStockPage extends ConsumerWidget {
- const SellerStockPage({super.key,required this.shopId});
- final String shopId;
+ const SellerStockPage({super.key, this.shopId});
+ final String? shopId;
  @override Widget build(BuildContext context,WidgetRef ref){
   final repo=ref.watch(sellerStockRepositoryProvider);
   return Scaffold(appBar:AppBar(title:const Text('Stock')),body:FutureBuilder(
-   future:repo?.stock(shopId),
+   future:repo?.stock(shopId: shopId),
    builder:(context,s){
     if(s.connectionState==ConnectionState.waiting)return const Center(child:CircularProgressIndicator());
     if(s.hasError)return Center(child:Text('Erreur : ${s.error}'));
