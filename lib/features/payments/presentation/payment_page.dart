@@ -4,7 +4,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/providers/repository_providers.dart';
 import '../data/payment_repository.dart';
-import '../domain/payment_request.dart';
 
 class PaymentPage extends ConsumerStatefulWidget {
   const PaymentPage({super.key, required this.orderId});
