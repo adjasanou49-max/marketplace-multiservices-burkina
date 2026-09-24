@@ -45,16 +45,25 @@ android {
 
     buildTypes {
         release {
-            if (!hasReleaseSigning) {
-                throw GradleException(
-                    "Release signing is not configured. Set "
-                        + "ANDROID_KEYSTORE_PATH, ANDROID_KEYSTORE_PASSWORD, "
-                        + "ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD."
-                )
+            // A production release may only be signed by the secure release
+            // pipeline. Debug builds remain available without a keystore.
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("releaseSecure")
             }
-            signingConfig = signingConfigs.getByName("releaseSecure")
             isMinifyEnabled = true
             isShrinkResources = true
+        }
+    }
+}
+
+tasks.register("verifyReleaseSigning") {
+    doLast {
+        if (!hasReleaseSigning) {
+            throw GradleException(
+                "Release signing is not configured. Set "
+                    + "ANDROID_KEYSTORE_PATH, ANDROID_KEYSTORE_PASSWORD, "
+                    + "ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD."
+            )
         }
     }
 }
