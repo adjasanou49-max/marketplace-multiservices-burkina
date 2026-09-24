@@ -1,0 +1,41 @@
+name: Supabase Edge Functions CI
+
+on:
+  push:
+    paths:
+      - 'supabase/functions/**'
+      - '.github/workflows/supabase-functions-ci.yml'
+  pull_request:
+    paths:
+      - 'supabase/functions/**'
+      - '.github/workflows/supabase-functions-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  edge-functions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Format check
+        run: deno fmt --check supabase/functions
+
+      - name: Lint
+        run: deno lint supabase/functions
+
+      - name: Type check Edge Functions
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            echo "Checking $file"
+            deno check "$file"
+          done < <(find supabase/functions -type f -name '*.ts' -print | sort)
