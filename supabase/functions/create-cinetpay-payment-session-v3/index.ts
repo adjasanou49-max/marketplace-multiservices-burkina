@@ -47,12 +47,13 @@ Deno.serve(async (req: Request) => {
   const orderId = body.order_id?.trim();
   const provider = body.provider?.trim().toUpperCase();
   let paymentId = body.payment_id?.trim();
-  const returnUrl = Deno.env.get("CINETPAY_RETURN_URL") ||
-    url + "/functions/v1/payment-return?status=success&order_id=" +
-      encodeURIComponent(orderId);
   if (!orderId || !provider || provider !== "CINETPAY") {
     return json({ error: "provider_invalid" }, 400);
   }
+
+  const returnUrl = Deno.env.get("CINETPAY_RETURN_URL") ||
+    url + "/functions/v1/payment-return?status=success&order_id=" +
+      encodeURIComponent(orderId);
 
   const supabase = createClient(url, key, {
     global: { headers: { Authorization: auth } },
