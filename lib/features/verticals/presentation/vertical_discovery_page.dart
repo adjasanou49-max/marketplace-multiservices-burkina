@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -136,7 +138,7 @@ class _VerticalDiscoveryPageState
           break;
       }
     } catch (error) {
-      _info('Opération impossible : $error');
+      _info('Opération impossible : ${userFacingError(error)}');
     }
   }
 
@@ -160,7 +162,7 @@ class _VerticalDiscoveryPageState
       );
       _success('Trajet demandé : $id');
     } catch (error) {
-      _info(error.toString());
+      _info(userFacingError(error));
     }
   }
 

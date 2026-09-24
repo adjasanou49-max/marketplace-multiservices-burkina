@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -82,7 +84,7 @@ class _SellerCouponsPageState extends ConsumerState<SellerCouponsPage> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Coupon refusé : $error')),
+        SnackBar(content: Text('Coupon refusé : ${userFacingError(error)}')),
       );
     }
   }
@@ -100,7 +102,7 @@ class _SellerCouponsPageState extends ConsumerState<SellerCouponsPage> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Modification refusée : $error')),
+        SnackBar(content: Text('Modification refusée : ${userFacingError(error)}')),
       );
     }
   }

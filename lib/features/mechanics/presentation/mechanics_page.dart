@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -145,7 +147,7 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur : $error')),
+        SnackBar(content: Text('Erreur : ${userFacingError(error)}')),
       );
     } finally {
       descriptionController.dispose();

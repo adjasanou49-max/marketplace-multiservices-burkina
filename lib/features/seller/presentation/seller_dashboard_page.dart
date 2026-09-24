@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/seller_controller.dart';
@@ -12,7 +14,7 @@ class SellerDashboardPage extends ConsumerWidget {
       appBar: AppBar(title: const Text('Espace vendeur')),
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Erreur : $error')),
+        error: (error, _) => Center(child: Text('Erreur : ${userFacingError(error)}')),
         data: (dashboard) => ListView(
           padding: const EdgeInsets.all(16),
           children: [

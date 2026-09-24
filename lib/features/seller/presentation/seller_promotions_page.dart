@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -83,7 +85,7 @@ class _SellerPromotionsPageState
     try {
       shopId = (await _loadBase()).$1;
     } catch (error) {
-      _show('Création impossible : $error');
+      _show('Création impossible : ${userFacingError(error)}');
       return;
     }
 
@@ -106,7 +108,7 @@ class _SellerPromotionsPageState
       _show('Promotion créée : $id');
       setState(() => _future = _load());
     } catch (error) {
-      _show('Promotion refusée : $error');
+      _show('Promotion refusée : ${userFacingError(error)}');
     }
   }
 
@@ -124,7 +126,7 @@ class _SellerPromotionsPageState
       );
       if (mounted) setState(() => _future = _load());
     } catch (error) {
-      _show('Modification refusée : $error');
+      _show('Modification refusée : ${userFacingError(error)}');
     }
   }
 
