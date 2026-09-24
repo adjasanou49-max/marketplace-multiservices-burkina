@@ -63,7 +63,7 @@ begin
     v_def := pg_get_functiondef(r.oid);
     v_new := regexp_replace(
       v_def,
-      '\\bbegin\\b',
+      '\bbegin\b',
       E'begin\n  perform private.require_active_account();',
       1,
       1,
