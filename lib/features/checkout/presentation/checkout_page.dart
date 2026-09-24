@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -93,7 +95,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         deliveryQuoteValid = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Frais de livraison indisponibles : $error')),
+        SnackBar(content: Text('Frais de livraison indisponibles : ${userFacingError(error)}')),
       );
     } finally {
       if (mounted && requestId == _quoteRequestId) {
@@ -141,7 +143,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur commande : $error')),
+        SnackBar(content: Text('Erreur commande : ${userFacingError(error)}')),
       );
     } finally {
       if (mounted) setState(() => submitting = false);
@@ -159,7 +161,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       body: addresses.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
-          child: Text('Impossible de charger les adresses : $error'),
+          child: Text('Impossible de charger les adresses : ${userFacingError(error)}'),
         ),
         data: (items) {
           if (items.isEmpty) {

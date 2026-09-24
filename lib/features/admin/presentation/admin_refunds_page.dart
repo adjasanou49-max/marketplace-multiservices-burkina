@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -161,7 +163,7 @@ class _AdminRefundsPageState extends ConsumerState<AdminRefundsPage> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Opération refusée : $error')),
+        SnackBar(content: Text('Opération refusée : ${userFacingError(error)}')),
       );
     } finally {
       if (mounted) setState(() => _working = false);

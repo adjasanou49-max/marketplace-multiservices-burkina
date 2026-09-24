@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
@@ -88,7 +90,7 @@ class _AuthPageState extends State<AuthPage> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur : $error')),
+        SnackBar(content: Text('Erreur : ${userFacingError(error)}')),
       );
     } finally {
       if (mounted) setState(() => loading = false);

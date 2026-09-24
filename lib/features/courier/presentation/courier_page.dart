@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/repository_providers.dart';
@@ -26,7 +28,7 @@ class CourierPage extends ConsumerWidget {
       appBar: AppBar(title: const Text('Espace livreur')),
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Erreur : $error')),
+        error: (error, _) => Center(child: Text('Erreur : ${userFacingError(error)}')),
         data: (items) {
           if (items.isEmpty) return const Center(child: Text('Aucune livraison'));
           return ListView.builder(

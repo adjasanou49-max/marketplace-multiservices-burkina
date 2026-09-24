@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/repository_providers.dart';
@@ -66,7 +68,7 @@ class _SellerProductsPageState extends ConsumerState<SellerProductsPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Modification impossible : $error',
+                                'Modification impossible : ${userFacingError(error)}',
                               ),
                             ),
                           );

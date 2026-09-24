@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -94,7 +96,7 @@ class SellerSettingsPage extends ConsumerWidget {
                 } catch (error) {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Déconnexion impossible : $error')),
+                    SnackBar(content: Text('Déconnexion impossible : ${userFacingError(error)}')),
                   );
                 }
               },
