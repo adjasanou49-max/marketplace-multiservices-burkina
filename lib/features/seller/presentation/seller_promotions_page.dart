@@ -77,7 +77,7 @@ class _SellerPromotionsPageState
     try {
       shopId = (await _loadBase()).$1;
     } catch (error) {
-      _show('Création impossible : ' + error.toString());
+      _show('Création impossible : $error');
       return;
     }
 
@@ -103,10 +103,10 @@ class _SellerPromotionsPageState
         },
       );
       if (!mounted) return;
-      _show('Promotion créée : ' + id.toString());
+      _show('Promotion créée : $id');
       setState(() => _future = _load());
     } catch (error) {
-      _show('Promotion refusée : ' + error.toString());
+      _show('Promotion refusée : $error');
     }
   }
 
@@ -124,7 +124,7 @@ class _SellerPromotionsPageState
       );
       if (mounted) setState(() => _future = _load());
     } catch (error) {
-      _show('Modification refusée : ' + error.toString());
+      _show('Modification refusée : $error');
     }
   }
 
@@ -162,7 +162,7 @@ class _SellerPromotionsPageState
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text(
-                  'Erreur : ' + snapshot.error.toString(),
+                  'Erreur : ${snapshot.error}',
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -189,13 +189,7 @@ class _SellerPromotionsPageState
                   onChanged: (value) => _toggle(p, value),
                   title: Text(p['name']?.toString() ?? 'Promotion'),
                   subtitle: Text(
-                    (p['promotion_type']?.toString() ?? '-') +
-                        ' • ' +
-                        (p['value']?.toString() ?? '0') +
-                        '\nDu ' +
-                        (p['starts_at']?.toString() ?? '-') +
-                        ' au ' +
-                        (p['ends_at']?.toString() ?? '-'),
+                    '${p['promotion_type']?.toString() ?? '-'} • ${p['value']?.toString() ?? '0'}\nDu ${p['starts_at']?.toString() ?? '-'} au ${p['ends_at']?.toString() ?? '-'}',
                   ),
                 ),
               );
@@ -295,7 +289,8 @@ class _PromotionDialogState extends State<_PromotionDialog> {
                 end: DateTime.now().add(const Duration(days: 7)),
               ),
             );
-            if (range == null || !mounted) return;
+            if (range == null) return;
+            if (!mounted) return;
 
             Navigator.pop(
               context,
