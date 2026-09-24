@@ -35,6 +35,36 @@ class SellerToolsPage extends StatelessWidget {
             onTap: () => GoRouter.of(context).push('/seller/commissions'),
           ),
           ListTile(
+            leading: const Icon(Icons.people_outline),
+            title: const Text('Clients'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => GoRouter.of(context).push('/seller/clients'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.local_offer_outlined),
+            title: const Text('Coupons'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => GoRouter.of(context).push('/seller/coupons'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.campaign_outlined),
+            title: const Text('Promotions'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => GoRouter.of(context).push('/seller/promotions'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.bar_chart_outlined),
+            title: const Text('Statistiques'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => GoRouter.of(context).push('/seller/stats'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.star_outline),
+            title: const Text('Avis clients'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => GoRouter.of(context).push('/seller/reviews'),
+          ),
+          ListTile(
             leading: const Icon(Icons.chat_outlined),
             title: const Text('Messages administration'),
             trailing: const Icon(Icons.chevron_right),
