@@ -56,7 +56,9 @@ class TransportRepository {
         : await client
             .from('transport_companies')
             .select('id,name,phone,verification_status,active')
-            .inFilter('id', companyIds);
+            .inFilter('id', companyIds)
+            .eq('active', true)
+            .eq('verification_status', 'VERIFIED');
     final stationRows = stationIds.isEmpty
         ? const []
         : await client
