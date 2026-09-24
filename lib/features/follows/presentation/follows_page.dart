@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -43,7 +45,7 @@ class FollowsPage extends ConsumerWidget {
             const SizedBox(height: 8),
             products.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Text('Erreur : $error'),
+              error: (error, _) => Text('Erreur : ${userFacingError(error)}'),
               data: (items) => items.isEmpty
                   ? const Text('Aucun produit favori.')
                   : Column(
@@ -67,7 +69,7 @@ class FollowsPage extends ConsumerWidget {
             const SizedBox(height: 8),
             shops.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Text('Erreur : $error'),
+              error: (error, _) => Text('Erreur : ${userFacingError(error)}'),
               data: (items) => items.isEmpty
                   ? const Text('Aucune boutique suivie.')
                   : Column(

@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,7 +30,7 @@ class ExpiryPage extends ConsumerWidget {
       appBar: AppBar(title: const Text('Expiration proche')),
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Erreur : $error')),
+        error: (error, _) => Center(child: Text('Erreur : ${userFacingError(error)}')),
         data: (products) {
           if (products.isEmpty) {
             return const Center(

@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -49,7 +51,7 @@ class _GroupBuyPageState extends ConsumerState<GroupBuyPage> {
       setState(() => future = _load());
     } catch (error) {
       if (!mounted) return;
-      messenger.showSnackBar(SnackBar(content: Text('Erreur : $error')));
+      messenger.showSnackBar(SnackBar(content: Text('Erreur : ${userFacingError(error)}')));
     } finally {
       if (mounted) {
         setState(() => _joiningGroups.remove(groupId));

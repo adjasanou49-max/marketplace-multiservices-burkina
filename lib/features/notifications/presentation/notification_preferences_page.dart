@@ -1,3 +1,5 @@
+import 'package:marketplace_multiservices_burkina/core/errors/user_facing_error.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -75,7 +77,7 @@ class _NotificationPreferencesPageState
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Enregistrement impossible : $error')),
+        SnackBar(content: Text('Enregistrement impossible : ${userFacingError(error)}')),
       );
     } finally {
       if (mounted) setState(() => saving = false);
