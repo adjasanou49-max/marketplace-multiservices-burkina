@@ -32,6 +32,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   bool submitting = false;
   bool quoteLoading = false;
   bool deliveryQuoteValid = false;
+  int _quoteRequestId = 0;
 
   @override
   void dispose() {
@@ -46,7 +47,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       return;
     }
 
-    setState(() => quoteLoading = true);
+    final requestId = ++_quoteRequestId;
+    if (mounted) {
+      setState(() {
+        quoteLoading = true;
+        deliveryQuoteValid = false;
+      });
+    }
     try {
       final cartRepository = CartRepository(client);
       await cartRepository.syncItems(cartItems);
@@ -65,7 +72,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         },
       );
 
-      if (!mounted) return;
+      if (!mounted || requestId != _quoteRequestId) return;
       setState(() {
         state = state.copyWith(
           addressId: address.id,
@@ -76,7 +83,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         deliveryQuoteValid = true;
       });
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted || requestId != _quoteRequestId) return;
       setState(() {
         state = state.copyWith(
           deliveryFee: 0,
@@ -89,7 +96,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         SnackBar(content: Text('Frais de livraison indisponibles : $error')),
       );
     } finally {
-      if (mounted) setState(() => quoteLoading = false);
+      if (mounted && requestId == _quoteRequestId) {
+        setState(() => quoteLoading = false);
+      }
     }
   }
   Future<void> submit() async {
