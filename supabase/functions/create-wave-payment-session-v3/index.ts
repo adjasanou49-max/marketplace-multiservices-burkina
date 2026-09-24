@@ -195,7 +195,7 @@ Deno.serve(async (req: Request) => {
     return json({
       error: "wave_api_error",
       provider_status: response.status,
-      message: "Wave rejected the checkout session", 
+      message: "Wave rejected the checkout session",
     }, 502);
   }
 
