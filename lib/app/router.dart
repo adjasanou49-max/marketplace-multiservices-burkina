@@ -28,6 +28,11 @@ import '../features/seller/presentation/seller_stock_page.dart';
 import '../features/seller/presentation/seller_finance_page.dart';
 import '../features/seller/presentation/seller_payouts_page.dart';
 import '../features/seller/presentation/seller_settings_page.dart';
+import '../features/seller/presentation/seller_reviews_page.dart';
+import '../features/seller/presentation/seller_stats_page.dart';
+import '../features/seller/presentation/seller_promotions_page.dart';
+import '../features/seller/presentation/seller_coupons_page.dart';
+import '../features/seller/presentation/seller_clients_page.dart';
 import '../features/seller/presentation/seller_navigation.dart';
 import '../features/seller/presentation/seller_create_shop_page.dart';
 import '../features/promotions/presentation/promotions_page.dart';
@@ -155,6 +160,11 @@ GoRouter createAppRouter() {
  GoRoute(path:'/seller/finance',builder:(c,s)=>const SellerFinancePage()),
  GoRoute(path:'/seller/payouts',builder:(c,s)=>const SellerPayoutsPage()),
  GoRoute(path:'/seller/settings',builder:(c,s)=>const SellerSettingsPage()),
+ GoRoute(path:'/seller/reviews',builder:(c,s)=>const SellerReviewsPage()),
+ GoRoute(path:'/seller/stats',builder:(c,s)=>const SellerStatsPage()),
+ GoRoute(path:'/seller/promotions',builder:(c,s)=>const SellerPromotionsPage()),
+ GoRoute(path:'/seller/coupons',builder:(c,s)=>const SellerCouponsPage()),
+ GoRoute(path:'/seller/clients',builder:(c,s)=>const SellerClientsPage()),
  GoRoute(path:'/courier',builder:(c,s)=>const CourierPage()),
  GoRoute(path:'/delivery/:orderId/:courierId',builder:(c,s)=>DeliveryTrackingPage(orderId:s.pathParameters['orderId']!,courierId:s.pathParameters['courierId']!)),
  GoRoute(path:'/promotions',builder:(c,s)=>const PromotionsPage()),
