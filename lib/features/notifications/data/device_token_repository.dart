@@ -1,13 +1,52 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DeviceTokenRepository {
- const DeviceTokenRepository(this.client); final SupabaseClient client;
- Future<void> register({required String token,required String platform}) async {
-  final u=client.auth.currentUser;if(u==null)throw StateError('Utilisateur non authentifié');
-  await client.from('notification_devices').upsert({'user_id':u.id,'platform':platform,'push_token':token,'active':true,'last_seen_at':DateTime.now().toUtc().toIso8601String()},onConflict:'user_id,push_token');
- }
- Future<void> deactivate(String token) async {
-  final u=client.auth.currentUser;if(u==null)return;
-  await client.from('notification_devices').update({'active':false}).eq('user_id',u.id).eq('push_token',token);
- }
+  const DeviceTokenRepository(this.client);
+
+  final SupabaseClient client;
+
+  Future<void> register({
+    required String token,
+    required String platform,
+  }) async {
+    final user = client.auth.currentUser;
+    if (user == null) {
+      throw StateError('Utilisateur non authentifié');
+    }
+
+    final normalizedToken = token.trim();
+    final normalizedPlatform = platform.trim().toUpperCase();
+    if (normalizedToken.isEmpty) {
+      throw ArgumentError('Token push invalide.');
+    }
+
+    if (normalizedPlatform != 'ANDROID' && normalizedPlatform != 'IOS') {
+      throw ArgumentError('Plateforme push invalide.');
+    }
+
+    await client.rpc(
+      'register_notification_device',
+      params: {
+        'p_platform': normalizedPlatform,
+        'p_push_token': normalizedToken,
+      },
+    );
+  }
+
+  Future<void> deactivate(String token) async {
+    final user = client.auth.currentUser;
+    if (user == null) {
+      throw StateError('Utilisateur non authentifié');
+    }
+
+    final normalizedToken = token.trim();
+    if (normalizedToken.isEmpty) return;
+
+    await client.rpc(
+      'deactivate_notification_device',
+      params: {
+        'p_push_token': normalizedToken,
+      },
+    );
+  }
 }
