@@ -1,59 +1,42 @@
--- Guarantee at most one active cart per customer.
--- Existing duplicates are resolved before the unique partial index is created.
-DO $$
+-- Serialize active-cart creation per customer and reject concurrent duplicates.
+CREATE OR REPLACE FUNCTION public.enforce_one_active_cart()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
 DECLARE
-  duplicate RECORD;
-  keeper UUID;
+  existing_id uuid;
 BEGIN
-  FOR duplicate IN
-    SELECT customer_id
-    FROM carts
-    WHERE status = 'ACTIVE'
-    GROUP BY customer_id
-    HAVING COUNT(*) > 1
-  LOOP
-    SELECT id
-      INTO keeper
-    FROM carts
-    WHERE customer_id = duplicate.customer_id
-      AND status = 'ACTIVE'
-    ORDER BY created_at DESC NULLS LAST, id DESC
-    LIMIT 1;
+  IF NEW.status <> 'ACTIVE' THEN
+    RETURN NEW;
+  END IF;
 
-    -- Merge cart items into the newest active cart.
-    INSERT INTO cart_items (cart_id, product_id, quantity, unit_price)
-    SELECT
-      keeper,
-      ci.product_id,
-      SUM(ci.quantity),
-      MAX(ci.unit_price)
-    FROM cart_items ci
-    JOIN carts c ON c.id = ci.cart_id
-    WHERE c.customer_id = duplicate.customer_id
-      AND c.status = 'ACTIVE'
-      AND ci.cart_id <> keeper
-    GROUP BY ci.product_id
-    ON CONFLICT (cart_id, product_id)
-    DO UPDATE SET
-      quantity = cart_items.quantity + EXCLUDED.quantity,
-      unit_price = EXCLUDED.unit_price;
+  PERFORM pg_advisory_xact_lock(
+    hashtextextended(NEW.customer_id::text, 0)
+  );
 
-    DELETE FROM cart_items ci
-    USING carts c
-    WHERE ci.cart_id = c.id
-      AND c.customer_id = duplicate.customer_id
-      AND c.status = 'ACTIVE'
-      AND ci.cart_id <> keeper;
+  SELECT id
+    INTO existing_id
+  FROM public.carts
+  WHERE customer_id = NEW.customer_id
+    AND status = 'ACTIVE'
+    AND id <> NEW.id
+  ORDER BY created_at DESC NULLS LAST, id DESC
+  LIMIT 1;
 
-    UPDATE carts
-    SET status = 'MERGED'
-    WHERE customer_id = duplicate.customer_id
-      AND status = 'ACTIVE'
-      AND id <> keeper;
-  END LOOP;
-END
+  IF existing_id IS NOT NULL THEN
+    RAISE EXCEPTION 'active cart already exists for customer'
+      USING ERRCODE = '23505';
+  END IF;
+
+  RETURN NEW;
+END;
 $$;
 
-CREATE UNIQUE INDEX IF NOT EXISTS carts_one_active_per_customer_idx
-  ON carts (customer_id)
-  WHERE status = 'ACTIVE';
+DROP TRIGGER IF EXISTS carts_one_active_per_customer_trigger
+ON public.carts;
+
+CREATE TRIGGER carts_one_active_per_customer_trigger
+BEFORE INSERT OR UPDATE OF customer_id, status
+ON public.carts
+FOR EACH ROW
+EXECUTE FUNCTION public.enforce_one_active_cart();
