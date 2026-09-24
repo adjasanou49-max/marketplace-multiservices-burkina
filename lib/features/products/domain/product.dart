@@ -9,6 +9,7 @@ class Product {
     this.imageUrl,
     this.categoryId,
     this.shopId,
+    this.createdAt,
     this.isActive = true,
   });
 
@@ -18,9 +19,11 @@ class Product {
   final String? description;
   final num? price;
   final String currency;
+  final DateTime? createdAt;
   final String? imageUrl;
   final String? categoryId;
   final String? shopId;
+  final DateTime? createdAt;
   final bool isActive;
 
   factory Product.fromMap(Map<String, dynamic> map) => Product(
@@ -33,6 +36,7 @@ class Product {
         imageUrl: map['image_url'] as String?,
         categoryId: map['category_id'] as String?,
         shopId: map['shop_id'] as String?,
+        createdAt: DateTime.tryParse(map['created_at']?.toString() ?? ''),
         isActive: map['status'] == null || map['status'] == 'ACTIVE',
       );
 }
