@@ -1,0 +1,1 @@
+drop policy if exists marketplace_modules_client_read on public.marketplace_modules;

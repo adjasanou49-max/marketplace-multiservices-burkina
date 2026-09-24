@@ -1,0 +1,1 @@
+create unique index if not exists uq_carts_customer_active on public.carts(customer_id) where status = 'ACTIVE';

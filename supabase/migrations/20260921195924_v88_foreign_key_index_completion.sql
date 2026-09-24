@@ -1,0 +1,19 @@
+
+create index if not exists idx_accommodation_bookings_unit_id on public.accommodation_bookings(unit_id);
+create index if not exists idx_checkout_requests_user_id on public.checkout_requests(user_id);
+create index if not exists idx_conversation_reads_conversation_id on public.conversation_reads(conversation_id);
+create index if not exists idx_conversation_reads_user_id on public.conversation_reads(user_id);
+create index if not exists idx_courier_earnings_courier_id on public.courier_earnings(courier_id);
+create index if not exists idx_courier_incidents_courier_id on public.courier_incidents(courier_id);
+create index if not exists idx_delivery_events_package_id on public.delivery_events(package_id);
+create index if not exists idx_job_applications_job_id on public.job_applications(job_id);
+create index if not exists idx_mechanic_quotes_request_id on public.mechanic_quotes(request_id);
+create index if not exists idx_mechanic_reviews_request_id on public.mechanic_reviews(request_id);
+create index if not exists idx_parcel_events_parcel_id on public.parcel_events(parcel_id);
+create index if not exists idx_parcel_pickup_points_parcel_id on public.parcel_pickup_points(parcel_id);
+create index if not exists idx_parcels_sender_id on public.parcels(sender_id);
+create index if not exists idx_seller_documents_seller_id on public.seller_documents(seller_id);
+create index if not exists idx_transport_checkins_ticket_id on public.transport_checkins(ticket_id);
+create index if not exists idx_transport_seats_vehicle_id on public.transport_seats(vehicle_id);
+create index if not exists idx_transport_trip_stops_trip_id on public.transport_trip_stops(trip_id);
+create index if not exists idx_vehicle_rental_bookings_rental_id on public.vehicle_rental_bookings(rental_id);
