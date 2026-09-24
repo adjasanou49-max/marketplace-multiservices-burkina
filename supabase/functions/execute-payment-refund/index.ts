@@ -1,15 +1,19 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
-  status,
-  headers: { "content-type": "application/json" },
-});
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
 
 function publishableKey(): string {
   const raw = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS");
   if (raw) {
-    try { const parsed = JSON.parse(raw); if (parsed.default) return parsed.default; } catch (_) {}
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed.default) return parsed.default;
+    } catch (_) {}
   }
   return Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 }
@@ -17,7 +21,10 @@ function publishableKey(): string {
 function secretKey(): string {
   const raw = Deno.env.get("SUPABASE_SECRET_KEYS");
   if (raw) {
-    try { const parsed = JSON.parse(raw); if (parsed.default) return parsed.default; } catch (_) {}
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed.default) return parsed.default;
+    } catch (_) {}
   }
   return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 }
@@ -29,10 +36,16 @@ Deno.serve(async (req: Request) => {
   const url = Deno.env.get("SUPABASE_URL") ?? "";
   const key = publishableKey();
   const adminKey = secretKey();
-  if (!auth || !url || !key || !adminKey) return json({ error: "supabase_not_configured" }, 503);
+  if (!auth || !url || !key || !adminKey) {
+    return json({ error: "supabase_not_configured" }, 503);
+  }
 
   let body: { refund_id?: string };
-  try { body = await req.json(); } catch (_) { return json({ error: "invalid_json" }, 400); }
+  try {
+    body = await req.json();
+  } catch (_) {
+    return json({ error: "invalid_json" }, 400);
+  }
   const refundId = body.refund_id?.trim();
   if (!refundId) return json({ error: "refund_required" }, 400);
 
@@ -41,17 +54,24 @@ Deno.serve(async (req: Request) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const { data: refundRows, error: beginError } = await userClient.rpc("admin_begin_refund", {
-    p_refund_id: refundId,
-  });
+  const { data: refundRows, error: beginError } = await userClient.rpc(
+    "admin_begin_refund",
+    {
+      p_refund_id: refundId,
+    },
+  );
   if (beginError) return json({ error: beginError.message }, 409);
-  if (!Array.isArray(refundRows) || refundRows.length === 0) return json({ error: "refund_not_found" }, 404);
+  if (!Array.isArray(refundRows) || refundRows.length === 0) {
+    return json({ error: "refund_not_found" }, 404);
+  }
 
   const refund = refundRows[0] as Record<string, unknown>;
   const provider = String(refund.provider ?? "");
   const providerReference = String(refund.provider_reference ?? "").trim();
   const amount = Number(refund.amount);
-  if (!provider || !providerReference || !Number.isFinite(amount) || amount <= 0) {
+  if (
+    !provider || !providerReference || !Number.isFinite(amount) || amount <= 0
+  ) {
     return json({ error: "refund_provider_data_invalid" }, 409);
   }
 
@@ -84,7 +104,10 @@ Deno.serve(async (req: Request) => {
 
   const waveApiKey = Deno.env.get("WAVE_API_KEY");
   if (!waveApiKey) {
-    await adminClient.from("refunds").update({ status: "APPROVED" }).eq("id", refundId);
+    await adminClient.from("refunds").update({ status: "APPROVED" }).eq(
+      "id",
+      refundId,
+    );
     return json({ error: "wave_not_configured", refund_id: refundId }, 503);
   }
 

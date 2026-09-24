@@ -1,10 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
-  status,
-  headers: { "content-type": "application/json" },
-});
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
 
 async function hmacHex(message: string, secret: string): Promise<string> {
   const key = await crypto.subtle.importKey(
@@ -81,7 +82,9 @@ Deno.serve(async (req: Request) => {
     }
   } else {
     const expected = await hmacHex(String(timestamp) + rawBody, webhookSecret);
-    if (!signatures.some((signature) => constantTimeEqual(expected, signature))) {
+    if (
+      !signatures.some((signature) => constantTimeEqual(expected, signature))
+    ) {
       return json({ error: "invalid_signature" }, 401);
     }
   }
@@ -146,7 +149,8 @@ Deno.serve(async (req: Request) => {
     return json({ error: "payment_amount_invalid" }, 422);
   }
 
-  const providerReference = sessionId || transactionId || clientReference || null;
+  const providerReference = sessionId || transactionId || clientReference ||
+    null;
   const { data: result, error } = await supabase.rpc("process_payment_event", {
     p_payment_id: paymentId,
     p_event_type: eventType,

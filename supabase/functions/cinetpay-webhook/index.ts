@@ -1,10 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
-  status,
-  headers: { "content-type": "application/json" },
-});
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
 
 async function hmacHex(message: string, secret: string): Promise<string> {
   const key = await crypto.subtle.importKey(
@@ -98,26 +99,33 @@ Deno.serve(async (req: Request) => {
     .limit(1)
     .maybeSingle();
 
-  if (lookup.error || !lookup.data) return json({ error: "payment_not_found" }, 404);
+  if (lookup.error || !lookup.data) {
+    return json({ error: "payment_not_found" }, 404);
+  }
   const payment = lookup.data as Record<string, unknown>;
   if (String(payment.provider) !== "CINETPAY") {
     return json({ error: "provider_invalid" }, 409);
   }
 
-  const verify = await fetch("https://api-checkout.cinetpay.com/v2/payment/check", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "User-Agent": "Marketplace-Multiservices-Burkina/1.0",
+  const verify = await fetch(
+    "https://api-checkout.cinetpay.com/v2/payment/check",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "Marketplace-Multiservices-Burkina/1.0",
+      },
+      body: JSON.stringify({
+        apikey: apiKey,
+        site_id: siteId,
+        transaction_id: transactionId,
+      }),
     },
-    body: JSON.stringify({
-      apikey: apiKey,
-      site_id: siteId,
-      transaction_id: transactionId,
-    }),
-  });
+  );
   const checked = await verify.json().catch(() => null);
-  if (!verify.ok || !checked) return json({ error: "cinetpay_verification_failed" }, 502);
+  if (!verify.ok || !checked) {
+    return json({ error: "cinetpay_verification_failed" }, 502);
+  }
 
   const data = (checked.data ?? {}) as Record<string, unknown>;
   const providerAmount = Number(data.amount);

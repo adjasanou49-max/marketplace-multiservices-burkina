@@ -1,10 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
-  status,
-  headers: { "content-type": "application/json" },
-});
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
 
 function publishableKey(): string {
   const raw = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS");
@@ -82,7 +83,9 @@ Deno.serve(async (req: Request) => {
   const auth = req.headers.get("Authorization");
   const url = Deno.env.get("SUPABASE_URL");
   const key = publishableKey();
-  if (!auth || !url || !key) return json({ error: "supabase_not_configured" }, 503);
+  if (!auth || !url || !key) {
+    return json({ error: "supabase_not_configured" }, 503);
+  }
 
   const apiKey = Deno.env.get("WAVE_API_KEY");
   const signingSecret = Deno.env.get("WAVE_SIGNING_SECRET") ?? "";
@@ -100,8 +103,10 @@ Deno.serve(async (req: Request) => {
   const orderId = body.order_id?.trim();
   let paymentId = body.payment_id?.trim();
   const defaultReturn = url + "/functions/v1/payment-return";
-  const successUrl = Deno.env.get("WAVE_SUCCESS_URL") || defaultReturn + "?status=success&order_id=" + encodeURIComponent(orderId);
-  const errorUrl = Deno.env.get("WAVE_ERROR_URL") || defaultReturn + "?status=error&order_id=" + encodeURIComponent(orderId);
+  const successUrl = Deno.env.get("WAVE_SUCCESS_URL") ||
+    defaultReturn + "?status=success&order_id=" + encodeURIComponent(orderId);
+  const errorUrl = Deno.env.get("WAVE_ERROR_URL") ||
+    defaultReturn + "?status=error&order_id=" + encodeURIComponent(orderId);
   if (!orderId) return json({ error: "order_required" }, 400);
 
   const supabase = createClient(url, key, {
@@ -158,8 +163,7 @@ Deno.serve(async (req: Request) => {
         payment_id: paymentId,
         provider: "WAVE",
         checkout_url: existingJson.wave_launch_url,
-        provider_reference:
-          existingJson.id ?? payment.provider_reference,
+        provider_reference: existingJson.id ?? payment.provider_reference,
         checkout_status: existingJson.checkout_status ?? null,
         payment_status: existingJson.payment_status ?? null,
         expires_at: existingJson.when_expires ?? null,
@@ -187,8 +191,7 @@ Deno.serve(async (req: Request) => {
     return json({
       error: "wave_api_error",
       provider_status: response.status,
-      message:
-        wave?.message ??
+      message: wave?.message ??
         wave?.error ??
         "Wave rejected the checkout session",
     }, 502);
