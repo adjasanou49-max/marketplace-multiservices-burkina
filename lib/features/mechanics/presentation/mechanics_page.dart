@@ -56,7 +56,7 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
                   initialValue: selectedVehicle,
                   decoration: const InputDecoration(labelText: 'Véhicule'),
                   items: const [
-                    DropdownMenuItem(value: 'MOTORBIKE', child: Text('Moto')),
+                    DropdownMenuItem(value: 'MOTORCYCLE', child: Text('Moto')),
                     DropdownMenuItem(value: 'CAR', child: Text('Voiture')),
                     DropdownMenuItem(value: 'BICYCLE', child: Text('Vélo')),
                   ],
