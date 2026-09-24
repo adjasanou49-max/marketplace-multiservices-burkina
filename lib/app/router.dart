@@ -97,6 +97,7 @@ String? _routeGuard(BuildContext context, GoRouterState state) {
     '/admin',
     '/courier',
     '/delivery',
+    '/mechanics',
   ];
 
   bool protected = false;
