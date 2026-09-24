@@ -77,18 +77,28 @@ class TransportRepository {
       stations[row['id'].toString()] = row;
     }
 
+    final visibleTrips = <Map<String, dynamic>>[];
     for (final trip in trips) {
       final route = routes[trip['route_id']?.toString()];
       if (route == null) continue;
-      trip['route'] = route;
-      trip['company'] = companies[route['company_id']?.toString()];
-      trip['departure_station'] =
+
+      final company = companies[route['company_id']?.toString()];
+      if (company == null) continue;
+
+      final departureStation =
           stations[route['departure_station_id']?.toString()];
-      trip['arrival_station'] =
+      final arrivalStation =
           stations[route['arrival_station_id']?.toString()];
+      if (departureStation == null || arrivalStation == null) continue;
+
+      trip['route'] = route;
+      trip['company'] = company;
+      trip['departure_station'] = departureStation;
+      trip['arrival_station'] = arrivalStation;
+      visibleTrips.add(trip);
     }
 
-    return trips;
+    return visibleTrips;
   }
 
   Future<String> createBooking({
