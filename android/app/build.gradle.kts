@@ -56,7 +56,7 @@ android {
     }
 }
 
-tasks.register("verifyReleaseSigning") {
+val verifyReleaseSigning = tasks.register("verifyReleaseSigning") {
     doLast {
         if (!hasReleaseSigning) {
             throw GradleException(
@@ -65,6 +65,12 @@ tasks.register("verifyReleaseSigning") {
                     + "ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD."
             )
         }
+    }
+}
+
+tasks.configureEach {
+    if (name.contains("Release", ignoreCase = true)) {
+        dependsOn(verifyReleaseSigning)
     }
 }
 
