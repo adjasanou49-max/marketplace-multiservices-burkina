@@ -1,3 +1,4 @@
+// deno-lint-ignore no-import-prefix no-unversioned-import
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -38,7 +39,9 @@ function secretKey(): string {
     try {
       const parsed = JSON.parse(raw);
       if (parsed.default) return parsed.default;
-    } catch (_) {}
+    } catch (_) {
+      // Ignore malformed optional key configuration and use the fallback.
+    }
   }
   return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 }
