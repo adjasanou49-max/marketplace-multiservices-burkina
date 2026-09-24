@@ -228,12 +228,16 @@ async function processNotification(
   }
 
   const notification = claimedRows[0] as Json;
+  const userId = String(notification.user_id ?? "").trim();
+  if (!userId) {
+    throw new Error("NOTIFICATION_USER_INVALID");
+  }
 
   try {
     const prefResult = await adminClient
       .from("notification_preferences")
       .select("orders,promotions,messages,delivery,services")
-      .eq("user_id", String(notification.user_id ?? ""))
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (prefResult.error) throw prefResult.error;
