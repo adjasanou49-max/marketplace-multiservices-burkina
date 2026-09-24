@@ -45,7 +45,7 @@ class _SellerClientsPageState extends ConsumerState<SellerClientsPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Erreur : ' + snapshot.error.toString()));
+            return Center(child: Text('Erreur : ${snapshot.error}'));
           }
           final s = snapshot.data ?? const <String, dynamic>{};
           return ListView(
