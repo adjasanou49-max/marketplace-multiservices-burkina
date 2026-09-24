@@ -389,12 +389,31 @@ class _ServiceModuleSliver extends ConsumerWidget {
         final visible = modules
             .where(
               (module) => const <String>{
+                '/',
                 '/restaurants',
                 '/transport',
                 '/mechanics',
                 '/expiry',
                 '/group-buy',
+                '/promotions',
+                '/follows',
                 '/services',
+                '/rides',
+                '/rentals',
+                '/real-estate',
+                '/accommodations',
+                '/events',
+                '/jobs',
+                '/professionals',
+                '/agriculture',
+                '/freight',
+                '/health',
+                '/beauty',
+                '/home-services',
+                '/digital',
+                '/training',
+                '/creative',
+                '/parcels',
               }.contains(module.route),
             )
             .toList();
@@ -482,6 +501,38 @@ class _ModuleShortcut extends StatelessWidget {
         return Icons.groups_outlined;
       case 'handyman':
         return Icons.handyman_outlined;
+      case 'directions_car':
+        return Icons.directions_car_outlined;
+      case 'car_rental':
+        return Icons.car_rental_outlined;
+      case 'home_work':
+        return Icons.home_work_outlined;
+      case 'hotel':
+        return Icons.hotel_outlined;
+      case 'event':
+        return Icons.event_outlined;
+      case 'work':
+        return Icons.work_outline;
+      case 'engineering':
+        return Icons.engineering_outlined;
+      case 'agriculture':
+        return Icons.agriculture_outlined;
+      case 'local_shipping':
+        return Icons.local_shipping_outlined;
+      case 'health_and_safety':
+        return Icons.health_and_safety_outlined;
+      case 'content_cut':
+        return Icons.content_cut_outlined;
+      case 'home_repair_service':
+        return Icons.home_repair_service_outlined;
+      case 'devices':
+        return Icons.devices_outlined;
+      case 'school':
+        return Icons.school_outlined;
+      case 'camera_alt':
+        return Icons.camera_alt_outlined;
+      case 'inventory_2':
+        return Icons.inventory_2_outlined;
       default:
         return Icons.apps_outlined;
     }
