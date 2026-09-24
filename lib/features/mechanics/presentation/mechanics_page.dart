@@ -39,8 +39,6 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
     var selectedVehicle = 'MOTORBIKE';
     var selectedProblem = 'PNEU_CREVE';
     final descriptionController = TextEditingController();
-    final latitude = address?['latitude'] as num?;
-    final longitude = address?['longitude'] as num?;
 
     final request = await showDialog<bool>(
       context: context,
@@ -113,9 +111,7 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
               child: const Text('Annuler'),
             ),
             FilledButton(
-              onPressed: latitude == null || longitude == null
-                  ? null
-                  : () => Navigator.pop(dialogContext, true),
+              onPressed: () => Navigator.pop(dialogContext, true),
               child: const Text('Envoyer la demande'),
             ),
           ],
@@ -130,9 +126,6 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
 
     try {
       final position = await _getCurrentPosition();
-      if (position == null) {
-        throw StateError('Position actuelle indisponible.');
-      }
 
       final id = await repository.createRequest(
         vehicleType: selectedVehicle,
