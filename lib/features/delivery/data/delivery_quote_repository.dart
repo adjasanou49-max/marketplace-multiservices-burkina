@@ -1,6 +1,8 @@
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../cart/data/cart_repository.dart';
+
 class DeliveryQuote {
   const DeliveryQuote({
     required this.customerFee,
@@ -46,23 +48,7 @@ class DeliveryQuoteRepository {
     );
   }
 
-  Future<String> activeCartId() async {
-    final user = client.auth.currentUser;
-    if (user == null) {
-      throw StateError('Utilisateur non authentifié');
-    }
-
-    final row = await client
-        .from('carts')
-        .select('id')
-        .eq('customer_id', user.id)
-        .eq('status', 'ACTIVE')
-        .maybeSingle();
-
-    if (row == null) {
-      throw StateError('Panier actif introuvable');
-    }
-
-    return row['id'] as String;
+  Future<String> activeCartId() {
+    return CartRepository(client).getOrCreateActiveCart();
   }
 }
