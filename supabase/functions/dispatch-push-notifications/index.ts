@@ -349,7 +349,7 @@ async function processNotification(
       total: devices.length,
       errors,
     };
-  } catch (error) {
+  } catch (_error) {
     await adminClient
       .from("notifications")
       .update({
