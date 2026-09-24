@@ -76,13 +76,13 @@ class _SellerCouponsPageState extends ConsumerState<SellerCouponsPage> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Coupon créé : ' + id.toString())),
+        SnackBar(content: Text('Coupon créé : $id')),
       );
       setState(() => _future = _load());
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Coupon refusé : ' + error.toString())),
+        SnackBar(content: Text('Coupon refusé : $error')),
       );
     }
   }
@@ -100,7 +100,7 @@ class _SellerCouponsPageState extends ConsumerState<SellerCouponsPage> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Modification refusée : ' + error.toString())),
+        SnackBar(content: Text('Modification refusée : $error')),
       );
     }
   }
@@ -129,7 +129,7 @@ class _SellerCouponsPageState extends ConsumerState<SellerCouponsPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Erreur : ' + snapshot.error.toString()));
+            return Center(child: Text('Erreur : ${snapshot.error}'));
           }
 
           final coupons = snapshot.data ?? const <Map<String, dynamic>>[];
@@ -154,15 +154,7 @@ class _SellerCouponsPageState extends ConsumerState<SellerCouponsPage> {
                 child: SwitchListTile(
                   title: Text(coupon['code']?.toString() ?? 'COUPON'),
                   subtitle: Text(
-                    type +
-                        ' ' +
-                        value +
-                        ' • utilisations ' +
-                        used +
-                        '/' +
-                        max +
-                        '\nExpire : ' +
-                        (coupon['ends_at']?.toString() ?? '-'),
+                    '${type} $value • utilisations $used/$max\nExpire : ${coupon['ends_at']?.toString() ?? '-'}',
                   ),
                   value: coupon['active'] == true,
                   onChanged: (value) => _toggle(coupon, value),
@@ -305,7 +297,8 @@ class _CouponDialogState extends State<_CouponDialog> {
               lastDate: DateTime.now().add(const Duration(days: 3650)),
               initialDate: DateTime.now().add(const Duration(days: 30)),
             );
-            if (ends == null || !mounted) return;
+            if (ends == null) return;
+            if (!mounted) return;
 
             Navigator.pop(
               context,
