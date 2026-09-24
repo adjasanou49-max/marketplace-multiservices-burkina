@@ -78,7 +78,7 @@ class _SellerReviewsPageState extends ConsumerState<SellerReviewsPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Erreur : ' + snapshot.error.toString()));
+            return Center(child: Text('Erreur : ${snapshot.error}'));
           }
           final rows = snapshot.data ?? const <Map<String, dynamic>>[];
           if (rows.isEmpty) {
