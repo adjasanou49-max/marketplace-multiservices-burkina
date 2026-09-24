@@ -3,15 +3,19 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 type Json = Record<string, unknown>;
 
-const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
-  status,
-  headers: { "content-type": "application/json" },
-});
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
 
 function secretKey(): string {
   const raw = Deno.env.get("SUPABASE_SECRET_KEYS");
   if (raw) {
-    try { const parsed = JSON.parse(raw); if (parsed.default) return parsed.default; } catch (_) {}
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed.default) return parsed.default;
+    } catch (_) {}
   }
   return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 }
@@ -19,7 +23,10 @@ function secretKey(): string {
 function base64Url(bytes: Uint8Array): string {
   let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(
+    /=+$/g,
+    "",
+  );
 }
 
 function textBase64Url(value: string): string {
@@ -39,8 +46,13 @@ function pemToArrayBuffer(pem: string): ArrayBuffer {
 
 async function makeAccessToken(serviceAccount: Json): Promise<string> {
   const clientEmail = String(serviceAccount.client_email ?? "").trim();
-  const privateKeyPem = String(serviceAccount.private_key ?? "").replace(/\\n/g, "\n");
-  if (!clientEmail || !privateKeyPem) throw new Error("FCM_SERVICE_ACCOUNT_INVALID");
+  const privateKeyPem = String(serviceAccount.private_key ?? "").replace(
+    /\\n/g,
+    "\n",
+  );
+  if (!clientEmail || !privateKeyPem) {
+    throw new Error("FCM_SERVICE_ACCOUNT_INVALID");
+  }
 
   const now = Math.floor(Date.now() / 1000);
   const header = textBase64Url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
@@ -60,7 +72,11 @@ async function makeAccessToken(serviceAccount: Json): Promise<string> {
     ["sign"],
   );
   const signature = new Uint8Array(
-    await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(unsigned)),
+    await crypto.subtle.sign(
+      "RSASSA-PKCS1-v1_5",
+      key,
+      new TextEncoder().encode(unsigned),
+    ),
   );
   const assertion = unsigned + "." + base64Url(signature);
 
@@ -81,11 +97,25 @@ async function makeAccessToken(serviceAccount: Json): Promise<string> {
 
 function preferenceEnabled(type: string, prefs: Json): boolean {
   const normalized = type.toLowerCase();
-  if (normalized.includes("order") || normalized.includes("payment") || normalized.includes("commande")) return prefs.orders !== false;
-  if (normalized.includes("delivery") || normalized.includes("courier") || normalized.includes("livraison")) return prefs.delivery !== false;
-  if (normalized.includes("message") || normalized.includes("chat")) return prefs.messages !== false;
-  if (normalized.includes("promotion") || normalized.includes("coupon") || normalized.includes("promo")) return prefs.promotions !== false;
-  if (normalized.includes("service") || normalized.includes("mechanic") || normalized.includes("transport")) return prefs.services !== false;
+  if (
+    normalized.includes("order") || normalized.includes("payment") ||
+    normalized.includes("commande")
+  ) return prefs.orders !== false;
+  if (
+    normalized.includes("delivery") || normalized.includes("courier") ||
+    normalized.includes("livraison")
+  ) return prefs.delivery !== false;
+  if (normalized.includes("message") || normalized.includes("chat")) {
+    return prefs.messages !== false;
+  }
+  if (
+    normalized.includes("promotion") || normalized.includes("coupon") ||
+    normalized.includes("promo")
+  ) return prefs.promotions !== false;
+  if (
+    normalized.includes("service") || normalized.includes("mechanic") ||
+    normalized.includes("transport")
+  ) return prefs.services !== false;
   return true;
 }
 
@@ -109,7 +139,8 @@ async function sendToToken(
   data: Record<string, string>,
 ) {
   const response = await fetch(
-    "https://fcm.googleapis.com/v1/projects/" + encodeURIComponent(projectId) + "/messages:send",
+    "https://fcm.googleapis.com/v1/projects/" + encodeURIComponent(projectId) +
+      "/messages:send",
     {
       method: "POST",
       headers: {
@@ -239,11 +270,13 @@ async function processNotification(
         const fcmError = details.find(
           (detail: Json) =>
             detail["@type"] ===
-            "type.googleapis.com/google.firebase.fcm.v1.FcmError",
+              "type.googleapis.com/google.firebase.fcm.v1.FcmError",
         ) as Json | undefined;
         const errorCode = fcmError?.errorCode;
 
-        if (!result.ok && (errorCode === "UNREGISTERED" || result.status === 404)) {
+        if (
+          !result.ok && (errorCode === "UNREGISTERED" || result.status === 404)
+        ) {
           await adminClient
             .from("notification_devices")
             .update({ active: false, last_seen_at: new Date().toISOString() })
@@ -266,12 +299,9 @@ async function processNotification(
         push_sent_at: sent > 0 ? new Date().toISOString() : null,
         push_processing_at: null,
         push_attempts: Number(notification.push_attempts ?? 0) + 1,
-        push_error:
-          sent > 0
-            ? errors.length
-              ? errors.join(" | ")
-              : null
-            : errors.join(" | ") || "FCM_SEND_FAILED",
+        push_error: sent > 0
+          ? errors.length ? errors.join(" | ") : null
+          : errors.join(" | ") || "FCM_SEND_FAILED",
       })
       .eq("id", notificationId);
 
@@ -287,10 +317,9 @@ async function processNotification(
       .update({
         push_processing_at: null,
         push_attempts: Number(notification.push_attempts ?? 0) + 1,
-        push_error:
-          error instanceof Error
-            ? error.message
-            : "PUSH_PROCESSING_FAILED",
+        push_error: error instanceof Error
+          ? error.message
+          : "PUSH_PROCESSING_FAILED",
       })
       .eq("id", notificationId);
 
@@ -304,30 +333,57 @@ Deno.serve(async (req: Request) => {
   const url = Deno.env.get("SUPABASE_URL") ?? "";
   const adminKey = secretKey();
   const dispatchSecret = req.headers.get("x-push-dispatch-secret") ?? "";
-  if (!url || !adminKey || !dispatchSecret) return json({ error: "not_configured" }, 503);
+  if (!url || !adminKey || !dispatchSecret) {
+    return json({ error: "not_configured" }, 503);
+  }
 
-  const adminClient = createClient(url, adminKey, { auth: { persistSession: false, autoRefreshToken: false } });
-  const check = await adminClient.rpc("verify_push_dispatch_secret", { p_candidate: dispatchSecret });
-  if (check.error || check.data !== true) return json({ error: "unauthorized" }, 401);
+  const adminClient = createClient(url, adminKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const check = await adminClient.rpc("verify_push_dispatch_secret", {
+    p_candidate: dispatchSecret,
+  });
+  if (check.error || check.data !== true) {
+    return json({ error: "unauthorized" }, 401);
+  }
 
   const serviceAccountRaw = Deno.env.get("FCM_SERVICE_ACCOUNT_JSON") ?? "";
   if (!serviceAccountRaw) return json({ error: "fcm_not_configured" }, 503);
   let serviceAccount: Json;
-  try { serviceAccount = JSON.parse(serviceAccountRaw) as Json; } catch (_) { return json({ error: "fcm_service_account_invalid" }, 503); }
+  try {
+    serviceAccount = JSON.parse(serviceAccountRaw) as Json;
+  } catch (_) {
+    return json({ error: "fcm_service_account_invalid" }, 503);
+  }
 
-  const projectId = String(serviceAccount.project_id ?? Deno.env.get("FCM_PROJECT_ID") ?? "").trim();
+  const projectId = String(
+    serviceAccount.project_id ?? Deno.env.get("FCM_PROJECT_ID") ?? "",
+  ).trim();
   if (!projectId) return json({ error: "fcm_project_id_missing" }, 503);
 
   let accessToken: string;
-  try { accessToken = await makeAccessToken(serviceAccount); } catch (error) {
-    return json({ error: error instanceof Error ? error.message : "fcm_auth_failed" }, 503);
+  try {
+    accessToken = await makeAccessToken(serviceAccount);
+  } catch (error) {
+    return json({
+      error: error instanceof Error ? error.message : "fcm_auth_failed",
+    }, 503);
   }
 
   let payload: { notification_id?: string };
-  try { payload = await req.json(); } catch (_) { payload = {}; }
+  try {
+    payload = await req.json();
+  } catch (_) {
+    payload = {};
+  }
 
   if (payload.notification_id) {
-    const result = await processNotification(adminClient, accessToken, projectId, payload.notification_id);
+    const result = await processNotification(
+      adminClient,
+      accessToken,
+      projectId,
+      payload.notification_id,
+    );
     return json(result);
   }
 
@@ -336,12 +392,19 @@ Deno.serve(async (req: Request) => {
     .select("id")
     .is("push_sent_at", null)
     .lt("push_attempts", 20)
-    .gte("created_at", new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString())
+    .gte(
+      "created_at",
+      new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    )
     .order("created_at", { ascending: true })
     .limit(50);
   if (pending.error) return json({ error: pending.error.message }, 500);
 
   const ids = ((pending.data ?? []) as Json[]).map((row) => String(row.id));
-  const results = await Promise.all(ids.map((id) => processNotification(adminClient, accessToken, projectId, id)));
+  const results = await Promise.all(
+    ids.map((id) =>
+      processNotification(adminClient, accessToken, projectId, id)
+    ),
+  );
   return json({ processed: results.length, results });
 });
