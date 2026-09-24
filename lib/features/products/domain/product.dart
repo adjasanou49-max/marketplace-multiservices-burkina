@@ -23,7 +23,6 @@ class Product {
   final String? imageUrl;
   final String? categoryId;
   final String? shopId;
-  final DateTime? createdAt;
   final bool isActive;
 
   factory Product.fromMap(Map<String, dynamic> map) => Product(
