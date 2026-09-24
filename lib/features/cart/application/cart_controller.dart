@@ -26,14 +26,14 @@ class CartController extends Notifier<List<CartItem>> {
     state = state.where(
       (item) =>
           item.productId != productId ||
-          (variantId != null && item.variantId != variantId),
+          item.variantId != variantId,
     ).toList();
   }
 
   void setQuantity(String productId, int quantity, {String? variantId}) {
     bool matches(CartItem item) =>
         item.productId == productId &&
-        (variantId == null || item.variantId == variantId);
+        item.variantId == variantId;
 
     if (quantity <= 0) {
       state = state.where((item) => !matches(item)).toList();
