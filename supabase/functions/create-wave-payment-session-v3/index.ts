@@ -105,12 +105,13 @@ Deno.serve(async (req: Request) => {
 
   const orderId = body.order_id?.trim();
   let paymentId = body.payment_id?.trim();
+  if (!orderId) return json({ error: "order_required" }, 400);
+
   const defaultReturn = url + "/functions/v1/payment-return";
   const successUrl = Deno.env.get("WAVE_SUCCESS_URL") ||
     defaultReturn + "?status=success&order_id=" + encodeURIComponent(orderId);
   const errorUrl = Deno.env.get("WAVE_ERROR_URL") ||
     defaultReturn + "?status=error&order_id=" + encodeURIComponent(orderId);
-  if (!orderId) return json({ error: "order_required" }, 400);
 
   const supabase = createClient(url, key, {
     global: { headers: { Authorization: auth } },
