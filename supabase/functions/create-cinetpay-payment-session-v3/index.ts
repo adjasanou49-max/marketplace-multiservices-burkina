@@ -160,7 +160,7 @@ Deno.serve(async (req: Request) => {
       error: "cinetpay_api_error",
       provider_status: checkout.status,
       code: response?.code ?? null,
-      message: "CinetPay rejected the payment", 
+      message: "CinetPay rejected the payment",
     }, 502);
   }
 
