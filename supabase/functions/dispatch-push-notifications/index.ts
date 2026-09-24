@@ -404,7 +404,7 @@ Deno.serve(async (req: Request) => {
   let accessToken: string;
   try {
     accessToken = await makeAccessToken(serviceAccount);
-  } catch (error) {
+  } catch (_) {
     return json({ error: "fcm_auth_failed" }, 503);
   }
 
