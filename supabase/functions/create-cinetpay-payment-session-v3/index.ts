@@ -27,7 +27,6 @@ Deno.serve(async (req: Request) => {
 
   const apiKey = Deno.env.get("CINETPAY_API_KEY") ?? "";
   const siteId = Deno.env.get("CINETPAY_SITE_ID") ?? "";
-  const returnUrl = Deno.env.get("CINETPAY_RETURN_URL") || url + "/functions/v1/payment-return?status=success&order_id=" + encodeURIComponent(orderId);
   if (!apiKey || !siteId) {
     return json({ error: "cinetpay_not_configured" }, 503);
   }
@@ -42,6 +41,7 @@ Deno.serve(async (req: Request) => {
   const orderId = body.order_id?.trim();
   const provider = body.provider?.trim().toUpperCase();
   let paymentId = body.payment_id?.trim();
+  const returnUrl = Deno.env.get("CINETPAY_RETURN_URL") || url + "/functions/v1/payment-return?status=success&order_id=" + encodeURIComponent(orderId);
   if (!orderId || !provider || provider !== "CINETPAY") {
     return json({ error: "provider_invalid" }, 400);
   }
