@@ -105,6 +105,16 @@ class AdminDashboardPage extends ConsumerWidget {
                       GoRouter.of(context).push('/admin/products'),
                 ),
               ),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.currency_exchange_outlined),
+                  title: const Text('Remboursements'),
+                  subtitle: const Text('Examiner et traiter les demandes'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () =>
+                      GoRouter.of(context).push('/admin/refunds'),
+                ),
+              ),
             ],
           );
         },
