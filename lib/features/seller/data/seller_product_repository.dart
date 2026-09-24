@@ -28,6 +28,12 @@ class SellerProductRepository {
   }
 
   Future<void> updateActive(String productId, bool active) async {
+    if (active) {
+      throw StateError(
+        'L’activation d’un produit nécessite une approbation administrateur.',
+      );
+    }
+
     final sellerId = await _mySellerId();
     final product = await client
         .from('products')
