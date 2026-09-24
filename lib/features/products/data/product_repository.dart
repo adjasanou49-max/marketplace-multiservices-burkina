@@ -80,9 +80,23 @@ class ProductRepository {
   }
 
   Future<List<Product>> hydrateRows(Iterable<dynamic> rows) async {
-    final products = <Product>[];
+    final input = rows.toList(growable: false);
+    final signedUrlCache = <String, Future<String>>{};
 
-    for (final raw in rows) {
+    Future<String?> signedUrlFor(String path) {
+      final existing = signedUrlCache[path];
+      if (existing != null) {
+        return existing.then<String?>((value) => value);
+      }
+
+      final future = client.storage
+          .from('product-media')
+          .createSignedUrl(path, 3600);
+      signedUrlCache[path] = future;
+      return future.then<String?>((value) => value);
+    }
+
+    Future<Product> hydrate(dynamic raw) async {
       final row = Map<String, dynamic>.from(raw as Map);
       final rawImages = row.remove('product_images');
       String? imageUrl;
@@ -100,9 +114,7 @@ class ProductRepository {
         final path = images.first['storage_path'] as String?;
         if (path != null && path.isNotEmpty) {
           try {
-            imageUrl = await client.storage
-                .from('product-media')
-                .createSignedUrl(path, 3600);
+            imageUrl = await signedUrlFor(path);
           } catch (_) {
             imageUrl = null;
           }
@@ -111,9 +123,9 @@ class ProductRepository {
 
       row['image_url'] = imageUrl;
       row['currency'] = 'XOF';
-      products.add(Product.fromMap(row));
+      return Product.fromMap(row);
     }
 
-    return products;
+    return Future.wait(input.map(hydrate));
   }
 }
