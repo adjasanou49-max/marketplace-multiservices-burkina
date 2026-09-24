@@ -44,7 +44,7 @@ class _SellerStatsPageState extends ConsumerState<SellerStatsPage> {
           ),
         ],
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
+      body: FutureBuilder<SellerDashboard>(
         future: _future,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -67,7 +67,6 @@ class _SellerStatsPageState extends ConsumerState<SellerStatsPage> {
             children: [
               _Metric(title: 'Produits actifs', value: products.toString()),
               _Metric(title: 'Commandes en cours', value: pending.toString()),
-              _Metric(title: 'Commandes livrées', value: delivered.toString()),
               _Metric(title: 'Ventes livrées', value: sales.toStringAsFixed(0) + ' XOF'),
             ],
           );
