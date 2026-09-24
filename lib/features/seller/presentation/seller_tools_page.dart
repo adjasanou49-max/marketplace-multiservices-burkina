@@ -41,9 +41,12 @@ class SellerToolsPage extends StatelessWidget {
             onTap: () => GoRouter.of(context).push('/messages'),
           ),
           const Divider(),
-          const ListTile(
-            leading: Icon(Icons.settings_outlined),
-            title: Text('Paramètres vendeur'),
+          ListTile(
+            leading: const Icon(Icons.settings_outlined),
+            title: const Text('Paramètres vendeur'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () =>
+                GoRouter.of(context).push('/seller/settings'),
           ),
         ],
       ),
