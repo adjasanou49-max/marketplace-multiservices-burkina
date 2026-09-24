@@ -115,6 +115,16 @@ class AdminDashboardPage extends ConsumerWidget {
                       GoRouter.of(context).push('/admin/refunds'),
                 ),
               ),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.account_balance_wallet_outlined),
+                  title: const Text('Reversements vendeurs'),
+                  subtitle: const Text('Valider ou rejeter les demandes de paiement'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () =>
+                      GoRouter.of(context).push('/admin/payouts'),
+                ),
+              ),
             ],
           );
         },
