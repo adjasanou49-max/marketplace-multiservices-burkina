@@ -19,6 +19,7 @@ class MechanicsPage extends ConsumerStatefulWidget {
 
 class _MechanicsPageState extends ConsumerState<MechanicsPage> {
   late Future<List<Map<String, dynamic>>> future;
+  bool _requestingHelp = false;
 
   @override
   void initState() {
@@ -34,7 +35,9 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
 
   Future<void> _requestHelp() async {
     final repository = ref.read(mechanicRepositoryProvider);
-    if (repository == null) return;
+    if (repository == null || _requestingHelp) return;
+
+    setState(() => _requestingHelp = true);
 
     var selectedVehicle = 'MOTORBIKE';
     var selectedProblem = 'PNEU_CREVE';
@@ -121,6 +124,7 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
 
     if (request != true) {
       descriptionController.dispose();
+      if (mounted) setState(() => _requestingHelp = false);
       return;
     }
 
@@ -145,6 +149,7 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
       );
     } finally {
       descriptionController.dispose();
+      if (mounted) setState(() => _requestingHelp = false);
     }
   }
   Future<Position> _getCurrentPosition() async {
@@ -209,9 +214,17 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
       floatingActionButton: repository == null
           ? null
           : FloatingActionButton.extended(
-              onPressed: _requestHelp,
-              icon: const Icon(Icons.warning_amber_outlined),
-              label: const Text('Besoin d’aide'),
+              onPressed: _requestingHelp ? null : _requestHelp,
+              icon: _requestingHelp
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.warning_amber_outlined),
+              label: Text(
+                _requestingHelp ? 'Envoi en cours…' : 'Besoin d’aide',
+              ),
             ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: future,
