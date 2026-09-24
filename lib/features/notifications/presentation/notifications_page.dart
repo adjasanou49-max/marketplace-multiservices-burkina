@@ -57,7 +57,10 @@ class NotificationsPage extends ConsumerWidget {
           }
 
           return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(notificationsProvider),
+            onRefresh: () async {
+              ref.invalidate(notificationsProvider);
+              await ref.read(notificationsProvider.future);
+            },
             child: ListView.separated(
               padding: const EdgeInsets.all(12),
               itemCount: items.length,
