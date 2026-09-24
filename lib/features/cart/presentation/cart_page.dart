@@ -28,13 +28,13 @@ class CartPage extends ConsumerWidget {
                       children: [
                         IconButton(
                           onPressed: () => ref.read(cartControllerProvider.notifier)
-                              .setQuantity(current.productId, current.quantity - 1),
+                              .setQuantity(current.productId, current.quantity - 1, variantId: current.variantId),
                           icon: const Icon(Icons.remove_circle_outline),
                         ),
                         Text('${current.quantity}'),
                         IconButton(
                           onPressed: () => ref.read(cartControllerProvider.notifier)
-                              .setQuantity(current.productId, current.quantity + 1),
+                              .setQuantity(current.productId, current.quantity + 1, variantId: current.variantId),
                           icon: const Icon(Icons.add_circle_outline),
                         ),
                       ],
