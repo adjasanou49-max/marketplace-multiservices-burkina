@@ -1,8 +1,5 @@
 import "jsr:@supabase/functions-js@^2.116.0/edge-runtime.d.ts";
-import {
-  createClient,
-  type SupabaseClient,
-} from "jsr:@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "jsr:@supabase/supabase-js@2";
 
 type Json = Record<string, unknown>;
 
@@ -374,9 +371,13 @@ Deno.serve(async (req: Request) => {
     return json({ error: "not_configured" }, 503);
   }
 
-  const adminClient: AdminClient = createClient<AdminDatabase, "public">(url, adminKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const adminClient: AdminClient = createClient<AdminDatabase, "public">(
+    url,
+    adminKey,
+    {
+      auth: { persistSession: false, autoRefreshToken: false },
+    },
+  );
   const check = await adminClient.rpc("verify_push_dispatch_secret", {
     p_candidate: dispatchSecret,
   });
