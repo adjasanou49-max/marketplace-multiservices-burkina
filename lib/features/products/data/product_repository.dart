@@ -53,9 +53,12 @@ class ProductRepository {
   Future<List<Product>> fetchActivePage({
     String? categoryId,
     int limit = 24,
-    int offset = 0,
+    DateTime? beforeCreatedAt,
+    String? beforeId,
   }) async {
-    if (limit <= 0 || offset < 0) {
+    if (limit <= 0 ||
+        (beforeCreatedAt == null) != (beforeId == null) ||
+        (beforeId != null && beforeId.trim().isEmpty)) {
       throw ArgumentError('Pagination produit invalide.');
     }
 
@@ -63,7 +66,7 @@ class ProductRepository {
         .from('products')
         .select(
           'id,name,slug,description,price,status,category_id,shop_id,'
-          'product_images(storage_path,sort_order)',
+          'created_at,product_images(storage_path,sort_order)',
         )
         .eq('status', 'ACTIVE');
 
@@ -71,11 +74,17 @@ class ProductRepository {
       query = query.eq('category_id', categoryId);
     }
 
-    final end = offset + limit - 1;
+    if (beforeCreatedAt != null && beforeId != null) {
+      final cursor = beforeCreatedAt.toUtc().toIso8601String();
+      query = query.or(
+        'created_at.lt.$cursor,and(created_at.eq.$cursor,id.lt.$beforeId)',
+      );
+    }
+
     final rows = await query
         .order('created_at', ascending: false)
         .order('id', ascending: false)
-        .range(offset, end);
+        .limit(limit);
     return hydrateRows(rows);
   }
 
