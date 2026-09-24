@@ -374,9 +374,7 @@ class _VerticalDiscoveryPageState
             child: ListTile(
               title: Text(unit['name']?.toString() ?? 'Unité'),
               subtitle: Text(
-                (unit['price_per_night']?.toString() ?? '0') +
-                    ' XOF / nuit • capacité ' +
-                    (unit['capacity']?.toString() ?? '0'),
+                '${unit['price_per_night']?.toString() ?? '0'} XOF / nuit • capacité ${unit['capacity']?.toString() ?? '0'}',
               ),
             ),
           );
