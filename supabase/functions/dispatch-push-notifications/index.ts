@@ -1,7 +1,8 @@
 import "jsr:@supabase/functions-js@^2.116.0/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "jsr:@supabase/supabase-js@2";
 
 type Json = Record<string, unknown>;
+type AdminClient = SupabaseClient<any, "public">;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -177,7 +178,7 @@ async function sendToToken(
 }
 
 async function processNotification(
-  adminClient: ReturnType<typeof createClient>,
+  adminClient: AdminClient,
   accessToken: string,
   projectId: string,
   notificationId: string,
@@ -201,7 +202,7 @@ async function processNotification(
     const prefResult = await adminClient
       .from("notification_preferences")
       .select("orders,promotions,messages,delivery,services")
-      .eq("user_id", notification.user_id)
+      .eq("user_id", String(notification.user_id ?? ""))
       .maybeSingle();
 
     if (prefResult.error) throw prefResult.error;
@@ -282,7 +283,7 @@ async function processNotification(
           await adminClient
             .from("notification_devices")
             .update({ active: false, last_seen_at: new Date().toISOString() })
-            .eq("id", device.id);
+            .eq("id", String(device.id ?? ""));
         }
 
         return { token, ...result };
@@ -339,7 +340,7 @@ Deno.serve(async (req: Request) => {
     return json({ error: "not_configured" }, 503);
   }
 
-  const adminClient = createClient(url, adminKey, {
+  const adminClient: AdminClient = createClient<any, "public">(url, adminKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   const check = await adminClient.rpc("verify_push_dispatch_secret", {
