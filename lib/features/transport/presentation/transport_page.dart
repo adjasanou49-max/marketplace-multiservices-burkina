@@ -162,7 +162,12 @@ class _TransportPageState extends ConsumerState<TransportPage> {
         title: const Text('Compagnies de transport'),
         actions: [
           IconButton(
-            onPressed: () => setState(() => future = _load()),
+            onPressed: () {
+              setState(() {
+                future = _load();
+                _ticketsFuture = _loadTickets();
+              });
+            },
             icon: const Icon(Icons.refresh),
           ),
         ],
@@ -176,122 +181,163 @@ class _TransportPageState extends ConsumerState<TransportPage> {
           if (snapshot.hasError) {
             return Center(child: Text('Erreur : ${snapshot.error}'));
           }
+
           final rows = snapshot.data ?? const <Map<String, dynamic>>[];
-          if (rows.isEmpty) {
-            return const Center(
-              child: Text('Aucun départ disponible actuellement.'),
-            );
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.all(12),
-            itemCount: rows.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (_, index) {
-              final row = rows[index];
-              final company = row['company'] is Map
-                  ? Map<String, dynamic>.from(row['company'])
-                  : const <String, dynamic>{};
-              final departure = row['departure_station'] is Map
-                  ? Map<String, dynamic>.from(row['departure_station'])
-                  : const <String, dynamic>{};
-              final arrival = row['arrival_station'] is Map
-                  ? Map<String, dynamic>.from(row['arrival_station'])
-                  : const <String, dynamic>{};
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const CircleAvatar(
-                            child: Icon(Icons.directions_bus_outlined),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              company['name']?.toString() ?? 'Compagnie',
-                              style: Theme.of(context).textTheme.titleMedium,
+          return RefreshIndicator(
+            onRefresh: () async {
+              setState(() {
+                future = _load();
+                _ticketsFuture = _loadTickets();
+              });
+              await Future.wait([future, _ticketsFuture]);
+            },
+            child: ListView(
+              padding: const EdgeInsets.all(12),
+              children: [
+                Text(
+                  'Départs disponibles',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                if (rows.isEmpty)
+                  const Text('Aucun départ disponible actuellement.')
+                else
+                  for (final row in rows) ...[
+                    Builder(
+                      builder: (context) {
+                        final company = row['company'] is Map
+                            ? Map<String, dynamic>.from(row['company'])
+                            : const <String, dynamic>{};
+                        final departure = row['departure_station'] is Map
+                            ? Map<String, dynamic>.from(
+                                row['departure_station'],
+                              )
+                            : const <String, dynamic>{};
+                        final arrival = row['arrival_station'] is Map
+                            ? Map<String, dynamic>.from(row['arrival_station'])
+                            : const <String, dynamic>{};
+
+                        return Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const CircleAvatar(
+                                      child: Icon(
+                                        Icons.directions_bus_outlined,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        company['name']?.toString() ??
+                                            'Compagnie',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${row['price'] ?? 0} XOF',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  '${departure['name'] ?? 'Départ'} → '
+                                  '${arrival['name'] ?? 'Arrivée'}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  '${_time(row['departure_at'])} → '
+                                  '${_time(row['arrival_at'])}',
+                                ),
+                                if (row['route'] is Map)
+                                  Text(
+                                    'Durée : '
+                                    '${(row['route']['duration_minutes'] ?? '—').toString()} min',
+                                  ),
+                                const SizedBox(height: 10),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: FilledButton.icon(
+                                    onPressed: repository == null
+                                        ? null
+                                        : () => _book(row),
+                                    icon: const Icon(
+                                      Icons.confirmation_num_outlined,
+                                    ),
+                                    label: const Text('Réserver'),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          Text(
-                            '${row['price'] ?? 0} XOF',
-                            style: const TextStyle(fontWeight: FontWeight.w700),
+                        );
+                      },
+                    ),
+                    if (row != rows.last) const SizedBox(height: 10),
+                  ],
+                const SizedBox(height: 18),
+                Text(
+                  'Mes billets',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                FutureBuilder<List<Map<String, dynamic>>>(
+                  future: _ticketsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return Text('Erreur billets : ${snapshot.error}');
+                    }
+                    final tickets =
+                        snapshot.data ?? const <Map<String, dynamic>>[];
+                    if (tickets.isEmpty) {
+                      return const Text(
+                        'Aucun billet émis pour le moment. '
+                        'Une réservation doit être payée avant émission du billet.',
+                      );
+                    }
+                    return Column(
+                      children: [
+                        for (final ticket in tickets)
+                          Card(
+                            child: ListTile(
+                              leading: const Icon(
+                                Icons.confirmation_number_outlined,
+                              ),
+                              title: Text(
+                                ticket['passenger_name']?.toString() ??
+                                    'Passager',
+                              ),
+                              subtitle: Text(
+                                'Billet #${ticket['id']?.toString() ?? '—'}'
+                                ' • Place ${ticket['seat_number']?.toString() ?? '—'}'
+                                ' • ${ticket['status']?.toString() ?? '—'}',
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        '${departure['name'] ?? 'Départ'} → ${arrival['name'] ?? 'Arrivée'}',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        '${_time(row['departure_at'])} → ${_time(row['arrival_at'])}',
-                      ),
-                      if (row['route'] is Map)
-                        Text(
-                          'Durée : ${(row['route']['duration_minutes'] ?? '—').toString()} min',
-                        ),
-                      const SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: FilledButton.icon(
-                          onPressed: repository == null ? null : () => _book(row),
-                          icon: const Icon(Icons.confirmation_num_outlined),
-                          label: const Text('Réserver'),
-                        ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    );
+                  },
                 ),
-              );
-            },
-          );
-        },
-      ),
-
-      const SizedBox(height: 18),
-      Text(
-        'Mes billets',
-        style: Theme.of(context).textTheme.titleLarge,
-      ),
-      const SizedBox(height: 8),
-      FutureBuilder<List<Map<String, dynamic>>>(
-        future: _ticketsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Padding(
-              padding: EdgeInsets.all(12),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-          if (snapshot.hasError) {
-            return Text('Erreur billets : ${snapshot.error}');
-          }
-          final tickets = snapshot.data ?? const <Map<String, dynamic>>[];
-          if (tickets.isEmpty) {
-            return const Text(
-              'Aucun billet émis pour le moment. Une réservation doit être payée avant émission du billet.',
-            );
-          }
-          return Column(
-            children: [
-              for (final ticket in tickets)
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.confirmation_number_outlined),
-                    title: Text(
-                      ticket['passenger_name']?.toString() ?? 'Passager',
-                    ),
-                    subtitle: Text(
-                      'Billet #${ticket['id']?.toString() ?? '—'}'
-                      ' • Place ${ticket['seat_number']?.toString() ?? '—'}'
-                      ' • ${ticket['status']?.toString() ?? '—'}',
-                    ),
-                  ),
-                ),
-            ],
+                const SizedBox(height: 24),
+              ],
+            ),
           );
         },
       ),
