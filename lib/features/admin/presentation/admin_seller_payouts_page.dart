@@ -166,7 +166,7 @@ class _AdminSellerPayoutsPageState
       final name = seller['business_name']?.toString().trim();
       if (name != null && name.isNotEmpty) return name;
     }
-    return 'Vendeur ' + (row['seller_id']?.toString() ?? '—');
+    return 'Vendeur ${row['seller_id']?.toString() ?? '—'}';
   }
 
   @override
@@ -190,8 +190,7 @@ class _AdminSellerPayoutsPageState
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                'Chargement impossible : ' +
-                    userFacingError(snapshot.error),
+                'Chargement impossible : ${userFacingError(snapshot.error)}',
               ),
             );
           }
@@ -226,11 +225,11 @@ class _AdminSellerPayoutsPageState
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 4),
-                      Text(amount + ' ' + currency + ' • ' + provider),
+                      Text('$amount $currency • $provider'),
                       const SizedBox(height: 4),
-                      Text('Statut : ' + status),
+                      Text('Statut : $status'),
                       if (reference != null && reference.isNotEmpty)
-                        Text('Référence : ' + reference),
+                        Text('Référence : $reference'),
                       if (isPending) ...[
                         const SizedBox(height: 12),
                         Row(
