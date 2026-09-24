@@ -1,0 +1,52 @@
+begin;
+
+do $block$
+declare
+  r record;
+  v_def text;
+  v_new text;
+begin
+  for r in
+    select p.oid
+    from pg_proc p
+    join pg_namespace n on n.oid=p.pronamespace
+    join pg_language l on l.oid=p.prolang
+    where n.nspname='public'
+      and l.lanname='plpgsql'
+      and p.prosecdef
+      and has_function_privilege('authenticated',p.oid,'EXECUTE')
+      and p.proname in (
+        'accept_mechanic_quote','add_to_cart','apply_to_job','checkout_cart',
+        'create_accommodation_booking','create_beauty_booking','create_digital_order',
+        'create_freight_request','create_home_service_request','create_mechanic_request',
+        'create_parcel_request','create_payment_intent','create_review','create_ride_request',
+        'create_service_request','create_transport_booking_secure','create_vehicle_rental_booking',
+        'enroll_training_course','join_group_buy','prepare_payment_processing',
+        'record_courier_location','request_refund','request_seller_payout_secure',
+        'reserve_event_ticket','schedule_mechanic_time_off','set_cart_item_quantity',
+        'set_mechanic_availability'
+      )
+  loop
+    v_def := pg_get_functiondef(r.oid);
+    if position('private.require_active_account()' in v_def) > 0 then
+      continue;
+    end if;
+
+    v_new := regexp_replace(
+      v_def,
+      E'\n[Bb]egin\n',
+      E'\nbegin\n  perform private.require_active_account();\n',
+      1,
+      1
+    );
+
+    if v_new = v_def then
+      raise exception 'active_account_guard_injection_failed for %', r.oid::regprocedure;
+    end if;
+
+    execute v_new;
+  end loop;
+end;
+$block$;
+
+commit;
