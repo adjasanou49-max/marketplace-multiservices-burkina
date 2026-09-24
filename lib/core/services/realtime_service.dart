@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RealtimeService {
@@ -12,6 +14,11 @@ class RealtimeService {
   }) {
     try {
       final client = Supabase.instance.client;
+      final previous = _channels.remove(key);
+      if (previous != null) {
+        unawaited(client.removeChannel(previous));
+      }
+
       final channel = client.channel(key);
 
       void handleChange(PostgresChangePayload payload) {
