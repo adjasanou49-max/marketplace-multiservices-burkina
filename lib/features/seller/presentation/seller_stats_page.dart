@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/seller_repository.dart';
+import '../domain/seller_dashboard.dart';
 import '../../../core/providers/repository_providers.dart';
 
 final sellerStatsRepositoryProvider = Provider<SellerRepository?>((ref) {
@@ -17,7 +18,7 @@ class SellerStatsPage extends ConsumerStatefulWidget {
 }
 
 class _SellerStatsPageState extends ConsumerState<SellerStatsPage> {
-  late Future<List<Map<String, dynamic>>> _future;
+  late Future<SellerDashboard> _future;
 
   @override
   void initState() {
@@ -25,7 +26,7 @@ class _SellerStatsPageState extends ConsumerState<SellerStatsPage> {
     _future = _load();
   }
 
-  Future<List<Map<String, dynamic>>> _load() async {
+  Future<SellerDashboard> _load() async {
     final repo = ref.read(sellerStatsRepositoryProvider);
     if (repo == null) throw StateError('Authentification requise.');
     return repo.dashboard();
@@ -52,24 +53,14 @@ class _SellerStatsPageState extends ConsumerState<SellerStatsPage> {
           if (snapshot.hasError) {
             return Center(child: Text('Erreur : ' + snapshot.error.toString()));
           }
+          if (!snapshot.hasData) {
+            return const Center(child: Text('Statistiques indisponibles.'));
+          }
 
-          final shops = snapshot.data ?? const <Map<String, dynamic>>[];
-          final products = shops.fold<int>(
-            0,
-            (sum, row) => sum + ((row['active_products'] as num?)?.toInt() ?? 0),
-          );
-          final pending = shops.fold<int>(
-            0,
-            (sum, row) => sum + ((row['pending_orders'] as num?)?.toInt() ?? 0),
-          );
-          final delivered = shops.fold<int>(
-            0,
-            (sum, row) => sum + ((row['delivered_orders'] as num?)?.toInt() ?? 0),
-          );
-          final sales = shops.fold<num>(
-            0,
-            (sum, row) => sum + ((num.tryParse(row['gross_sales']?.toString() ?? '') ?? 0)),
-          );
+          final dashboard = snapshot.data!;
+          final products = dashboard.productCount;
+          final pending = dashboard.pendingOrders;
+          final sales = dashboard.revenue;
 
           return ListView(
             padding: const EdgeInsets.all(16),
