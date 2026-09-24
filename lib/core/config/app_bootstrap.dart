@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../storage/secure_supabase_local_storage.dart';
 import 'app_config.dart';
 
 class AppBootstrap {
@@ -42,6 +43,11 @@ class AppBootstrap {
     await Supabase.initialize(
       url: config.supabaseUrl!,
       publishableKey: config.supabasePublishableKey!,
+      authOptions: FlutterAuthClientOptions(
+        authFlowType: AuthFlowType.pkce,
+        localStorage: SecureSupabaseLocalStorage(),
+        persistSession: true,
+      ),
     );
   }
 }
