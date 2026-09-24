@@ -73,6 +73,12 @@ class _SellerPromotionsPageState
   }
 
   Future<void> _create() async {
+    final form = await showDialog<_PromotionForm>(
+      context: context,
+      builder: (_) => const _PromotionDialog(),
+    );
+    if (form == null || !mounted) return;
+
     String? shopId;
     try {
       shopId = (await _loadBase()).$1;
@@ -80,13 +86,6 @@ class _SellerPromotionsPageState
       _show('Création impossible : $error');
       return;
     }
-    if (!context.mounted) return;
-
-    final form = await showDialog<_PromotionForm>(
-      context: context,
-      builder: (_) => const _PromotionDialog(),
-    );
-    if (form == null) return;
 
     final client = ref.read(supabaseProvider);
     if (client == null) return;
