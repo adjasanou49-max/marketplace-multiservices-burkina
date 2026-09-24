@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../../core/providers/repository_providers.dart';
 import '../data/mechanic_repository.dart';
@@ -34,9 +35,6 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
   Future<void> _requestHelp() async {
     final repository = ref.read(mechanicRepositoryProvider);
     if (repository == null) return;
-
-    final address = await repository.defaultCustomerAddress();
-    if (!mounted) return;
 
     var selectedVehicle = 'MOTORBIKE';
     var selectedProblem = 'PNEU_CREVE';
@@ -100,21 +98,12 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                if (latitude != null && longitude != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      'Position par défaut : ${address?['city'] ?? 'adresse enregistrée'}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  )
-                else
-                  const Padding(
-                    padding: EdgeInsets.only(top: 8),
-                    child: Text(
-                      'Ajoutez une adresse avec GPS pour envoyer votre position.',
-                    ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Votre position actuelle sera récupérée au moment de l’envoi.',
                   ),
+                ),
               ],
             ),
           ),
@@ -134,18 +123,23 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
       ),
     );
 
-    if (request != true || latitude == null || longitude == null) {
+    if (request != true) {
       descriptionController.dispose();
       return;
     }
 
     try {
+      final position = await _getCurrentPosition();
+      if (position == null) {
+        throw StateError('Position actuelle indisponible.');
+      }
+
       final id = await repository.createRequest(
         vehicleType: selectedVehicle,
         problemType: selectedProblem,
         description: descriptionController.text,
-        latitude: latitude.toDouble(),
-        longitude: longitude.toDouble(),
+        latitude: position.latitude,
+        longitude: position.longitude,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -160,6 +154,35 @@ class _MechanicsPageState extends ConsumerState<MechanicsPage> {
       descriptionController.dispose();
     }
   }
+  Future<Position> _getCurrentPosition() async {
+    final enabled = await Geolocator.isLocationServiceEnabled();
+    if (!enabled) {
+      throw StateError(
+        'Activez la localisation du téléphone pour envoyer votre position.',
+      );
+    }
+
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.denied) {
+      throw StateError('Autorisation de localisation refusée.');
+    }
+    if (permission == LocationPermission.deniedForever) {
+      throw StateError(
+        'Autorisation de localisation bloquée. Autorisez-la dans les réglages.',
+      );
+    }
+
+    return Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+      ),
+    );
+  }
+
   String _availabilityLabel(String? status) {
     switch (status) {
       case 'AVAILABLE':
