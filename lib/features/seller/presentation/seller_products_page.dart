@@ -44,30 +44,41 @@ class _SellerProductsPageState extends ConsumerState<SellerProductsPage> {
               subtitle: Text('Stock: ${p['inventory'] is Map ? (p['inventory']['quantity'] ?? 0) : 0}'),
               trailing: Switch(
                 value: p['status']?.toString() == 'ACTIVE',
-                onChanged: (v) async {
-                  final repo = ref.read(sellerProductRepositoryProvider);
-                  final productId = p['id']?.toString();
-                  if (repo == null || productId == null || productId.isEmpty) {
-                    return;
-                  }
-                  if (_updatingProducts.contains(productId)) return;
+                onChanged: p['status']?.toString() == 'ACTIVE'
+                    ? (v) async {
+                        final repo =
+                            ref.read(sellerProductRepositoryProvider);
+                        final productId = p['id']?.toString();
+                        if (repo == null ||
+                            productId == null ||
+                            productId.isEmpty ||
+                            _updatingProducts.contains(productId)) {
+                          return;
+                        }
 
-                  setState(() => _updatingProducts.add(productId));
-                  try {
-                    await repo.updateActive(productId, v);
-                    if (!mounted) return;
-                    setState(() => future = _load());
-                  } catch (error) {
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Modification impossible : $error')),
-                    );
-                  } finally {
-                    if (mounted) {
-                      setState(() => _updatingProducts.remove(productId));
-                    }
-                  }
-                },
+                        setState(() => _updatingProducts.add(productId));
+                        try {
+                          await repo.updateActive(productId, false);
+                          if (!mounted) return;
+                          setState(() => future = _load());
+                        } catch (error) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Modification impossible : $error',
+                              ),
+                            ),
+                          );
+                        } finally {
+                          if (mounted) {
+                            setState(
+                              () => _updatingProducts.remove(productId),
+                            );
+                          }
+                        }
+                      }
+                    : null,
               ),
             );
           },
