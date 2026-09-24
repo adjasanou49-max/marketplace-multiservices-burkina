@@ -1,8 +1,41 @@
 import "jsr:@supabase/functions-js@^2.116.0/edge-runtime.d.ts";
-import { createClient, type SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import {
+  createClient,
+  type SupabaseClient,
+} from "jsr:@supabase/supabase-js@2";
 
 type Json = Record<string, unknown>;
-type AdminClient = SupabaseClient<any, "public">;
+
+type AdminSchema = {
+  Tables: Record<
+    string,
+    {
+      Row: Record<string, unknown>;
+      Insert: Record<string, unknown>;
+      Update: Record<string, unknown>;
+      Relationships: [];
+    }
+  >;
+  Views: Record<
+    string,
+    {
+      Row: Record<string, unknown>;
+      Relationships: [];
+    }
+  >;
+  Functions: Record<
+    string,
+    {
+      Args: Record<string, unknown>;
+      Returns: unknown;
+    }
+  >;
+  Enums: Record<string, string>;
+  CompositeTypes: Record<string, Record<string, unknown>>;
+};
+
+type AdminDatabase = { public: AdminSchema };
+type AdminClient = SupabaseClient<AdminDatabase, "public">;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -188,7 +221,8 @@ async function processNotification(
   });
 
   if (claimed.error) throw claimed.error;
-  if (!Array.isArray(claimed.data) || claimed.data.length === 0) {
+  const claimedRows = Array.isArray(claimed.data) ? claimed.data : [];
+  if (claimedRows.length === 0) {
     return {
       id: notificationId,
       skipped: true,
@@ -196,7 +230,7 @@ async function processNotification(
     };
   }
 
-  const notification = claimed.data[0] as Json;
+  const notification = claimedRows[0] as Json;
 
   try {
     const prefResult = await adminClient
@@ -340,7 +374,7 @@ Deno.serve(async (req: Request) => {
     return json({ error: "not_configured" }, 503);
   }
 
-  const adminClient: AdminClient = createClient<any, "public">(url, adminKey, {
+  const adminClient: AdminClient = createClient<AdminDatabase, "public">(url, adminKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   const check = await adminClient.rpc("verify_push_dispatch_secret", {
