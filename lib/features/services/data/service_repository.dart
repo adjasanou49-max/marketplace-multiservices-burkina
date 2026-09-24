@@ -22,7 +22,8 @@ class ServiceRepository {
         .from('services')
         .select('id,provider_id,category,name,description,price,active,created_at,service_providers!inner(display_name,verification_status,active)')
         .eq('active', true)
-        .eq('service_providers.active', true);
+        .eq('service_providers.active', true)
+        .eq('service_providers.verification_status', 'VERIFIED');
     if (category != null && category.isNotEmpty) query = query.eq('category', category);
     final rows = await query.order('created_at', ascending: false).limit(limit);
     return (rows as List).map((row) => Map<String, dynamic>.from(row as Map)).toList();
