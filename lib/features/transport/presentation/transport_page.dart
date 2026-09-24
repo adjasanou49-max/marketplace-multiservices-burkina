@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/repository_providers.dart';
 import '../data/transport_repository.dart';
@@ -33,7 +34,14 @@ class _TransportPageState extends ConsumerState<TransportPage> {
 
   Future<void> _book(Map<String, dynamic> trip) async {
     final repository = ref.read(transportRepositoryProvider);
-    if (repository == null) return;
+    final client = ref.read(supabaseProvider);
+    if (repository == null || client == null) return;
+
+    if (client.auth.currentUser == null) {
+      if (!mounted) return;
+      context.push('/auth');
+      return;
+    }
 
     final nameController = TextEditingController();
     var quantity = 1;
