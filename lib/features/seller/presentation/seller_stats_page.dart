@@ -51,7 +51,7 @@ class _SellerStatsPageState extends ConsumerState<SellerStatsPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Erreur : ' + snapshot.error.toString()));
+            return Center(child: Text('Erreur : ${snapshot.error}'));
           }
           if (!snapshot.hasData) {
             return const Center(child: Text('Statistiques indisponibles.'));
@@ -67,7 +67,7 @@ class _SellerStatsPageState extends ConsumerState<SellerStatsPage> {
             children: [
               _Metric(title: 'Produits actifs', value: products.toString()),
               _Metric(title: 'Commandes en cours', value: pending.toString()),
-              _Metric(title: 'Ventes livrées', value: sales.toStringAsFixed(0) + ' XOF'),
+              _Metric(title: 'Ventes livrées', value: '${sales.toStringAsFixed(0)} XOF'),
             ],
           );
         },
