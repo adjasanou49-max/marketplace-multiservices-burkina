@@ -519,7 +519,7 @@ class _VerticalDiscoveryPageState
           }
           if (snapshot.hasError) {
             return Center(
-              child: Text('Erreur : ' + snapshot.error.toString()),
+              child: Text('Erreur : ${snapshot.error}'),
             );
           }
 
