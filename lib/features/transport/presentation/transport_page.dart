@@ -19,17 +19,28 @@ class TransportPage extends ConsumerStatefulWidget {
 
 class _TransportPageState extends ConsumerState<TransportPage> {
   late Future<List<Map<String, dynamic>>> future;
+  late Future<List<Map<String, dynamic>>> _ticketsFuture;
 
   @override
   void initState() {
     super.initState();
     future = _load();
+    _ticketsFuture = _loadTickets();
   }
 
   Future<List<Map<String, dynamic>>> _load() async {
     final repository = ref.read(transportRepositoryProvider);
     if (repository == null) return const [];
     return repository.upcomingTrips();
+  }
+
+  Future<List<Map<String, dynamic>>> _loadTickets() {
+    final repository = ref.read(transportRepositoryProvider);
+    final client = ref.read(supabaseProvider);
+    if (repository == null || client?.auth.currentUser == null) {
+      return Future.value(const []);
+    }
+    return repository.myTickets();
   }
 
   Future<void> _book(Map<String, dynamic> trip) async {
@@ -120,6 +131,7 @@ class _TransportPageState extends ConsumerState<TransportPage> {
         passengerName: nameController.text,
       );
       if (!mounted) return;
+      setState(() => _ticketsFuture = _loadTickets());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Réservation créée : $bookingId')),
       );
@@ -235,6 +247,51 @@ class _TransportPageState extends ConsumerState<TransportPage> {
                 ),
               );
             },
+          );
+        },
+      ),
+
+      const SizedBox(height: 18),
+      Text(
+        'Mes billets',
+        style: Theme.of(context).textTheme.titleLarge,
+      ),
+      const SizedBox(height: 8),
+      FutureBuilder<List<Map<String, dynamic>>>(
+        future: _ticketsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Padding(
+              padding: EdgeInsets.all(12),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (snapshot.hasError) {
+            return Text('Erreur billets : ${snapshot.error}');
+          }
+          final tickets = snapshot.data ?? const <Map<String, dynamic>>[];
+          if (tickets.isEmpty) {
+            return const Text(
+              'Aucun billet émis pour le moment. Une réservation doit être payée avant émission du billet.',
+            );
+          }
+          return Column(
+            children: [
+              for (final ticket in tickets)
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.confirmation_number_outlined),
+                    title: Text(
+                      ticket['passenger_name']?.toString() ?? 'Passager',
+                    ),
+                    subtitle: Text(
+                      'Billet #${ticket['id']?.toString() ?? '—'}'
+                      ' • Place ${ticket['seat_number']?.toString() ?? '—'}'
+                      ' • ${ticket['status']?.toString() ?? '—'}',
+                    ),
+                  ),
+                ),
+            ],
           );
         },
       ),
