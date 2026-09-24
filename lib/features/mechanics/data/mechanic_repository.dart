@@ -14,6 +14,7 @@ class MechanicRepository {
           'id,display_name,phone,verification_status,active,service_radius_km',
         )
         .eq('active', true)
+        .eq('verification_status', 'VERIFIED')
         .order('display_name')
         .limit(limit);
 
