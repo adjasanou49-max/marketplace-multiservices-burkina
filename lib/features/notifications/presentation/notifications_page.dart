@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/repository_providers.dart';
@@ -41,6 +42,11 @@ class NotificationsPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Notifications'),
         actions: [
+          IconButton(
+            tooltip: 'Préférences',
+            onPressed: () => GoRouter.of(context).push('/notification-preferences'),
+            icon: const Icon(Icons.settings_outlined),
+          ),
           IconButton(
             tooltip: 'Tout marquer comme lu',
             onPressed: repository == null ? null : markAll,
