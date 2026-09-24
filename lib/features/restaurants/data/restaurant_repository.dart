@@ -16,6 +16,7 @@ class RestaurantRepository {
         )
         .eq('delivery_available', true)
         .eq('shops.status', 'ACTIVE')
+        .eq('shops.verification_status', 'VERIFIED')
         .limit(limit);
 
     return (rows as List)
