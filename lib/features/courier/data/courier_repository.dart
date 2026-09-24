@@ -13,7 +13,23 @@ class CourierRepository {
   }
 
   Future<List<Map<String,dynamic>>> activeLocations(String courierId) async {
-    final rows=await client.from('courier_locations').select('id,location,accuracy_m,recorded_at').eq('courier_id',courierId).order('recorded_at',ascending:false).limit(20);
-    return (rows as List).map((e)=>Map<String,dynamic>.from(e as Map)).toList();
+    final user = client.auth.currentUser;
+    if (user == null) {
+      throw StateError('Utilisateur non authentifié');
+    }
+    if (courierId != user.id) {
+      throw StateError('Accès aux positions du livreur refusé');
+    }
+
+    final rows = await client
+        .from('courier_locations')
+        .select('id,location,accuracy_m,recorded_at')
+        .eq('courier_id', user.id)
+        .order('recorded_at', ascending: false)
+        .limit(20);
+
+    return (rows as List)
+        .map((e) => Map<String, dynamic>.from(e as Map))
+        .toList();
   }
 }
