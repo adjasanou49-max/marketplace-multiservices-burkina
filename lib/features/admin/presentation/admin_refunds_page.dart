@@ -161,7 +161,7 @@ class _AdminRefundsPageState extends ConsumerState<AdminRefundsPage> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Opération refusée : ' + error.toString())),
+        SnackBar(content: Text('Opération refusée : $error')),
       );
     } finally {
       if (mounted) setState(() => _working = false);
@@ -218,19 +218,10 @@ class _AdminRefundsPageState extends ConsumerState<AdminRefundsPage> {
                     ),
                   ),
                   title: Text(
-                    (row['customer_name']?.toString() ?? 'Client') +
-                        ' • ' +
-                        amount +
-                        ' ' +
-                        (row['currency']?.toString() ?? 'XOF'),
+                    ${row['customer_name']?.toString() ?? 'Client'} • $amount ${row['currency']?.toString() ?? 'XOF'},
                   ),
                   subtitle: Text(
-                    'Statut : ' +
-                        status +
-                        ' • Fournisseur : ' +
-                        provider +
-                        '\n' +
-                        reason,
+                    'Statut : $status • Fournisseur : $provider\n$reason,
                   ),
                   trailing: PopupMenuButton<String>(
                     enabled: !_working && id.isNotEmpty,
