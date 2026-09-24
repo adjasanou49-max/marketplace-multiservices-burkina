@@ -18,6 +18,7 @@ class GroupBuyPage extends ConsumerStatefulWidget {
 
 class _GroupBuyPageState extends ConsumerState<GroupBuyPage> {
   late Future<List<Map<String, dynamic>>> future;
+  final Set<String> _joiningGroups = <String>{};
 
   @override
   void initState() {
@@ -33,10 +34,14 @@ class _GroupBuyPageState extends ConsumerState<GroupBuyPage> {
 
   Future<void> _join(Map<String, dynamic> group) async {
     final repository = ref.read(groupBuyRepositoryProvider);
-    if (repository == null) return;
+    final groupId = group['id']?.toString() ?? '';
+    if (repository == null || groupId.isEmpty) return;
+    if (_joiningGroups.contains(groupId)) return;
+
+    setState(() => _joiningGroups.add(groupId));
     final messenger = ScaffoldMessenger.of(context);
     try {
-      final memberId = await repository.join(groupBuyId: group['id'].toString());
+      final memberId = await repository.join(groupBuyId: groupId);
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(content: Text('Participation enregistrée : $memberId')),
@@ -45,6 +50,10 @@ class _GroupBuyPageState extends ConsumerState<GroupBuyPage> {
     } catch (error) {
       if (!mounted) return;
       messenger.showSnackBar(SnackBar(content: Text('Erreur : $error')));
+    } finally {
+      if (mounted) {
+        setState(() => _joiningGroups.remove(groupId));
+      }
     }
   }
 
@@ -85,8 +94,21 @@ class _GroupBuyPageState extends ConsumerState<GroupBuyPage> {
                       '$current / $target participants • ${group['group_price'] ?? 0} XOF',
                     ),
                     trailing: FilledButton(
-                      onPressed: current >= target ? null : () => _join(group),
-                      child: const Text('Rejoindre'),
+                      onPressed: current >= target ||
+                              _joiningGroups.contains(
+                                group['id']?.toString(),
+                              )
+                          ? null
+                          : () => _join(group),
+                      child: _joiningGroups.contains(
+                                group['id']?.toString(),
+                              )
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Rejoindre'),
                     ),
                   ),
                 );
