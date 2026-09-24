@@ -11,7 +11,7 @@ class MechanicRepository {
     final rows = await client
         .from('mechanics')
         .select(
-          'id,display_name,phone,verification_status,active,service_radius_km',
+          'id,display_name,verification_status,active,service_radius_km',
         )
         .eq('active', true)
         .eq('verification_status', 'VERIFIED')
