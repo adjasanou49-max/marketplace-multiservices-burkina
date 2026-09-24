@@ -14,9 +14,12 @@ class RestaurantDetailPage extends ConsumerWidget {
         .from('restaurant_profiles')
         .select(
           'id,shop_id,cuisine_types,preparation_time_min,delivery_available,'
-          'shops(name,logo_url,cover_url,description,phone,address,status,verification_status)',
+          'shops!inner(name,logo_url,cover_url,description,phone,address,status,verification_status)',
         )
         .eq('id', restaurantId)
+        .eq('delivery_available', true)
+        .eq('shops.status', 'ACTIVE')
+        .eq('shops.verification_status', 'VERIFIED')
         .single();
 
     final menus = await client
