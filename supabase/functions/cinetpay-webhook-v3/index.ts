@@ -53,7 +53,6 @@ Deno.serve(async (req: Request) => {
   }
 
   if (req.method === "GET") return new Response("ok", { status: 200 });
-  if (req.method === "GET") return new Response("ok", { status: 200 });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   const raw = await req.text();
@@ -157,7 +156,7 @@ Deno.serve(async (req: Request) => {
     p_amount: providerAmount,
     p_payload: data,
   });
-  if (error) return json({ error: error.message }, 409);
+  if (error) return json({ error: "payment_event_processing_failed" }, 409);
 
   return json({ ok: true, status: internalStatus }, 200);
 });
