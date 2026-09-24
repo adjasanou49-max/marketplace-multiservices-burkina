@@ -228,7 +228,7 @@ async function processNotification(
   }
 
   const notification = claimedRows[0] as Json;
-  const userId = String(userId ?? "").trim();
+  const userId = String(notification.user_id ?? "").trim();
   if (!userId) {
     throw new Error("NOTIFICATION_USER_INVALID");
   }
