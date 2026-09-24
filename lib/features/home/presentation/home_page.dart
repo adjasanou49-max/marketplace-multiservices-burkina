@@ -389,7 +389,6 @@ class _ServiceModuleSliver extends ConsumerWidget {
         final visible = modules
             .where(
               (module) => const <String>{
-                '/',
                 '/restaurants',
                 '/transport',
                 '/mechanics',
@@ -489,6 +488,8 @@ class _ModuleShortcut extends StatelessWidget {
 
   IconData _moduleIcon(String? name) {
     switch (name) {
+      case 'storefront':
+        return Icons.storefront_outlined;
       case 'restaurant':
         return Icons.restaurant_outlined;
       case 'directions_bus':
@@ -533,6 +534,10 @@ class _ModuleShortcut extends StatelessWidget {
         return Icons.camera_alt_outlined;
       case 'inventory_2':
         return Icons.inventory_2_outlined;
+      case 'local_offer':
+        return Icons.local_offer_outlined;
+      case 'favorite':
+        return Icons.favorite_outline;
       default:
         return Icons.apps_outlined;
     }
