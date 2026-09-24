@@ -23,7 +23,10 @@ class ProductRepository {
       query = query.eq('category_id', categoryId);
     }
 
-    final rows = await query.order('created_at', ascending: false).limit(limit);
+    final rows = await query
+        .order('created_at', ascending: false)
+        .order('id', ascending: false)
+        .limit(limit);
     return hydrateRows(rows);
   }
 
@@ -71,6 +74,7 @@ class ProductRepository {
     final end = offset + limit - 1;
     final rows = await query
         .order('created_at', ascending: false)
+        .order('id', ascending: false)
         .range(offset, end);
     return hydrateRows(rows);
   }
