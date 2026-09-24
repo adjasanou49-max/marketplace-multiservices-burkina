@@ -62,9 +62,10 @@ class BookingsRepository {
     required String userId,
     required String kind,
     required String fields,
+    String orderColumn = 'created_at',
   }) async {
     try {
-      final rows = await client.from(table).select(fields).eq(userColumn, userId).order('created_at', ascending: false).limit(100);
+      final rows = await client.from(table).select(fields).eq(userColumn, userId).order(orderColumn, ascending: false).limit(100);
       return (rows as List).map((raw) {
         final row = Map<String, dynamic>.from(raw as Map);
         return BookingRecord(
