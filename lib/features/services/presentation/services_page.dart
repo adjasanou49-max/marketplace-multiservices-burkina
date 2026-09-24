@@ -18,6 +18,7 @@ class ServicesPage extends ConsumerStatefulWidget {
 
 class _ServicesPageState extends ConsumerState<ServicesPage> {
   String? category;
+  final Set<String> _requestingServiceIds = <String>{};
   late Future<List<Map<String, dynamic>>> categoriesFuture;
   late Future<List<Map<String, dynamic>>> servicesFuture;
 
@@ -39,7 +40,12 @@ class _ServicesPageState extends ConsumerState<ServicesPage> {
 
   Future<void> _requestService(Map<String, dynamic> service) async {
     final repository = ref.read(serviceRepositoryProvider);
-    if (repository == null) return;
+    final serviceId = service['id']?.toString() ?? '';
+    if (repository == null || serviceId.isEmpty) return;
+    if (_requestingServiceIds.contains(serviceId)) return;
+
+    setState(() => _requestingServiceIds.add(serviceId));
+
     final controller = TextEditingController();
     final description = await showDialog<String>(
       context: context,
@@ -60,11 +66,16 @@ class _ServicesPageState extends ConsumerState<ServicesPage> {
       ),
     );
     controller.dispose();
-    if (!mounted || description == null) return;
+    if (description == null) {
+      if (mounted) setState(() => _requestingServiceIds.remove(serviceId));
+      return;
+    }
+    if (!mounted) return;
+
     final messenger = ScaffoldMessenger.of(context);
     try {
       final requestId = await repository.createRequest(
-        serviceId: service['id'].toString(),
+        serviceId: serviceId,
         description: description,
       );
       if (!mounted) return;
@@ -72,6 +83,10 @@ class _ServicesPageState extends ConsumerState<ServicesPage> {
     } catch (error) {
       if (!mounted) return;
       messenger.showSnackBar(SnackBar(content: Text('Erreur : $error')));
+    } finally {
+      if (mounted) {
+        setState(() => _requestingServiceIds.remove(serviceId));
+      }
     }
   }
 
@@ -156,7 +171,11 @@ class _ServicesPageState extends ConsumerState<ServicesPage> {
                               '${provider['display_name'] ?? 'Prestataire'}${price == null ? '' : ' • $price XOF'}',
                             ),
                             trailing: const Icon(Icons.chevron_right),
-                            onTap: () => _requestService(service),
+                            onTap: _requestingServiceIds.contains(
+                                      service['id']?.toString(),
+                                    )
+                                ? null
+                                : () => _requestService(service),
                           ),
                         );
                       },
