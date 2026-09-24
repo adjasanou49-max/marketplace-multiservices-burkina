@@ -17,7 +17,8 @@ final productsFeedProvider =
 class ProductsFeedController extends AutoDisposeAsyncNotifier<List<Product>> {
   static const _pageSize = 24;
 
-  int _offset = 0;
+  DateTime? _cursorCreatedAt;
+  String? _cursorId;
   bool _hasMore = true;
   bool _loadingMore = false;
 
@@ -30,9 +31,16 @@ class ProductsFeedController extends AutoDisposeAsyncNotifier<List<Product>> {
     }
 
     final page = await repository.fetchActivePage(limit: _pageSize);
-    _offset = page.length;
-    _hasMore = page.length == _pageSize;
+    _updateCursor(page);
+    _hasMore = page.length == _pageSize && _cursorCreatedAt != null;
     return page;
+  }
+
+  void _updateCursor(List<Product> page) {
+    if (page.isEmpty) return;
+    final last = page.last;
+    _cursorCreatedAt = last.createdAt;
+    _cursorId = last.createdAt == null ? null : last.id;
   }
 
   Future<void> loadMore() async {
@@ -49,7 +57,8 @@ class ProductsFeedController extends AutoDisposeAsyncNotifier<List<Product>> {
     try {
       final page = await repository.fetchActivePage(
         limit: _pageSize,
-        offset: _offset,
+        beforeCreatedAt: _cursorCreatedAt,
+        beforeId: _cursorId,
       );
 
       final ids = current.map((product) => product.id).toSet();
@@ -58,12 +67,12 @@ class ProductsFeedController extends AutoDisposeAsyncNotifier<List<Product>> {
           if (!ids.contains(product.id)) product,
       ];
 
-      _offset += page.length;
-      _hasMore = page.length == _pageSize;
+      _updateCursor(page);
+      _hasMore = page.length == _pageSize && _cursorCreatedAt != null;
 
       if (uniquePage.isNotEmpty) {
         state = AsyncData([...current, ...uniquePage]);
-      } else if (page.isEmpty) {
+      } else if (page.isEmpty || _cursorCreatedAt == null) {
         _hasMore = false;
       }
     } catch (error, stackTrace) {
