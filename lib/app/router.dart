@@ -45,6 +45,8 @@ import '../features/delivery/presentation/delivery_tracking_page.dart';
 import '../features/services/presentation/services_page.dart';
 import '../features/group_buy/presentation/group_buy_page.dart';
 import '../features/expiry/presentation/expiry_page.dart';
+import '../features/verticals/data/vertical_repository.dart';
+import '../features/verticals/presentation/vertical_discovery_page.dart';
 
 class _AuthRefreshNotifier extends ChangeNotifier {
   _AuthRefreshNotifier() {
@@ -68,6 +70,7 @@ class _AuthRefreshNotifier extends ChangeNotifier {
 
 String? _routeGuard(BuildContext context, GoRouterState state) {
   const protectedPrefixes = [
+    '/cart',
     '/checkout',
     '/orders',
     '/order',
@@ -172,6 +175,22 @@ GoRouter createAppRouter() {
  GoRoute(path:'/services',builder:(c,s)=>const ServicesPage()),
  GoRoute(path:'/group-buy',builder:(c,s)=>const GroupBuyPage()),
  GoRoute(path:'/expiry',builder:(c,s)=>const ExpiryPage()),
+ GoRoute(path:'/rides',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.rides)),
+ GoRoute(path:'/rentals',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.rentals)),
+ GoRoute(path:'/real-estate',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.realEstate)),
+ GoRoute(path:'/accommodations',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.accommodations)),
+ GoRoute(path:'/events',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.events)),
+ GoRoute(path:'/jobs',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.jobs)),
+ GoRoute(path:'/professionals',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.professionals)),
+ GoRoute(path:'/agriculture',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.agriculture)),
+ GoRoute(path:'/freight',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.freight)),
+ GoRoute(path:'/health',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.health)),
+ GoRoute(path:'/beauty',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.beauty)),
+ GoRoute(path:'/home-services',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.homeServices)),
+ GoRoute(path:'/digital',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.digital)),
+ GoRoute(path:'/training',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.training)),
+ GoRoute(path:'/creative',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.creative)),
+ GoRoute(path:'/parcels',builder:(c,s)=>const VerticalDiscoveryPage(module: VerticalModule.parcels)),
   ],
 );
 }
