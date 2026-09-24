@@ -154,7 +154,7 @@ class _SellerCouponsPageState extends ConsumerState<SellerCouponsPage> {
                 child: SwitchListTile(
                   title: Text(coupon['code']?.toString() ?? 'COUPON'),
                   subtitle: Text(
-                    '${type} $value • utilisations $used/$max\nExpire : ${coupon['ends_at']?.toString() ?? '-'}',
+                    '$type $value • utilisations $used/$max\nExpire : ${coupon['ends_at']?.toString() ?? '-'}',
                   ),
                   value: coupon['active'] == true,
                   onChanged: (value) => _toggle(coupon, value),
@@ -298,7 +298,7 @@ class _CouponDialogState extends State<_CouponDialog> {
               initialDate: DateTime.now().add(const Duration(days: 30)),
             );
             if (ends == null) return;
-            if (!mounted) return;
+            if (!context.mounted) return;
 
             Navigator.pop(
               context,
