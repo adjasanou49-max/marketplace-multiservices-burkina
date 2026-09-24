@@ -28,6 +28,10 @@ class FollowsPage extends ConsumerWidget {
         onRefresh: () async {
           ref.invalidate(favoriteProductsProvider);
           ref.invalidate(followedShopsProvider);
+          await Future.wait([
+            ref.read(favoriteProductsProvider.future),
+            ref.read(followedShopsProvider.future),
+          ]);
         },
         child: ListView(
           padding: const EdgeInsets.all(12),
