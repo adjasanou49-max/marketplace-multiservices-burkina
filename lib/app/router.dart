@@ -97,7 +97,7 @@ String? _routeGuard(BuildContext context, GoRouterState state) {
   try {
     authenticated = Supabase.instance.client.auth.currentSession != null;
   } catch (_) {
-    return null;
+    return protected ? '/auth' : null;
   }
 
   if (!authenticated && protected) return '/auth';
