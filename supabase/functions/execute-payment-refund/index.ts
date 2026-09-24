@@ -65,7 +65,7 @@ Deno.serve(async (req: Request) => {
       p_refund_id: refundId,
     },
   );
-  if (beginError) return json({ error: beginError.message }, 409);
+  if (beginError) return json({ error: "refund_action_failed" }, 409);
   if (!Array.isArray(refundRows) || refundRows.length === 0) {
     return json({ error: "refund_not_found" }, 404);
   }
@@ -156,7 +156,7 @@ Deno.serve(async (req: Request) => {
 
   if (completeError) {
     return json({
-      error: completeError.message,
+      error: "refund_completion_failed",
       refund_provider_confirmed: true,
       refund_id: refundId,
     }, 409);

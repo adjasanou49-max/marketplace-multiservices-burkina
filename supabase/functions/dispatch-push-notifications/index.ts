@@ -328,7 +328,7 @@ async function processNotification(
     const sent = results.filter((item) => item.ok).length;
     const errors = results
       .filter((item) => !item.ok)
-      .map((item) => item.body?.error?.message ?? "FCM_SEND_FAILED")
+      .map(() => "FCM_SEND_FAILED")
       .slice(0, 5);
 
     await adminClient
@@ -338,8 +338,8 @@ async function processNotification(
         push_processing_at: null,
         push_attempts: Number(notification.push_attempts ?? 0) + 1,
         push_error: sent > 0
-          ? errors.length ? errors.join(" | ") : null
-          : errors.join(" | ") || "FCM_SEND_FAILED",
+          ? errors.length ? "FCM_SEND_FAILED" : null
+          : "FCM_SEND_FAILED",
       })
       .eq("id", notificationId);
 
@@ -355,9 +355,7 @@ async function processNotification(
       .update({
         push_processing_at: null,
         push_attempts: Number(notification.push_attempts ?? 0) + 1,
-        push_error: error instanceof Error
-          ? error.message
-          : "PUSH_PROCESSING_FAILED",
+        push_error: "PUSH_PROCESSING_FAILED",
       })
       .eq("id", notificationId);
 
@@ -407,9 +405,7 @@ Deno.serve(async (req: Request) => {
   try {
     accessToken = await makeAccessToken(serviceAccount);
   } catch (error) {
-    return json({
-      error: error instanceof Error ? error.message : "fcm_auth_failed",
-    }, 503);
+    return json({ error: "fcm_auth_failed" }, 503);
   }
 
   let payload: { notification_id?: string };
@@ -440,7 +436,7 @@ Deno.serve(async (req: Request) => {
     )
     .order("created_at", { ascending: true })
     .limit(50);
-  if (pending.error) return json({ error: pending.error.message }, 500);
+  if (pending.error) return json({ error: "notifications_fetch_failed" }, 500);
 
   const ids = ((pending.data ?? []) as Json[]).map((row) => String(row.id));
   const results = await Promise.all(

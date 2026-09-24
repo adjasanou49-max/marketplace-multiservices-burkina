@@ -65,7 +65,7 @@ Deno.serve(async (req: Request) => {
       p_order_id: orderId,
       p_provider: provider,
     });
-    if (error) return json({ error: error.message }, 409);
+    if (error) return json({ error: "payment_operation_failed" }, 409);
     paymentId = String(data);
   }
 
@@ -79,7 +79,7 @@ Deno.serve(async (req: Request) => {
     paymentRows.length === 0
   ) {
     return json(
-      { error: paymentError?.message ?? "payment_not_found" },
+      { error: "payment_not_found" },
       404,
     );
   }
@@ -160,8 +160,7 @@ Deno.serve(async (req: Request) => {
       error: "cinetpay_api_error",
       provider_status: checkout.status,
       code: response?.code ?? null,
-      message: response?.message ?? response?.description ??
-        "CinetPay rejected the payment",
+      message: "CinetPay rejected the payment", 
     }, 502);
   }
 
@@ -178,7 +177,7 @@ Deno.serve(async (req: Request) => {
       },
     },
   );
-  if (prepareError) return json({ error: prepareError.message }, 409);
+  if (prepareError) return json({ error: "payment_processing_failed" }, 409);
 
   return json({
     payment_id: paymentId,

@@ -123,7 +123,7 @@ Deno.serve(async (req: Request) => {
       p_order_id: orderId,
       p_provider: "WAVE",
     });
-    if (error) return json({ error: error.message }, 409);
+    if (error) return json({ error: "payment_operation_failed" }, 409);
     paymentId = String(data);
   }
 
@@ -137,7 +137,7 @@ Deno.serve(async (req: Request) => {
     paymentRows.length === 0
   ) {
     return json(
-      { error: paymentError?.message ?? "payment_not_found" },
+      { error: "payment_not_found" },
       404,
     );
   }
@@ -195,9 +195,7 @@ Deno.serve(async (req: Request) => {
     return json({
       error: "wave_api_error",
       provider_status: response.status,
-      message: wave?.message ??
-        wave?.error ??
-        "Wave rejected the checkout session",
+      message: "Wave rejected the checkout session", 
     }, 502);
   }
 
@@ -223,7 +221,7 @@ Deno.serve(async (req: Request) => {
       },
     },
   );
-  if (prepareError) return json({ error: prepareError.message }, 409);
+  if (prepareError) return json({ error: "payment_processing_failed" }, 409);
 
   return json({
     payment_id: paymentId,
