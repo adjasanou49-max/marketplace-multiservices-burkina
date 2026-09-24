@@ -16,6 +16,7 @@ import '../features/admin/presentation/admin_dashboard_page.dart';
 import '../features/admin/presentation/admin_accounts_page.dart';
 import '../features/admin/presentation/admin_products_page.dart';
 import '../features/admin/presentation/admin_modules_page.dart';
+import '../features/admin/presentation/admin_refunds_page.dart';
 import '../features/admin/presentation/admin_delivery_pricing_page.dart';
 import '../features/orders/presentation/orders_page.dart';
 import '../features/addresses/presentation/addresses_page.dart';
@@ -145,6 +146,7 @@ GoRouter createAppRouter() {
  GoRoute(path:'/admin/products',builder:(c,s)=>const AdminProductsPage()),
  GoRoute(path:'/admin/modules',builder:(c,s)=>const AdminModulesPage()),
  GoRoute(path:'/admin/delivery-pricing',builder:(c,s)=>const AdminDeliveryPricingPage()),
+ GoRoute(path:'/admin/refunds',builder:(c,s)=>const AdminRefundsPage()),
  GoRoute(path:'/orders',builder:(c,s)=>const OrdersPage()),
  GoRoute(path:'/bookings',builder:(c,s)=>const BookingsPage()),
  GoRoute(path:'/order/:id',builder:(c,s)=>OrderDetailPage(orderId:s.pathParameters['id']!)),
