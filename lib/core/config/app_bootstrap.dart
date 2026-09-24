@@ -31,8 +31,12 @@ class AppBootstrap {
     }
 
     final parsedUrl = Uri.tryParse(config.supabaseUrl!);
-    if (parsedUrl == null || parsedUrl.host.isEmpty) {
-      throw StateError('SUPABASE_URL est invalide.');
+    if (parsedUrl == null ||
+        parsedUrl.host.isEmpty ||
+        parsedUrl.scheme != 'https') {
+      throw StateError(
+        'SUPABASE_URL est invalide : utilisez une URL HTTPS Supabase.',
+      );
     }
 
     await Supabase.initialize(
