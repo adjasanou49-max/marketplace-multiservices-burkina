@@ -10,8 +10,8 @@ Deno.serve((req: Request) => {
       ? "Le paiement n’a pas été validé. Revenez dans l’application pour vérifier son état ou réessayer."
       : "Retour du guichet de paiement. Revenez dans l’application pour vérifier votre commande.";
   const deepLink = orderId
-    ? "marketplaceburkina://orders/" + encodeURIComponent(orderId)
-    : "marketplaceburkina://orders";
+    ? "marketplaceburkina:///order/" + encodeURIComponent(orderId)
+    : "marketplaceburkina:///orders";
   const html = "<!doctype html><html lang=\"fr\"><head><meta charset=\"utf-8\">" +
     "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Paiement</title></head>" +
     "<body style=\"font-family:system-ui;max-width:560px;margin:48px auto;padding:24px\">" +
