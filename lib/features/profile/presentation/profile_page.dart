@@ -37,6 +37,11 @@ class ProfilePage extends StatelessWidget {
             onTap: () => GoRouter.of(context).push('/addresses'),
           ),
           ListTile(
+            leading: const Icon(Icons.event_note_outlined),
+            title: const Text('Mes réservations'),
+            onTap: () => GoRouter.of(context).push('/bookings'),
+          ),
+          ListTile(
             leading: const Icon(Icons.receipt_long_outlined),
             title: const Text('Mes commandes'),
             onTap: () => GoRouter.of(context).push('/orders'),
