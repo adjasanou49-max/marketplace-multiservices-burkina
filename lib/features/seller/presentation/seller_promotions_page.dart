@@ -86,6 +86,7 @@ class _SellerPromotionsPageState
       builder: (_) => const _PromotionDialog(),
     );
     if (form == null) return;
+    if (!context.mounted) return;
 
     final client = ref.read(supabaseProvider);
     if (client == null) return;
@@ -290,7 +291,7 @@ class _PromotionDialogState extends State<_PromotionDialog> {
               ),
             );
             if (range == null) return;
-            if (!mounted) return;
+            if (!context.mounted) return;
 
             Navigator.pop(
               context,
