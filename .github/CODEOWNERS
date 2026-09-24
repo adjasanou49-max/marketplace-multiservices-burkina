@@ -1,0 +1,12 @@
+# Security-sensitive paths require review from the repository owner.
+* @adjasanou49-max
+
+/supabase/ @adjasanou49-max
+/lib/core/config/ @adjasanou49-max
+/lib/core/storage/ @adjasanou49-max
+/lib/core/errors/ @adjasanou49-max
+/lib/features/payments/ @adjasanou49-max
+/lib/features/refunds/ @adjasanou49-max
+/.github/workflows/ @adjasanou49-max
+/android/ @adjasanou49-max
+/ios/ @adjasanou49-max
