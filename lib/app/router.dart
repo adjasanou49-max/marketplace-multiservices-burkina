@@ -45,6 +45,7 @@ import '../features/delivery/presentation/delivery_tracking_page.dart';
 import '../features/services/presentation/services_page.dart';
 import '../features/group_buy/presentation/group_buy_page.dart';
 import '../features/expiry/presentation/expiry_page.dart';
+import '../features/bookings/presentation/bookings_page.dart';
 import '../features/verticals/data/vertical_repository.dart';
 import '../features/verticals/presentation/vertical_discovery_page.dart';
 
@@ -140,6 +141,7 @@ GoRouter createAppRouter() {
  GoRoute(path:'/admin/modules',builder:(c,s)=>const AdminModulesPage()),
  GoRoute(path:'/admin/delivery-pricing',builder:(c,s)=>const AdminDeliveryPricingPage()),
  GoRoute(path:'/orders',builder:(c,s)=>const OrdersPage()),
+ GoRoute(path:'/bookings',builder:(c,s)=>const BookingsPage()),
  GoRoute(path:'/order/:id',builder:(c,s)=>OrderDetailPage(orderId:s.pathParameters['id']!)),
  GoRoute(path:'/addresses',builder:(c,s)=>const AddressesPage()),
  GoRoute(path:'/notifications',builder:(c,s)=>const NotificationsPage()),
