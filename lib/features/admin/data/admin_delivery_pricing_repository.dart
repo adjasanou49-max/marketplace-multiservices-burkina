@@ -59,8 +59,16 @@ class AdminDeliveryPricingRepository {
     required num perStopFee,
     required bool active,
   }) async {
+    final normalizedName = name.trim();
+    if (normalizedName.isEmpty) {
+      throw ArgumentError('Le nom du tarif est obligatoire.');
+    }
+    if (baseFee < 0 || perKmFee < 0 || perStopFee < 0) {
+      throw ArgumentError('Les frais de livraison ne peuvent pas être négatifs.');
+    }
+
     await client.from('delivery_pricing_rules').update({
-      'name': name.trim(),
+      'name': normalizedName,
       'base_fee': baseFee,
       'per_km_fee': perKmFee,
       'per_stop_fee': perStopFee,
