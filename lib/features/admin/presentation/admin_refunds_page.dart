@@ -187,7 +187,7 @@ class _AdminRefundsPageState extends ConsumerState<AdminRefundsPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Accès impossible : ' + snapshot.error.toString()));
+            return Center(child: Text('Accès impossible : ${snapshot.error}'));
           }
 
           final items = snapshot.data ?? const <Map<String, dynamic>>[];
@@ -218,10 +218,10 @@ class _AdminRefundsPageState extends ConsumerState<AdminRefundsPage> {
                     ),
                   ),
                   title: Text(
-                    ${row['customer_name']?.toString() ?? 'Client'} • $amount ${row['currency']?.toString() ?? 'XOF'},
+                    '${row['customer_name']?.toString() ?? 'Client'} • $amount ${row['currency']?.toString() ?? 'XOF'}',
                   ),
                   subtitle: Text(
-                    'Statut : $status • Fournisseur : $provider\n$reason,
+                    'Statut : $status • Fournisseur : $provider\n$reason',
                   ),
                   trailing: PopupMenuButton<String>(
                     enabled: !_working && id.isNotEmpty,
