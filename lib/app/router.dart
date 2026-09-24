@@ -21,6 +21,7 @@ import '../features/admin/presentation/admin_delivery_pricing_page.dart';
 import '../features/orders/presentation/orders_page.dart';
 import '../features/addresses/presentation/addresses_page.dart';
 import '../features/notifications/presentation/notifications_page.dart';
+import '../features/notifications/presentation/notification_preferences_page.dart';
 import '../features/messaging/presentation/messages_page.dart';
 import '../features/messaging/presentation/conversation_page.dart';
 import '../features/seller/presentation/seller_orders_page.dart';
@@ -152,6 +153,7 @@ GoRouter createAppRouter() {
  GoRoute(path:'/order/:id',builder:(c,s)=>OrderDetailPage(orderId:s.pathParameters['id']!)),
  GoRoute(path:'/addresses',builder:(c,s)=>const AddressesPage()),
  GoRoute(path:'/notifications',builder:(c,s)=>const NotificationsPage()),
+ GoRoute(path:'/notification-preferences',builder:(c,s)=>const NotificationPreferencesPage()),
  GoRoute(path:'/messages',builder:(c,s)=>const MessagesPage()),
  GoRoute(path:'/conversation/:id',builder:(c,s)=>ConversationPage(conversationId:s.pathParameters['id']!)),
  GoRoute(path:'/seller',builder:(c,s)=>const SellerNavigation()),
